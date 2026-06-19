@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id         String    @id @default(cuid())
+  name       String // source/fallback text (in sourceLang)
+  sourceLang String    @default("en")
+  nameI18n   String    @default("{}") // JSON: { en, ru, uz }
+  sortOrder  Int       @default(0)
+  products   Product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String // source/fallback text (in sourceLang)
+  description String      @default("")
+  sourceLang  String      @default("en")
+  nameI18n    String      @default("{}") // JSON: { en, ru, uz }
+  descI18n    String      @default("{}") // JSON: { en, ru, uz }
+  price       Int // integer UZS (so'm), no minor units
+  imageUrl    String      @default("")
+  available   Boolean     @default(true)
+  sortOrder   Int         @default(0)
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([categoryId])
+}
+
+model Hotel {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  floors        Int      @default(1)
+  roomsPerFloor Int      @default(0)
+  active        Boolean  @default(true)
+  rooms         Room[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Room {
+  id        String   @id @default(cuid())
+  hotelId   String
+  hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  number    String
+  name      String   @default("")
+  floor     Int      @default(0)
+  active    Boolean  @default(true)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Room numbers only need to be unique within a hotel.
+  @@unique([hotelId, number])
+  @@index([hotelId])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  roomId    String
+  room      Room        @relation(fields: [roomId], references: [id])
+  // One of: PENDING | PREPARING | READY | DELIVERED | CANCELLED
+  // (SQLite connector has no native enums — validated in app code, see src/lib/orders.ts)
+  status    String      @default("PENDING")
+  note      String      @default("")
+  total     Int         @default(0) // minor units, snapshot at order time
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([roomId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  name      String // snapshot of product name at order time
+  price     Int // snapshot of unit price (minor units)
+  quantity  Int      @default(1)
+
+  @@index([orderId])
+}
