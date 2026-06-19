@@ -19,4 +19,10 @@ message Hotel {
     string intro_video = 13;
     string welcome_text = 14;
     string running_text = 15;
+
+    // In-room dining onboarding: the hotel + room the guest selected on this TV.
+    string booking_hotel_slug = 16;
+    string booking_hotel_name = 17;
+    string booking_room_number = 18;
+    bool onboarding_complete = 19;
 }

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import com.karuhun.feature.onboarding.presentation.navigation.OnBoarding
+import com.karuhun.feature.onboarding.presentation.navigation.HotelSelection
 import com.karuhun.feature.onboarding.presentation.navigation.onboardingGraph
 
 @Composable
@@ -16,9 +16,12 @@ fun OnboardingNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = OnBoarding,
+        startDestination = HotelSelection,
         modifier = modifier
     ) {
-        onboardingGraph(onNavigateToHome = onOnboardingComplete)
+        onboardingGraph(
+            navController = navController,
+            onNavigateToHome = onOnboardingComplete,
+        )
     }
 }

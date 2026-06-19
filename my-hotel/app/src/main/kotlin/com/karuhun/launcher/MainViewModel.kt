@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.karuhun.core.common.onFailure
 import com.karuhun.core.common.onSuccess
 import com.karuhun.core.common.util.SyncManager
+import com.karuhun.core.domain.usecase.GetBookingUseCase
 import com.karuhun.core.domain.usecase.GetHotelProfileUseCase
 import com.karuhun.core.domain.usecase.GetRoomDetailUseCase
 import com.karuhun.core.domain.usecase.GetWeatherUseCase
@@ -20,6 +21,7 @@ class MainViewModel @Inject constructor(
     private val getHotelProfileUseCase: GetHotelProfileUseCase,
     private val getRoomDetailUseCase: GetRoomDetailUseCase,
     private val getWeatherUseCase: GetWeatherUseCase,
+    private val getBookingUseCase: GetBookingUseCase,
     private val syncManager: SyncManager
 ) : ViewModel(),
     MVI<MainContract.UiState, MainContract.UiAction, MainContract.UiEffect> by mvi(initialState = MainContract.UiState()) {
@@ -28,6 +30,15 @@ class MainViewModel @Inject constructor(
         onAction(MainContract.UiAction.LoadRoomDetail)
         onAction(MainContract.UiAction.SubscribeSyncStatus)
         onAction(MainContract.UiAction.LoadWeather)
+        observeBooking()
+    }
+
+    // Persisted onboarding gate: once a hotel + room are saved on this device,
+    // skip onboarding on every subsequent launch.
+    private fun observeBooking() = viewModelScope.launch {
+        getBookingUseCase().collect { booking ->
+            updateUiState { copy(isOnboardingCompleted = booking.onboardingComplete) }
+        }
     }
 
     override fun onAction(action: MainContract.UiAction) {

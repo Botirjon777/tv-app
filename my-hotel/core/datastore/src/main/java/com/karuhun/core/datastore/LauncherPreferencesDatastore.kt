@@ -83,7 +83,11 @@ class LauncherPreferencesDatastore @Inject constructor(
                         backgroundPhoto = currentPreferences.backgroundPhoto,
                         introVideo = currentPreferences.introVideo,
                         welcomeText = currentPreferences.welcomeText,
-                        runningText = currentPreferences.runningText
+                        runningText = currentPreferences.runningText,
+                        bookingHotelSlug = currentPreferences.bookingHotelSlug,
+                        bookingHotelName = currentPreferences.bookingHotelName,
+                        bookingRoomNumber = currentPreferences.bookingRoomNumber,
+                        onboardingComplete = currentPreferences.onboardingComplete
                     )
                 )
 
@@ -103,6 +107,10 @@ class LauncherPreferencesDatastore @Inject constructor(
                     introVideo = updatedPreferences.introVideo
                     welcomeText = updatedPreferences.welcomeText
                     runningText = updatedPreferences.runningText
+                    bookingHotelSlug = updatedPreferences.bookingHotelSlug
+                    bookingHotelName = updatedPreferences.bookingHotelName
+                    bookingRoomNumber = updatedPreferences.bookingRoomNumber
+                    onboardingComplete = updatedPreferences.onboardingComplete
                 }
             }
         } catch (ioException: IOException) {

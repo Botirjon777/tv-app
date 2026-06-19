@@ -84,6 +84,19 @@ internal object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("menu")
+    fun provideMenuRetrofitClient(
+        okHttpClient: OkHttpClient
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BuildConfig.MENU_API_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    @Provides
+    @Singleton
     @Named("weather")
     fun provideWeatherRetrofitClient(
         okHttpClient: OkHttpClient

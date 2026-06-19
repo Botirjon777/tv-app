@@ -13,6 +13,8 @@ import com.karuhun.feature.mainmenu.ui.navigation.MainMenu
 import com.karuhun.feature.mainmenu.ui.navigation.mainMenuScreen
 import com.karuhun.feature.restaurant.ui.navigation.RestaurantCategory
 import com.karuhun.feature.restaurant.ui.navigation.restaurantGraph
+import com.karuhun.feature.restaurant.ui.menu.MenuOrder
+import com.karuhun.feature.restaurant.ui.menu.menuOrderGraph
 
 @Composable
 fun MainAppNavGraph(
@@ -43,7 +45,7 @@ fun MainAppNavGraph(
                 )
             },
             onNavigateToRestaurant = {
-                navController.navigate(RestaurantCategory)
+                navController.navigate(MenuOrder)
             },
         )
         contentScreen(
@@ -59,5 +61,6 @@ fun MainAppNavGraph(
             },
         )
         restaurantGraph()
+        menuOrderGraph()
     }
 }
