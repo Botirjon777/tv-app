@@ -37,6 +37,9 @@ update live. Admins manage hotels, the menu, and every order.
   source text when no API key is configured).
 - **UZS currency with live USD estimate.** Prices are in Uzbek soʻm; each price
   shows an approximate USD value from a cached live exchange rate.
+- **Recommendation of the day.** Admins assign featured products to each
+  weekday; the guest menu shows **today's** picks in an auto-rotating, swipeable
+  **banner** at the top (localized, with UZS price, tap-to-add).
 - **Uzbek-only POS** for kitchen staff; English admin panel.
 - **Live updates** everywhere via Server-Sent Events (no polling on staff
   screens).
@@ -95,6 +98,9 @@ Hotel 1───* Room 1───* Order 1───* OrderItem *───1 Produ
 - **Category** / **Product** — the **shared, global menu** (not per-hotel).
   Both store `nameI18n` (and Product also `descI18n`) as JSON `{ en, ru, uz }`
   plus a `sourceLang`. Prices are integer **UZS** (no minor units).
+- **Recommendation** — featured product for a weekday (`dayOfWeek` 0–6,
+  unique per `(dayOfWeek, productId)`); global like the menu. Drives the guest
+  banner ("today's recommendation").
 - **Order** — belongs to a Room; `status` is a plain string
   (`PENDING | PREPARING | READY | DELIVERED | CANCELLED`) validated in
   `src/lib/orders.ts` because the SQLite connector has no native enums.
@@ -198,7 +204,13 @@ the auth cookie; the guest endpoints are public.
 | `/api/orders` | GET, POST | staff / **public POST** | List (filterable by hotel/status); a guest places an order |
 | `/api/orders/[id]` | GET, PATCH | public GET / staff PATCH | Track an order; advance status |
 | `/api/orders/stream` | GET (SSE) | staff | Live `order.created` / `order.updated` events |
+| `/api/recommendations` | GET, POST | admin | List all / feature a product on a weekday |
+| `/api/recommendations/[id]` | DELETE | admin | Remove a recommendation |
 | `/api/fx` | GET | public | Cached approximate UZS-per-USD exchange rate |
+
+> The guest banner reads **today's** recommendations directly in the room page
+> server component (`new Date().getDay()`, server local time) — not via a public
+> endpoint.
 
 ---
 

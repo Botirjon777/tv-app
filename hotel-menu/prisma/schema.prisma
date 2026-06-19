@@ -32,10 +32,25 @@ model Product {
   categoryId  String
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
+  recommendations Recommendation[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@index([categoryId])
+}
+
+// "Recommendation of the day" — a product featured on a given weekday.
+// Global (shared across hotels, like the menu). dayOfWeek: 0=Sunday … 6=Saturday.
+model Recommendation {
+  id        String   @id @default(cuid())
+  dayOfWeek Int
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([dayOfWeek, productId])
+  @@index([dayOfWeek])
 }
 
 model Hotel {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  CalendarDays,
   LayoutDashboard,
   ListOrdered,
   Tags,
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/admin/hotels", label: "Hotels & QR", icon: Building2 },
   { href: "/admin/products", label: "Products", icon: UtensilsCrossed },
   { href: "/admin/categories", label: "Categories", icon: Tags },
+  { href: "/admin/recommendations", label: "Recommendations", icon: CalendarDays },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -31,7 +33,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-slate-100">
       {/* Sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-zinc-800 bg-zinc-950 px-4 py-5 text-zinc-300 lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-zinc-800 bg-zinc-950 px-5 py-5 text-zinc-300 lg:flex">
         <div className="mb-8 flex items-center gap-2.5 px-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
             <UtensilsCrossed className="h-5 w-5" />
@@ -77,7 +79,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile top nav */}
-      <div className="fixed inset-x-0 top-0 z-20 flex items-center gap-1 overflow-x-auto border-b border-zinc-800 bg-zinc-950 px-3 py-2 lg:hidden">
+      <div className="fixed inset-x-0 top-0 z-20 flex items-center gap-1 overflow-x-auto border-b border-zinc-800 bg-zinc-950 px-2.5 py-2.5 lg:hidden">
         {NAV.map((item) => {
           const active = item.exact
             ? pathname === item.href
@@ -98,7 +100,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Content */}
-      <main className="flex-1 px-5 pb-12 pt-16 lg:ml-64 lg:px-8 lg:pt-8">
+      <main className="flex-1 px-2.5 pb-2.5 pt-16 lg:ml-64 lg:px-5 lg:pb-5 lg:pt-5">
         {children}
       </main>
     </div>

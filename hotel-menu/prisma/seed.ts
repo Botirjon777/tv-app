@@ -292,10 +292,14 @@ async function main() {
 
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.recommendation.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.room.deleteMany();
   await prisma.hotel.deleteMany();
+
+  // English product name -> id, for wiring up recommendations below.
+  const productIdByName: Record<string, string> = {};
 
   for (let c = 0; c < MENU.length; c++) {
     const group = MENU[c];
@@ -309,7 +313,7 @@ async function main() {
     });
     for (let p = 0; p < group.products.length; p++) {
       const prod = group.products[p];
-      await prisma.product.create({
+      const created = await prisma.product.create({
         data: {
           name: prod.name.en,
           description: prod.desc.en,
@@ -321,6 +325,27 @@ async function main() {
           sortOrder: p,
           categoryId: category.id,
         },
+      });
+      productIdByName[prod.name.en] = created.id;
+    }
+  }
+
+  // Recommendation of the day (0=Sunday … 6=Saturday).
+  const RECS: Record<number, string[]> = {
+    1: ["Grilled Ribeye Steak"],
+    2: ["Spaghetti Carbonara"],
+    3: ["Margherita Pizza"],
+    4: ["Grilled Salmon"],
+    5: ["Chicken Burger"],
+    6: ["Eggs Benedict", "Pancake Stack"],
+    0: ["Chocolate Lava Cake", "Continental Breakfast"],
+  };
+  for (const [dow, names] of Object.entries(RECS)) {
+    for (let i = 0; i < names.length; i++) {
+      const productId = productIdByName[names[i]];
+      if (!productId) continue;
+      await prisma.recommendation.create({
+        data: { dayOfWeek: Number(dow), productId, sortOrder: i },
       });
     }
   }
@@ -340,8 +365,9 @@ async function main() {
   const productCount = await prisma.product.count();
   const hotelCount = await prisma.hotel.count();
   const roomCount = await prisma.room.count();
+  const recCount = await prisma.recommendation.count();
   console.log(
-    `✅ Seeded ${MENU.length} categories, ${productCount} products, ${hotelCount} hotels, ${roomCount} rooms (en/ru/uz).`
+    `✅ Seeded ${MENU.length} categories, ${productCount} products, ${hotelCount} hotels, ${roomCount} rooms, ${recCount} recommendations (en/ru/uz).`
   );
 }
 

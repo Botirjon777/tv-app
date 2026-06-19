@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { MenuClient } from "@/components/client/MenuClient";
 import { DoorClosed } from "lucide-react";
 import { parseI18n, type Lang } from "@/lib/i18n";
-import type { MenuCategoryDTO } from "@/types";
+import type { MenuCategoryDTO, ProductDTO } from "@/types";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +14,7 @@ function NotAvailable({
   number: string;
 }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-zinc-950 px-6 text-center text-zinc-100">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-2.5 bg-zinc-950 px-2.5 text-center text-zinc-100 lg:gap-5 lg:px-5">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 text-zinc-500">
         <DoorClosed className="h-8 w-8" />
       </div>
@@ -59,6 +59,32 @@ export default async function RoomMenuPage({
     },
   });
 
+  const toProductDTO = (p: {
+    id: string;
+    name: string;
+    description: string;
+    sourceLang: string;
+    nameI18n: string;
+    descI18n: string;
+    price: number;
+    imageUrl: string;
+    available: boolean;
+    sortOrder: number;
+    categoryId: string;
+  }): ProductDTO => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    sourceLang: p.sourceLang as Lang,
+    nameI18n: parseI18n(p.nameI18n),
+    descI18n: parseI18n(p.descI18n),
+    price: p.price,
+    imageUrl: p.imageUrl,
+    available: p.available,
+    sortOrder: p.sortOrder,
+    categoryId: p.categoryId,
+  });
+
   const menu: MenuCategoryDTO[] = categories
     .filter((c) => c.products.length > 0)
     .map((c) => ({
@@ -67,26 +93,26 @@ export default async function RoomMenuPage({
       sourceLang: c.sourceLang as Lang,
       nameI18n: parseI18n(c.nameI18n),
       sortOrder: c.sortOrder,
-      products: c.products.map((p) => ({
-        id: p.id,
-        name: p.name,
-        description: p.description,
-        sourceLang: p.sourceLang as Lang,
-        nameI18n: parseI18n(p.nameI18n),
-        descI18n: parseI18n(p.descI18n),
-        price: p.price,
-        imageUrl: p.imageUrl,
-        available: p.available,
-        sortOrder: p.sortOrder,
-        categoryId: p.categoryId,
-      })),
+      products: c.products.map(toProductDTO),
     }));
+
+  // Today's "recommendation of the day" — featured in the banner swiper.
+  const today = new Date().getDay(); // 0=Sunday … 6=Saturday (server local time)
+  const recs = await prisma.recommendation.findMany({
+    where: { dayOfWeek: today, product: { available: true } },
+    orderBy: { sortOrder: "asc" },
+    include: { product: true },
+  });
+  const recommendations: ProductDTO[] = recs.map((r) =>
+    toProductDTO(r.product)
+  );
 
   return (
     <MenuClient
       hotel={{ slug: hotel.slug, name: hotel.name }}
       room={{ id: room.id, number: room.number, name: room.name }}
       menu={menu}
+      recommendations={recommendations}
     />
   );
 }
