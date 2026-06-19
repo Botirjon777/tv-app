@@ -12,6 +12,7 @@ import { webhookRoutes } from './routes/webhooks';
 import { adminRoutes } from './routes/admin';
 import { deviceRoutes } from './routes/devices';
 import { menuDataRoutes } from './routes/menuData';
+import { menuApiRoutes } from './routes/menuApi';
 
 const server = Fastify({
   logger: {
@@ -44,6 +45,7 @@ async function bootstrap() {
   await server.register(adminRoutes,   { prefix: '/api/v1' });
   await server.register(deviceRoutes,  { prefix: '/api/v1' });
   await server.register(menuDataRoutes, { prefix: '/api/v1' });
+  await server.register(menuApiRoutes,  { prefix: '/api/v1' });
 
   server.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
 
