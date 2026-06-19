@@ -124,11 +124,11 @@ export default function HotelDetailPage({
           description="Add a room to this hotel."
         />
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
           {rooms.map((r) => (
             <div
               key={r.id}
-              className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm lg:p-5"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -207,8 +207,8 @@ function QrView({ url, number }: { url: string; number: string }) {
     link.click();
   };
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div ref={wrapRef} className="rounded-2xl border border-slate-200 p-5">
+    <div className="flex flex-col items-center gap-2.5 lg:gap-5">
+      <div ref={wrapRef} className="rounded-2xl border border-slate-200 p-2.5 lg:p-5">
         <QRCodeCanvas value={url} size={200} level="M" includeMargin />
       </div>
       <code className="w-full break-all rounded-lg bg-slate-50 px-3 py-2 text-center text-xs text-slate-500">
@@ -269,7 +269,7 @@ function AddRoomForm({
         </div>
       }
     >
-      <form onSubmit={submit} className="grid grid-cols-2 gap-3">
+      <form onSubmit={submit} className="grid grid-cols-2 gap-2.5 lg:gap-5">
         <div>
           <Label>Room number</Label>
           <Input

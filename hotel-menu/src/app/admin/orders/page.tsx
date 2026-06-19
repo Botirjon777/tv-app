@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
       />
 
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center gap-2.5 lg:gap-5">
         <div className="no-scrollbar flex gap-2 overflow-x-auto">
           {FILTERS.map((f) => (
             <button
@@ -117,11 +117,11 @@ export default function AdminOrdersPage() {
           description="Orders placed by guests will appear here."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5 lg:space-y-5">
           {filtered.map((o) => (
             <div
               key={o.id}
-              className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm lg:p-5"
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-3">

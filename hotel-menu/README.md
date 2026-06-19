@@ -21,6 +21,11 @@ a hotel switcher). Chefs advance orders `New → Preparing → Ready → Deliver
 and guests watch the status update live. Admins manage hotels, products,
 categories and view every order (filterable by hotel).
 
+**Recommendation of the day:** in admin, assign featured products to each
+weekday (Mon → Steak, Tue → …). The guest menu shows **today's** picks in an
+auto-rotating, swipeable banner at the top — localized, with the UZS price and
+tap-to-add — managed under **Admin → Recommendations**.
+
 ## Stack
 
 - **Next.js 14** (App Router) + TypeScript + Tailwind CSS — dark, mobile-first guest UI

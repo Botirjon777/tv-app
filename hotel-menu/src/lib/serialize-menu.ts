@@ -1,5 +1,5 @@
 import { parseI18n, type Lang } from "@/lib/i18n";
-import type { CategoryDTO, ProductDTO } from "@/types";
+import type { CategoryDTO, ProductDTO, RecommendationDTO } from "@/types";
 
 type CategoryRow = {
   id: string;
@@ -31,6 +31,20 @@ export function serializeCategory(c: CategoryRow): CategoryDTO {
     sourceLang: c.sourceLang as Lang,
     nameI18n: parseI18n(c.nameI18n),
     sortOrder: c.sortOrder,
+  };
+}
+
+export function serializeRecommendation(r: {
+  id: string;
+  dayOfWeek: number;
+  sortOrder: number;
+  product: ProductRow;
+}): RecommendationDTO {
+  return {
+    id: r.id,
+    dayOfWeek: r.dayOfWeek,
+    sortOrder: r.sortOrder,
+    product: serializeProduct(r.product),
   };
 }
 

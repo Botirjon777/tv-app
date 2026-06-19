@@ -73,7 +73,8 @@ type UIKey =
   | "cancelledTitle"
   | "cancelledSub"
   | "couldNotPlace"
-  | "couldNotLoad";
+  | "couldNotLoad"
+  | "recommendedToday";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -103,6 +104,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     cancelledSub: "Please contact the front desk if this is unexpected.",
     couldNotPlace: "Could not place your order",
     couldNotLoad: "We couldn’t load your order.",
+    recommendedToday: "Recommended today",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -131,6 +133,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     cancelledSub: "Свяжитесь со стойкой регистрации, если это неожиданно.",
     couldNotPlace: "Не удалось оформить заказ",
     couldNotLoad: "Не удалось загрузить ваш заказ.",
+    recommendedToday: "Рекомендуем сегодня",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -159,6 +162,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     cancelledSub: "Agar bu kutilmagan bo‘lsa, qabulxonaga murojaat qiling.",
     couldNotPlace: "Buyurtma berib bo‘lmadi",
     couldNotLoad: "Buyurtmangizni yuklab bo‘lmadi.",
+    recommendedToday: "Bugungi tavsiya",
   },
 };
 

@@ -91,17 +91,17 @@ export default function ProductsPage() {
           description="Add your first menu item to get started."
         />
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-2.5 lg:space-y-5">
           {grouped.map(({ category, items }) => (
             <section key={category.id}>
               <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-400">
                 {category.name}
               </h2>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-2.5 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
                 {items.map((p) => (
                   <div
                     key={p.id}
-                    className="flex gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm"
+                    className="flex gap-2.5 rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm lg:gap-5 lg:p-5"
                   >
                     <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-slate-100">
                       {p.imageUrl ? (
@@ -263,7 +263,7 @@ function ProductForm({
         </div>
       }
     >
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-2.5 lg:space-y-5">
         {imageUrl && (
           <div className="relative h-36 w-full overflow-hidden rounded-xl bg-slate-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -309,7 +309,7 @@ function ProductForm({
             placeholder="Short description shown to guests"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2.5 lg:gap-5">
           <div>
             <Label>Price (UZS)</Label>
             <Input

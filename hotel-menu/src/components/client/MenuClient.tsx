@@ -18,6 +18,7 @@ import {
 } from "@/lib/i18n";
 import { CartSheet } from "./CartSheet";
 import { OrderTracker } from "./OrderTracker";
+import { RecommendationBanner } from "./RecommendationBanner";
 
 type Room = { id: string; number: string; name: string };
 type Hotel = { slug: string; name: string };
@@ -28,10 +29,12 @@ export function MenuClient({
   hotel,
   room,
   menu,
+  recommendations = [],
 }: {
   hotel: Hotel;
   room: Room;
   menu: MenuCategoryDTO[];
+  recommendations?: ProductDTO[];
 }) {
   const cart = useCart(`${hotel.slug}:${room.number}`);
   const [lang, setLang] = useState<Lang>(DEFAULT_LANG);
@@ -71,7 +74,7 @@ export function MenuClient({
 
   if (menu.length === 0) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-3 bg-zinc-950 px-6 text-center text-zinc-400">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-2.5 bg-zinc-950 px-2.5 text-center text-zinc-400 lg:gap-5 lg:px-5">
         <UtensilsCrossed className="h-10 w-10 text-zinc-700" />
         <h1 className="font-serif text-xl font-bold text-zinc-100">
           {t(lang, "menuSoon")}
@@ -85,7 +88,7 @@ export function MenuClient({
     <main className="min-h-screen bg-zinc-950 pb-28 text-zinc-100">
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-zinc-800/80 bg-zinc-950/85 backdrop-blur-md">
-        <div className="mx-auto max-w-2xl px-4 py-3">
+        <div className="mx-auto max-w-2xl px-2.5 py-2.5 lg:px-5 lg:py-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-900/40">
@@ -121,7 +124,7 @@ export function MenuClient({
           </div>
 
           {/* Category tabs */}
-          <nav className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
+          <nav className="no-scrollbar -mx-2.5 mt-3 flex gap-2 overflow-x-auto px-2.5 lg:-mx-5 lg:px-5">
             {menu.map((cat) => (
               <button
                 key={cat.id}
@@ -140,8 +143,22 @@ export function MenuClient({
         </div>
       </header>
 
+      {/* Today's recommendations */}
+      <div className="mx-auto max-w-2xl px-2.5 lg:px-5">
+        <RecommendationBanner
+          items={recommendations}
+          lang={lang}
+          onAdd={(product) =>
+            cart.add({
+              ...product,
+              name: resolveText(product.nameI18n, lang, product.name),
+            })
+          }
+        />
+      </div>
+
       {/* Menu sections */}
-      <div className="mx-auto max-w-2xl px-4">
+      <div className="mx-auto max-w-2xl px-2.5 lg:px-5">
         {menu.map((cat) => (
           <section
             key={cat.id}
@@ -153,7 +170,7 @@ export function MenuClient({
             <h2 className="mb-3 font-serif text-xl font-bold tracking-tight text-zinc-50">
               {resolveText(cat.nameI18n, lang, cat.name)}
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2.5 lg:space-y-5">
               {cat.products.map((product) => (
                 <ProductRow
                   key={product.id}
@@ -187,7 +204,7 @@ export function MenuClient({
 
       {/* Floating cart bar */}
       {cart.count > 0 && (
-        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 animate-slide-up px-4 pb-4">
+        <div className="safe-bottom fixed inset-x-0 bottom-0 z-30 animate-slide-up px-2.5 pb-2.5 lg:px-5 lg:pb-5">
           <div className="mx-auto max-w-2xl">
             <button
               onClick={() => setCartOpen(true)}
@@ -258,7 +275,7 @@ function ProductRow({
   const desc = resolveText(product.descI18n, lang, product.description);
 
   return (
-    <div className="flex gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3 shadow-lg shadow-black/20">
+    <div className="flex gap-2.5 rounded-2xl border border-zinc-800 bg-zinc-900 p-2.5 shadow-lg shadow-black/20 lg:gap-5 lg:p-5">
       {product.imageUrl ? (
         <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-800">
           <Image

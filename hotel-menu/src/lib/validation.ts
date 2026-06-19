@@ -75,6 +75,12 @@ export const orderStatusInput = z.object({
   status: z.enum(ORDER_STATUSES),
 });
 
+export const recommendationInput = z.object({
+  dayOfWeek: z.number().int().min(0).max(6),
+  productId: z.string().min(1, "Product is required"),
+  sortOrder: z.number().int().optional(),
+});
+
 export const loginInput = z.object({
   role: z.enum(["admin", "pos"]),
   password: z.string().min(1),

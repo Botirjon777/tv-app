@@ -177,7 +177,7 @@ export function Modal({
       >
         <div
           className={cn(
-            "flex items-center justify-between border-b px-5 py-4",
+            "flex items-center justify-between border-b px-2.5 py-2.5 lg:px-5 lg:py-5",
             dark ? "border-zinc-800" : "border-slate-100"
           )}
         >
@@ -195,11 +195,11 @@ export function Modal({
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-4">{children}</div>
+        <div className="max-h-[70vh] overflow-y-auto px-2.5 py-2.5 lg:px-5 lg:py-5">{children}</div>
         {footer && (
           <div
             className={cn(
-              "border-t px-5 py-4",
+              "border-t px-2.5 py-2.5 lg:px-5 lg:py-5",
               dark ? "border-zinc-800" : "border-slate-100"
             )}
           >

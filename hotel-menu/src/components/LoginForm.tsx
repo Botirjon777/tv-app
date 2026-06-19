@@ -52,10 +52,10 @@ export function LoginForm({
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-5">
+    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-2.5 lg:px-5">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm rounded-3xl bg-white p-7 shadow-xl"
+        className="w-full max-w-sm rounded-3xl bg-white p-2.5 shadow-xl lg:p-5"
       >
         <div
           className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl text-white ${accent}`}

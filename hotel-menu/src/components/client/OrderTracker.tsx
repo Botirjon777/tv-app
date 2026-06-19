@@ -59,7 +59,7 @@ export function OrderTracker({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950 text-zinc-100 animate-fade-in">
-      <header className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+      <header className="flex items-center justify-between border-b border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
         <h2 className="font-serif text-lg font-bold">{t(lang, "orderStatus")}</h2>
         <button
           onClick={onClose}
@@ -70,7 +70,7 @@ export function OrderTracker({
         </button>
       </header>
 
-      <div className="mx-auto w-full max-w-md flex-1 overflow-y-auto px-5 py-6">
+      <div className="mx-auto w-full max-w-md flex-1 overflow-y-auto px-2.5 py-2.5 lg:px-5 lg:py-5">
         {loading && !order ? (
           <div className="flex justify-center py-20">
             <Spinner />
@@ -81,7 +81,7 @@ export function OrderTracker({
           </p>
         ) : (
           <>
-            <div className="mb-8 rounded-2xl border border-brand-900/50 bg-brand-950/40 p-5 text-center">
+            <div className="mb-8 rounded-2xl border border-brand-900/50 bg-brand-950/40 p-2.5 text-center lg:p-5">
               <p className="text-sm text-brand-200">{t(lang, "thanks")}</p>
               <p className="mt-1 text-xs text-brand-400/70">
                 {t(lang, "orderNo")} #{order.id.slice(-6).toUpperCase()} ·{" "}
@@ -90,7 +90,7 @@ export function OrderTracker({
             </div>
 
             {cancelled ? (
-              <div className="rounded-2xl border border-rose-900/50 bg-rose-950/30 p-5 text-center text-rose-300">
+              <div className="rounded-2xl border border-rose-900/50 bg-rose-950/30 p-2.5 text-center text-rose-300 lg:p-5">
                 <p className="font-semibold">{t(lang, "cancelledTitle")}</p>
                 <p className="mt-1 text-sm">{t(lang, "cancelledSub")}</p>
               </div>
@@ -139,7 +139,7 @@ export function OrderTracker({
               </ol>
             )}
 
-            <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+            <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-2.5 lg:p-5">
               <h3 className="mb-2 text-sm font-bold text-zinc-200">
                 {t(lang, "orderSummary")}
               </h3>
@@ -174,7 +174,7 @@ export function OrderTracker({
         )}
       </div>
 
-      <div className="safe-bottom border-t border-zinc-800 px-5 py-4">
+      <div className="safe-bottom border-t border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
         <Button variant="outline" className="w-full border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-800" onClick={onClose}>
           {t(lang, "backToMenu")}
         </Button>
