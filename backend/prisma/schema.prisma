@@ -115,3 +115,122 @@ enum ContentType {
 
   @@map("content_type")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Hotel Menu (in-room dining) — mirrors hotel-menu/prisma/schema.prisma.
+// These tables back the hotel-menu Next.js app, which now persists through the
+// backend data API instead of its own SQLite file. i18n fields are stored as
+// JSON strings (the app parses/stringifies them itself) to stay byte-compatible.
+// MenuHotel/MenuRoom are named distinctly so they don't collide with the TV
+// platform's Hotel/Room above; relation field names match hotel-menu exactly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Category {
+  id         String    @id @default(cuid())
+  name       String
+  sourceLang String    @default("en")
+  nameI18n   String    @default("{}")
+  sortOrder  Int       @default(0)
+  products   Product[]
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("menu_categories")
+}
+
+model Product {
+  id              String           @id @default(cuid())
+  name            String
+  description     String           @default("")
+  sourceLang      String           @default("en")
+  nameI18n        String           @default("{}")
+  descI18n        String           @default("{}")
+  price           Int
+  imageUrl        String           @default("")
+  available       Boolean          @default(true)
+  sortOrder       Int              @default(0)
+  categoryId      String
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems      OrderItem[]
+  recommendations Recommendation[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@map("menu_products")
+}
+
+model Recommendation {
+  id        String   @id @default(cuid())
+  dayOfWeek Int
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([dayOfWeek, productId])
+  @@index([dayOfWeek])
+  @@map("menu_recommendations")
+}
+
+model MenuHotel {
+  id            String     @id @default(cuid())
+  name          String
+  slug          String     @unique
+  floors        Int        @default(1)
+  roomsPerFloor Int        @default(0)
+  active        Boolean    @default(true)
+  rooms         MenuRoom[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@map("menu_hotels")
+}
+
+model MenuRoom {
+  id        String    @id @default(cuid())
+  hotelId   String
+  hotel     MenuHotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  number    String
+  name      String    @default("")
+  floor     Int       @default(0)
+  active    Boolean   @default(true)
+  orders    Order[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([hotelId, number])
+  @@index([hotelId])
+  @@map("menu_rooms")
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  roomId    String
+  room      MenuRoom    @relation(fields: [roomId], references: [id])
+  status    String      @default("PENDING")
+  note      String      @default("")
+  total     Int         @default(0)
+  items     OrderItem[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@index([roomId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("menu_orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  name      String
+  price     Int
+  quantity  Int     @default(1)
+
+  @@index([orderId])
+  @@map("menu_order_items")
+}
