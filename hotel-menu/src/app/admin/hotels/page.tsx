@@ -104,11 +104,11 @@ export default function HotelsPage() {
           description="Add your first hotel — rooms and QR codes are generated automatically."
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-2.5 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
           {hotels.map((h) => (
             <div
               key={h.id}
-              className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
+              className="rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm lg:p-5"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -270,7 +270,7 @@ function HotelForm({
         </div>
       }
     >
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-2.5 lg:space-y-5">
         <div>
           <Label>Hotel name</Label>
           <Input
@@ -299,7 +299,7 @@ function HotelForm({
         </div>
 
         {!isEdit && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5 lg:gap-5">
             <div>
               <Label>Floors</Label>
               <Input

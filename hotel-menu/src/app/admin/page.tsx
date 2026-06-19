@@ -86,13 +86,13 @@ export default async function AdminDashboard() {
         description="Overview of today's in-room dining activity."
       />
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-5">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
             <div
               key={s.label}
-              className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+              className="rounded-2xl border border-slate-100 bg-white p-2.5 shadow-sm lg:p-5"
             >
               <div
                 className={`mb-3 flex h-9 w-9 items-center justify-center rounded-xl ${s.tone}`}
@@ -107,7 +107,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mt-8 rounded-2xl border border-slate-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="flex items-center justify-between border-b border-slate-100 px-2.5 py-2.5 lg:px-5 lg:py-5">
           <h2 className="font-bold">Recent orders</h2>
           <Link
             href="/admin/orders"
@@ -125,7 +125,7 @@ export default async function AdminDashboard() {
             {recent.map((o) => (
               <li
                 key={o.id}
-                className="flex items-center justify-between px-5 py-3"
+                className="flex items-center justify-between px-2.5 py-2.5 lg:px-5 lg:py-5"
               >
                 <div className="flex items-center gap-3">
                   <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700">

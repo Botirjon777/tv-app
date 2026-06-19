@@ -74,7 +74,7 @@ export default function CategoriesPage() {
             return (
               <li
                 key={c.id}
-                className="flex items-center gap-3 px-4 py-3.5"
+                className="flex items-center gap-3 px-2.5 py-2.5 lg:px-5 lg:py-5"
               >
                 <GripVertical className="h-4 w-4 text-slate-300" />
                 <div className="flex-1">
@@ -175,7 +175,7 @@ function CategoryForm({
         </div>
       }
     >
-      <form onSubmit={submit} className="space-y-4">
+      <form onSubmit={submit} className="space-y-2.5 lg:space-y-5">
         <div>
           <Label>Input language</Label>
           <select

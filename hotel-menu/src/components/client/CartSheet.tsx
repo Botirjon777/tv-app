@@ -67,7 +67,7 @@ export function CartSheet({
       dark
       title={t(lang, "yourOrder")}
       footer={
-        <div className="space-y-3">
+        <div className="space-y-2.5 lg:space-y-5">
           {error && (
             <p className="rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
               {error}
@@ -97,7 +97,7 @@ export function CartSheet({
           {t(lang, "emptyCart")}
         </p>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2.5 lg:space-y-5">
           <ul className="divide-y divide-zinc-800">
             {cart.items.map((item) => (
               <li key={item.productId} className="flex items-center gap-3 py-3">

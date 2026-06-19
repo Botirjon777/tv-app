@@ -79,7 +79,7 @@ export function PosBoard() {
   return (
     <div className="flex h-screen flex-col bg-slate-900 text-white">
       {/* Top bar */}
-      <header className="flex items-center justify-between border-b border-white/10 px-5 py-3">
+      <header className="flex items-center justify-between border-b border-white/10 px-2.5 py-2.5 lg:px-5 lg:py-5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600">
             <ChefHat className="h-5 w-5" />
@@ -128,7 +128,7 @@ export function PosBoard() {
         <div className="grid flex-1 grid-cols-1 gap-px overflow-hidden bg-white/10 md:grid-cols-3">
           {COLUMNS.map((col) => (
             <section key={col.status} className="flex flex-col bg-slate-900">
-              <div className="flex items-center justify-between px-4 py-2.5">
+              <div className="flex items-center justify-between px-2.5 py-2.5 lg:px-5 lg:py-5">
                 <div className="flex items-center gap-2">
                   <span className={`h-2.5 w-2.5 rounded-full ${col.tone}`} />
                   <h2 className="font-semibold">{col.title}</h2>
@@ -137,7 +137,7 @@ export function PosBoard() {
                   {byStatus[col.status].length}
                 </span>
               </div>
-              <div className="flex-1 space-y-3 overflow-y-auto px-3 pb-4">
+              <div className="flex-1 space-y-2.5 overflow-y-auto px-2.5 pb-2.5 lg:space-y-5 lg:px-5 lg:pb-5">
                 {byStatus[col.status].length === 0 ? (
                   <p className="px-2 py-8 text-center text-sm text-slate-600">
                     Buyurtmalar yo‘q

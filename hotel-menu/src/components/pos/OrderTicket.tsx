@@ -27,7 +27,7 @@ export function OrderTicket({
   return (
     <div
       className={cn(
-        "rounded-xl bg-white p-3 text-slate-900 shadow-sm",
+        "rounded-xl bg-white p-2.5 text-slate-900 shadow-sm lg:p-5",
         urgent && "ring-2 ring-rose-400"
       )}
     >
