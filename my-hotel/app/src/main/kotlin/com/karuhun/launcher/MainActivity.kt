@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -164,6 +168,23 @@ fun LauncherApplication(
                         .padding(bottom = 4.dp)
                         .fillMaxWidth(),
                     text = uiState.hotelProfile?.runningText.orEmpty(),
+                )
+            }
+        }
+
+        // Top-left order-status toast (shows on every launcher screen).
+        uiState.orderStatusToast?.let { message ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(24.dp)
+                    .background(Color(0xFFF4511E), RoundedCornerShape(10.dp))
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+            ) {
+                Text(
+                    text = "🔔  $message",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }

@@ -49,6 +49,7 @@ fun MenuOrderScreen(
     onAction: (MenuOrderContract.UiAction) -> Unit,
     onOrderPlaced: (String) -> Unit = {},
     onBack: () -> Unit = {},
+    onTrackOrder: (String) -> Unit = {},
 ) {
     uiEffect.collectWithLifecycle { effect ->
         when (effect) {
@@ -57,8 +58,37 @@ fun MenuOrderScreen(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
-        BackButton(onClick = onBack, modifier = Modifier.padding(bottom = 8.dp))
+    Box(modifier = modifier.fillMaxSize()) {
+      Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // Header: back + (resume active order) + (past orders) + edit label.
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            BackButton(onClick = onBack)
+            val active = uiState.activeOrder
+            if (active != null && !uiState.isEditing) {
+                PillButton(
+                    text = "Track order • ${statusLabel(active.status)}",
+                    onClick = { onTrackOrder(active.id) },
+                )
+            }
+            if (uiState.pastOrders.isNotEmpty()) {
+                PillButton(
+                    text = "Past orders (${uiState.pastOrders.size})",
+                    onClick = { onAction(MenuOrderContract.UiAction.ShowPastOrders) },
+                )
+            }
+            if (uiState.isEditing) {
+                Text(
+                    text = "Editing your order",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
         Row(modifier = Modifier.fillMaxSize()) {
             // ── Categories ──
             LazyColumn(
@@ -95,6 +125,85 @@ fun MenuOrderScreen(
                 uiState = uiState,
                 onAction = onAction,
             )
+        }
+      }
+
+      // Past orders overlay
+      if (uiState.showPastOrders) {
+          PastOrdersPanel(
+              modifier = Modifier.align(Alignment.Center),
+              orders = uiState.pastOrders,
+              onClose = { onAction(MenuOrderContract.UiAction.HidePastOrders) },
+          )
+      }
+    }
+}
+
+@Composable
+private fun PillButton(text: String, onClick: () -> Unit) {
+    LauncherCard(
+        onClick = onClick,
+        modifier = Modifier.height(44.dp),
+    ) {
+        Box(Modifier.fillMaxHeight().padding(horizontal = 16.dp), contentAlignment = Alignment.Center) {
+            Text(text = text, color = Color.White, fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+private fun statusLabel(status: String): String = when (status) {
+    "PENDING" -> "Received"
+    "PREPARING" -> "Preparing"
+    "READY" -> "On its way"
+    "DELIVERED" -> "Delivered"
+    "CANCELLED" -> "Cancelled"
+    else -> status
+}
+
+@Composable
+private fun PastOrdersPanel(
+    modifier: Modifier = Modifier,
+    orders: List<com.karuhun.core.model.PlacedOrder>,
+    onClose: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth(0.6f)
+            .fillMaxHeight(0.8f)
+            .background(Color(0xFF14100E), RoundedCornerShape(16.dp))
+            .padding(20.dp),
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("Past orders", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                PillButton(text = "Close", onClick = onClose)
+            }
+            androidx.compose.foundation.layout.Spacer(Modifier.height(12.dp))
+            if (orders.isEmpty()) {
+                Text("No past orders yet.", color = Color.White.copy(alpha = 0.6f))
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(orders, key = { it.id }) { order ->
+                        LauncherCard(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+                            Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Text(
+                                        "Order #${order.id.takeLast(5).uppercase()} • ${statusLabel(order.status)}",
+                                        color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium,
+                                    )
+                                    Text(formatSom(order.total), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                }
+                                Text(
+                                    order.items.joinToString(", ") { "${it.quantity}× ${it.name}" },
+                                    color = Color.White.copy(alpha = 0.7f),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -232,7 +341,11 @@ private fun CartPanel(
                         tint = Color.White,
                     )
                     Text(
-                        text = if (uiState.isPlacing) "Placing…" else "Place Order (${uiState.cartCount})",
+                        text = when {
+                            uiState.isPlacing -> "Saving…"
+                            uiState.isEditing -> "Update Order (${uiState.cartCount})"
+                            else -> "Place Order (${uiState.cartCount})"
+                        },
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                     )

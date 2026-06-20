@@ -50,12 +50,14 @@ data class PlacedOrder(
     val total: Int,
     val roomNumber: String,
     val items: List<PlacedOrderItem> = emptyList(),
+    val createdAt: String = "",
 )
 
 data class PlacedOrderItem(
     val name: String,
     val price: Int,
     val quantity: Int,
+    val productId: String = "",
 )
 
 // The guest currently checked into this room (from the backend).

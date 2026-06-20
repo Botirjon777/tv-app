@@ -14,9 +14,11 @@ import com.karuhun.feature.restaurant.data.source.MenuApiService
 import com.karuhun.feature.restaurant.data.source.remote.response.OrderItemRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
+import com.karuhun.feature.restaurant.data.source.remote.response.UpdateOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.toCategoryDomainList
 import com.karuhun.feature.restaurant.data.source.remote.response.toDomain
 import com.karuhun.feature.restaurant.data.source.remote.response.toHotelDomainList
+import com.karuhun.feature.restaurant.data.source.remote.response.toOrderDomainList
 import com.karuhun.feature.restaurant.data.source.remote.response.toProductDomainList
 import javax.inject.Inject
 
@@ -57,6 +59,20 @@ class MenuRepositoryImpl @Inject constructor(
     override suspend fun getOrder(orderId: String): Resource<PlacedOrder> =
         safeApiCall { api.getOrder(orderId) }
             .map { it.data?.toDomain() ?: PlacedOrder("", "", 0, "") }
+
+    override suspend fun getRoomOrders(
+        hotelSlug: String,
+        roomNumber: String,
+        activeOnly: Boolean,
+    ): Resource<List<PlacedOrder>> =
+        safeApiCall {
+            api.getRoomOrders(hotelSlug, roomNumber, if (activeOnly) "1" else null)
+        }.map { it.data?.toOrderDomainList() ?: emptyList() }
+
+    override suspend fun updateOrder(orderId: String, items: List<OrderLine>): Resource<PlacedOrder> =
+        safeApiCall {
+            api.updateOrder(orderId, UpdateOrderRequest(items.map { OrderItemRequest(it.productId, it.quantity) }))
+        }.map { it.data?.toDomain() ?: PlacedOrder("", "", 0, "") }
 
     override suspend fun placeOrder(
         hotelSlug: String,

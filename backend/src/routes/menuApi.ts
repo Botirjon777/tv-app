@@ -202,6 +202,89 @@ export async function menuApiRoutes(server: FastifyInstance) {
     );
   });
 
+  /* ── GET /menu/orders?hotelSlug=&roomNumber=&active=1 ──────────────────
+     Orders for a room: active ones (to resume tracking) or full history. */
+  server.get('/menu/orders', async (req, reply) => {
+    const q = req.query as {
+      hotelSlug?: string; roomNumber?: string; active?: string; limit?: string;
+    };
+    if (!q.hotelSlug || !q.roomNumber) {
+      return err(reply, 'hotelSlug and roomNumber are required', 422);
+    }
+    const hotel = await prisma.menuHotel.findUnique({ where: { slug: q.hotelSlug } });
+    if (!hotel) return ok(reply, []);
+
+    const orders = await prisma.order.findMany({
+      where: {
+        room: { hotelId: hotel.id, number: q.roomNumber },
+        ...(q.active === '1' ? { status: { in: ['PENDING', 'PREPARING', 'READY'] } } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(Number(q.limit) || 50, 100),
+      include: { items: true },
+    });
+    return ok(
+      reply,
+      orders.map((o) => ({
+        id: o.id,
+        status: o.status,
+        total: o.total,
+        roomNumber: q.roomNumber,
+        createdAt: o.createdAt.toISOString(),
+        items: o.items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity })),
+      }))
+    );
+  });
+
+  /* ── PUT /menu/orders/:id ──────────────────────────────────────────────
+     Edit an order's items — only while it is still PENDING (not yet in the
+     kitchen). Replaces the line items and re-snapshots prices. */
+  const editBody = z.object({
+    items: z
+      .array(z.object({ productId: z.string().min(1), quantity: z.number().int().positive() }))
+      .min(1),
+  });
+  server.put('/menu/orders/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const parsed = editBody.safeParse(req.body);
+    if (!parsed.success) return err(reply, 'Invalid order payload', 422);
+
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) return err(reply, 'Order not found', 404);
+    if (order.status !== 'PENDING') {
+      return err(reply, 'This order is already being prepared and cannot be edited', 409);
+    }
+
+    const productIds = parsed.data.items.map((i) => i.productId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds }, available: true },
+    });
+    const byId = new Map(products.map((p) => [p.id, p]));
+    if (parsed.data.items.some((i) => !byId.has(i.productId))) {
+      return err(reply, 'Some items are no longer available', 409);
+    }
+    const lineItems = parsed.data.items.map((item) => {
+      const product = byId.get(item.productId)!;
+      return { productId: product.id, name: product.name, price: product.price, quantity: item.quantity };
+    });
+    const total = lineItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
+
+    await prisma.orderItem.deleteMany({ where: { orderId: id } });
+    const updated = await prisma.order.update({
+      where: { id },
+      data: { total, items: { create: lineItems } },
+      include: { items: true, room: true },
+    });
+    return ok(reply, {
+      id: updated.id,
+      status: updated.status,
+      total: updated.total,
+      roomNumber: updated.room?.number ?? '',
+      createdAt: updated.createdAt.toISOString(),
+      items: updated.items.map((it) => ({ name: it.name, price: it.price, quantity: it.quantity })),
+    });
+  });
+
   /* ── GET /menu/orders/:id ─────────────────────────────────────────────
      One order's current status + items, for the TV order-tracking screen. */
   server.get('/menu/orders/:id', async (req, reply) => {
@@ -217,6 +300,7 @@ export async function menuApiRoutes(server: FastifyInstance) {
       total: order.total,
       roomNumber: order.room?.number ?? '',
       items: order.items.map((it) => ({
+        productId: it.productId,
         name: it.name,
         price: it.price,
         quantity: it.quantity,

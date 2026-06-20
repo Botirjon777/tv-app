@@ -52,7 +52,7 @@ fun MainAppNavGraph(
 
             },
             onOpenMenu = {
-                navController.navigate(MenuOrder)
+                navController.navigate(MenuOrder())
             },
             onGoToMainMenu = {
                 navController.navigate(MainMenu)

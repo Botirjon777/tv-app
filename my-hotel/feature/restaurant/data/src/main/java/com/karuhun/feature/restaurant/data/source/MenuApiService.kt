@@ -8,9 +8,11 @@ import com.karuhun.feature.restaurant.data.source.remote.response.MenuProductRes
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlacedOrderResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
+import com.karuhun.feature.restaurant.data.source.remote.response.UpdateOrderRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -42,4 +44,17 @@ interface MenuApiService {
 
     @GET("menu/orders/{id}")
     suspend fun getOrder(@Path("id") id: String): BaseResponse<PlacedOrderResponse>
+
+    @GET("menu/orders")
+    suspend fun getRoomOrders(
+        @Query("hotelSlug") hotelSlug: String,
+        @Query("roomNumber") roomNumber: String,
+        @Query("active") active: String?,
+    ): BaseResponse<List<PlacedOrderResponse>>
+
+    @PUT("menu/orders/{id}")
+    suspend fun updateOrder(
+        @Path("id") id: String,
+        @Body body: UpdateOrderRequest,
+    ): BaseResponse<PlacedOrderResponse>
 }

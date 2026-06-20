@@ -15,6 +15,8 @@ object MainContract {
         val weather: Weather? = null,
         val isOnboardingCompleted: Boolean = false,
         val roomNumber: String = "",
+        // A short order-status message shown as a top-left toast overlay.
+        val orderStatusToast: String? = null,
     )
     sealed interface UiEffect {
         data class ShowError(val message: String) : UiEffect

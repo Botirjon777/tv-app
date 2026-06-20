@@ -1,6 +1,8 @@
 package com.karuhun.feature.restaurant.ui.tracking
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +51,7 @@ fun OrderTrackingScreen(
     uiState: OrderTrackingContract.UiState,
     uiEffect: Flow<OrderTrackingContract.UiEffect>,
     onBackToMenu: () -> Unit,
+    onEdit: (String) -> Unit = {},
 ) {
     uiEffect.collectWithLifecycle { }
 
@@ -56,9 +59,12 @@ fun OrderTrackingScreen(
     val currentIndex = OrderTrackingContract.STEPS.indexOfFirst { it.status == order?.status }
         .coerceAtLeast(0)
 
-    Box(modifier = modifier.fillMaxSize().padding(horizontal = 64.dp, vertical = 32.dp)) {
+    Box(modifier = modifier.fillMaxSize().padding(horizontal = 64.dp, vertical = 24.dp)) {
         Column(
-            modifier = Modifier.fillMaxWidth(0.6f).align(Alignment.TopCenter),
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .align(Alignment.TopCenter)
+                .verticalScroll(rememberScrollState()),
         ) {
             Text(
                 text = "Order status",
@@ -124,12 +130,31 @@ fun OrderTrackingScreen(
             }
 
             Spacer(Modifier.height(20.dp))
-            LauncherCard(
-                onClick = onBackToMenu,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Back to menu", color = Color.White, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Editable only while the kitchen hasn't started it.
+                if (order?.status == "PENDING") {
+                    LauncherCard(
+                        onClick = { onEdit(order.id) },
+                        modifier = Modifier.weight(1f).height(52.dp),
+                        color = androidx.tv.material3.CardDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = Color.White,
+                            focusedContentColor = Color.White,
+                            pressedContentColor = Color.White,
+                        ),
+                    ) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Edit order", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+                LauncherCard(
+                    onClick = onBackToMenu,
+                    modifier = Modifier.weight(1f).height(52.dp),
+                ) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Back to menu", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }

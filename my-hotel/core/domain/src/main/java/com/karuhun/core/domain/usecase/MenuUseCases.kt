@@ -66,6 +66,23 @@ class GetOrderUseCase @Inject constructor(
         repository.getOrder(orderId)
 }
 
+class GetRoomOrdersUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(
+        hotelSlug: String,
+        roomNumber: String,
+        activeOnly: Boolean = false,
+    ): Resource<List<PlacedOrder>> = repository.getRoomOrders(hotelSlug, roomNumber, activeOnly)
+}
+
+class UpdateOrderUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(orderId: String, items: List<OrderLine>): Resource<PlacedOrder> =
+        repository.updateOrder(orderId, items)
+}
+
 class GetBookingUseCase @Inject constructor(
     private val repository: BookingRepository,
 ) {

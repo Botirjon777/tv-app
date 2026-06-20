@@ -15,6 +15,8 @@ interface MenuRepository {
     suspend fun getGuest(hotelSlug: String, roomNumber: String): Resource<MenuGuest>
     suspend fun setGuestLanguage(hotelSlug: String, roomNumber: String, language: String): Resource<Unit>
     suspend fun getOrder(orderId: String): Resource<PlacedOrder>
+    suspend fun getRoomOrders(hotelSlug: String, roomNumber: String, activeOnly: Boolean): Resource<List<PlacedOrder>>
+    suspend fun updateOrder(orderId: String, items: List<OrderLine>): Resource<PlacedOrder>
     suspend fun placeOrder(
         hotelSlug: String,
         roomNumber: String,

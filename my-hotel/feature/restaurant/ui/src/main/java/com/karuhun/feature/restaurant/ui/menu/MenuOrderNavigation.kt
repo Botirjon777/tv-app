@@ -11,7 +11,7 @@ import com.karuhun.feature.restaurant.ui.tracking.OrderTrackingViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object MenuOrder
+data class MenuOrder(val editOrderId: String? = null)
 
 @Serializable
 data class OrderTracking(val orderId: String)
@@ -24,8 +24,11 @@ fun NavGraphBuilder.menuOrderGraph(navController: NavHostController) {
             uiState = uiState,
             uiEffect = viewModel.uiEffect,
             onAction = viewModel::onAction,
-            onOrderPlaced = { orderId -> navController.navigate(OrderTracking(orderId)) },
+            onOrderPlaced = { orderId ->
+                navController.navigate(OrderTracking(orderId))
+            },
             onBack = { navController.popBackStack() },
+            onTrackOrder = { orderId -> navController.navigate(OrderTracking(orderId)) },
         )
     }
 
@@ -35,9 +38,8 @@ fun NavGraphBuilder.menuOrderGraph(navController: NavHostController) {
         OrderTrackingScreen(
             uiState = uiState,
             uiEffect = viewModel.uiEffect,
-            onBackToMenu = {
-                navController.popBackStack(MenuOrder, inclusive = false)
-            },
+            onBackToMenu = { navController.popBackStack() },
+            onEdit = { orderId -> navController.navigate(MenuOrder(orderId)) },
         )
     }
 }

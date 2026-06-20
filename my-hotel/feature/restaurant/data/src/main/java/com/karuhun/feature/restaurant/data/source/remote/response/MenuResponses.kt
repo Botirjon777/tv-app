@@ -82,6 +82,7 @@ data class OrderItemResponse(
     @SerializedName("name") val name: String? = null,
     @SerializedName("price") val price: Int? = null,
     @SerializedName("quantity") val quantity: Int? = null,
+    @SerializedName("productId") val productId: String? = null,
 )
 
 data class PlacedOrderResponse(
@@ -90,6 +91,7 @@ data class PlacedOrderResponse(
     @SerializedName("total") val total: Int? = null,
     @SerializedName("roomNumber") val roomNumber: String? = null,
     @SerializedName("items") val items: List<OrderItemResponse>? = null,
+    @SerializedName("createdAt") val createdAt: String? = null,
 )
 
 fun PlacedOrderResponse.toDomain() = PlacedOrder(
@@ -102,8 +104,16 @@ fun PlacedOrderResponse.toDomain() = PlacedOrder(
             name = it.name.orEmpty(),
             price = it.price ?: 0,
             quantity = it.quantity ?: 0,
+            productId = it.productId.orEmpty(),
         )
     },
+    createdAt = createdAt.orEmpty(),
+)
+
+fun List<PlacedOrderResponse>.toOrderDomainList() = map { it.toDomain() }
+
+data class UpdateOrderRequest(
+    val items: List<OrderItemRequest>,
 )
 
 data class MenuGuestResponse(
