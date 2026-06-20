@@ -30,6 +30,9 @@ fun MainAppNavGraph(
             onMenuItemClick = { menuItem ->
 
             },
+            onOpenMenu = {
+                navController.navigate(MenuOrder)
+            },
             onGoToMainMenu = {
                 navController.navigate(MainMenu)
             },

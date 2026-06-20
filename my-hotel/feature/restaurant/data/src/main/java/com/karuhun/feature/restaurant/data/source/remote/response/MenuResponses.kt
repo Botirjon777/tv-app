@@ -2,6 +2,7 @@ package com.karuhun.feature.restaurant.data.source.remote.response
 
 import com.google.gson.annotations.SerializedName
 import com.karuhun.core.model.MenuCategory
+import com.karuhun.core.model.MenuGuest
 import com.karuhun.core.model.MenuHotel
 import com.karuhun.core.model.MenuProduct
 import com.karuhun.core.model.PlacedOrder
@@ -89,4 +90,14 @@ fun PlacedOrderResponse.toDomain() = PlacedOrder(
     status = status.orEmpty(),
     total = total ?: 0,
     roomNumber = roomNumber.orEmpty(),
+)
+
+data class MenuGuestResponse(
+    @SerializedName("fullName") val fullName: String? = null,
+    @SerializedName("hasGuest") val hasGuest: Boolean? = null,
+)
+
+fun MenuGuestResponse.toDomain() = MenuGuest(
+    fullName = fullName.orEmpty(),
+    hasGuest = hasGuest ?: false,
 )

@@ -8,12 +8,41 @@ import com.karuhun.core.common.ApplicationNotInstalledException
 import com.karuhun.core.common.ApplicationSecurityException
 import com.karuhun.core.common.Resource
 import com.karuhun.core.domain.repository.ApplicationLauncher
+import com.karuhun.core.model.Application
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class ApplicationLauncherImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ApplicationLauncher {
+
+    override fun getLaunchableApplications(): List<Application> {
+        val pm = context.packageManager
+        val seen = LinkedHashMap<String, Application>()
+        // Android TV (leanback) launcher entries first, then standard launcher.
+        for (category in listOf(Intent.CATEGORY_LEANBACK_LAUNCHER, Intent.CATEGORY_LAUNCHER)) {
+            val intent = Intent(Intent.ACTION_MAIN).addCategory(category)
+            val resolved = try {
+                pm.queryIntentActivities(intent, 0)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            for (info in resolved) {
+                val pkg = info.activityInfo?.packageName ?: continue
+                if (pkg == context.packageName) continue // skip this launcher
+                if (seen.containsKey(pkg)) continue
+                val label = info.loadLabel(pm)?.toString().orEmpty()
+                seen[pkg] = Application(
+                    id = pkg.hashCode(),
+                    name = label,
+                    image = null,
+                    packageName = pkg,
+                )
+            }
+        }
+        return seen.values.sortedBy { it.name?.lowercase() }
+    }
+
     override fun launchApplication(packageName: String) : Resource<Unit> {
         return try {
             if (!isPackageInstalled(packageName)) {

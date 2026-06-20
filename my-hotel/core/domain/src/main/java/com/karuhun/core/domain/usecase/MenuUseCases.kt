@@ -5,6 +5,7 @@ import com.karuhun.core.domain.repository.BookingRepository
 import com.karuhun.core.domain.repository.MenuRepository
 import com.karuhun.core.model.Booking
 import com.karuhun.core.model.MenuCategory
+import com.karuhun.core.model.MenuGuest
 import com.karuhun.core.model.MenuHotel
 import com.karuhun.core.model.MenuProduct
 import com.karuhun.core.model.OrderLine
@@ -42,6 +43,13 @@ class PlaceMenuOrderUseCase @Inject constructor(
         note: String,
         items: List<OrderLine>,
     ): Resource<PlacedOrder> = repository.placeOrder(hotelSlug, roomNumber, note, items)
+}
+
+class GetMenuGuestUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(hotelSlug: String, roomNumber: String): Resource<MenuGuest> =
+        repository.getGuest(hotelSlug, roomNumber)
 }
 
 class GetBookingUseCase @Inject constructor(

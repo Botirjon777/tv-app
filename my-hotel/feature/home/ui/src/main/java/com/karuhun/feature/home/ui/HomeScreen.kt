@@ -63,6 +63,7 @@ internal fun HomeScreen(
     uiAction: (HomeContract.UiAction) -> Unit,
     uiEffect: Flow<HomeContract.UiEffect>,
     onMenuItemClick: (String) -> Unit = { _ -> },
+    onOpenMenu: () -> Unit = {},
     onGoToMainMenu: () -> Unit,
 ) {
     uiEffect.collectWithLifecycle { effect ->
@@ -71,8 +72,9 @@ internal fun HomeScreen(
         }
     }
 
-    val guestName = uiState.roomDetail?.guestName.orEmpty()
-    val roomNumber = DeviceUtil.getDeviceName(LocalContext.current)
+    // Greet the checked-in guest from the backend; room from the device booking.
+    val guestName = uiState.guestName
+    val roomNumber = uiState.roomNumber
 
     Box(
         modifier = modifier
@@ -95,6 +97,7 @@ internal fun HomeScreen(
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(),
             onMenuItemClick = onMenuItemClick,
+            onOpenMenu = onOpenMenu,
             onGoToMainMenu = onGoToMainMenu,
         )
     }
@@ -192,6 +195,7 @@ private fun RoomInfoPanel(
 private fun AppDock(
     modifier: Modifier = Modifier,
     onMenuItemClick: (String) -> Unit,
+    onOpenMenu: () -> Unit,
     onGoToMainMenu: () -> Unit,
 ) {
     val quickApps = MenuItem.quickApps
@@ -201,9 +205,9 @@ private fun AppDock(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.Bottom,
     ) {
-        // Large "Menu" card with food image
+        // Large "Menu" card with food image -> opens in-room dining ordering
         MenuHeroCard(
-            onClick = { onMenuItemClick("Menu") },
+            onClick = onOpenMenu,
         )
 
         // Center cluster: quick apps on top, service / all apps below

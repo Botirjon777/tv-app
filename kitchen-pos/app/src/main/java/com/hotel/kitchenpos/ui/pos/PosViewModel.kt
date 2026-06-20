@@ -40,6 +40,17 @@ class PosViewModel : ViewModel() {
         loadHotels()
         loadOrders()
         listenForEvents()
+        pollOrders()
+    }
+
+    // Periodic refresh as a safety net on top of the live SSE stream.
+    private fun pollOrders() {
+        viewModelScope.launch {
+            while (true) {
+                delay(POLL_INTERVAL_MS)
+                loadOrders()
+            }
+        }
     }
 
     private fun loadOrders() {
@@ -117,5 +128,9 @@ class PosViewModel : ViewModel() {
             KitchenApi.logout()
             onDone()
         }
+    }
+
+    private companion object {
+        const val POLL_INTERVAL_MS = 2 * 60 * 1000L // refresh every 2 minutes
     }
 }

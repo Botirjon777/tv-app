@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.karuhun.core.common.fold
 import com.karuhun.core.domain.usecase.GetApplicationsUseCase
 import com.karuhun.core.domain.usecase.GetContentsUseCase
+import com.karuhun.core.domain.usecase.GetInstalledAppsUseCase
 import com.karuhun.core.domain.usecase.LaunchApplicationUseCase
 import com.karuhun.core.ui.navigation.delegate.mvi.MVI
 import com.karuhun.core.ui.navigation.delegate.mvi.mvi
@@ -16,6 +17,7 @@ import javax.inject.Inject
 class MainMenuViewModel @Inject constructor(
     private val getContentsUseCase: GetContentsUseCase,
     private val getApplicationsUseCase: GetApplicationsUseCase,
+    private val getInstalledAppsUseCase: GetInstalledAppsUseCase,
     private val launchApplicationUseCase: LaunchApplicationUseCase,
 ) : ViewModel(),
     MVI<MainMenuContract.UiState, MainMenuContract.UiAction, MainMenuContract.UiEffect> by mvi(
@@ -59,12 +61,16 @@ class MainMenuViewModel @Inject constructor(
     }
 
     private fun loadApplications() = viewModelScope.launch {
-        getApplicationsUseCase().collect { applications ->
-            updateUiState {
-                copy(
-                    isLoading = false,
-                    applications = applications
-                )
+        // Device-installed apps (system + user) shown in "All apps".
+        val deviceApps = runCatching { getInstalledAppsUseCase() }.getOrDefault(emptyList())
+        updateUiState { copy(isLoading = false, applications = deviceApps) }
+
+        // Merge in any backend-provisioned apps on top (usually none).
+        getApplicationsUseCase().collect { backendApps ->
+            if (backendApps.isNotEmpty()) {
+                val merged = (deviceApps + backendApps)
+                    .distinctBy { it.packageName ?: it.id }
+                updateUiState { copy(applications = merged) }
             }
         }
     }

@@ -69,7 +69,7 @@ data class OrderEvent(
 )
 
 @Serializable
-data class LoginRequest(val role: String, val password: String)
+data class LoginRequest(val email: String, val password: String)
 
 @Serializable
 data class StatusPatch(val status: String)

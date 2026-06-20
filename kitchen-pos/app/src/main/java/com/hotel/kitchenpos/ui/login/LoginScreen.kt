@@ -3,6 +3,7 @@ package com.hotel.kitchenpos.ui.login
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,13 +17,18 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,12 +54,22 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Palette.Slate900)
-            .systemBarsPadding()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center,
+            .systemBarsPadding(),
     ) {
+        // Server settings live in the top-right corner, out of the main flow.
+        IconButton(
+            onClick = viewModel::openSettings,
+            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Settings,
+                contentDescription = "Server sozlamalari",
+                tint = Palette.Slate400,
+            )
+        }
+
         Column(
-            modifier = Modifier.width(380.dp),
+            modifier = Modifier.align(Alignment.Center).width(360.dp).padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Box(
@@ -75,24 +91,27 @@ fun LoginScreen(
             Text(
                 text = "Oshxona POS",
                 color = Palette.White,
-                style = androidx.compose.material3.MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleLarge,
             )
             Spacer(Modifier.height(6.dp))
             Text(
                 text = "Buyurtmalarni ko‘rish uchun tizimga kiring.",
                 color = Palette.Slate400,
                 textAlign = TextAlign.Center,
-                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             Spacer(Modifier.height(28.dp))
 
             OutlinedTextField(
-                value = state.serverUrl,
-                onValueChange = viewModel::onServerUrlChange,
-                label = { Text("Server manzili") },
+                value = state.email,
+                onValueChange = viewModel::onEmailChange,
+                label = { Text("Email") },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next,
+                ),
                 colors = fieldColors(),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -120,7 +139,7 @@ fun LoginScreen(
                 Text(
                     text = state.error!!,
                     color = Palette.Rose400,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall,
                 )
             }
 
@@ -134,9 +153,7 @@ fun LoginScreen(
                     containerColor = Palette.Brand600,
                     contentColor = Palette.White,
                 ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
+                modifier = Modifier.fillMaxWidth().height(50.dp),
             ) {
                 if (state.submitting) {
                     CircularProgressIndicator(
@@ -150,6 +167,46 @@ fun LoginScreen(
             }
         }
     }
+
+    if (state.showSettings) {
+        ServerSettingsDialog(
+            url = state.serverUrl,
+            onUrlChange = viewModel::onServerUrlChange,
+            onSave = viewModel::saveServerUrl,
+            onDismiss = viewModel::dismissSettings,
+        )
+    }
+}
+
+@Composable
+private fun ServerSettingsDialog(
+    url: String,
+    onUrlChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Server manzili") },
+        text = {
+            Column {
+                Text(
+                    "Backend manzilini kiriting (masalan, http://192.168.1.50:3001).",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Spacer(Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = onUrlChange,
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onSave) { Text("Saqlash") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Bekor qilish") } },
+    )
 }
 
 @Composable

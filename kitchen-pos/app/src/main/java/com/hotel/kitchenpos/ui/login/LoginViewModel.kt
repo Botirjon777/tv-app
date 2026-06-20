@@ -11,33 +11,49 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class LoginUiState(
-    val serverUrl: String = AppSession.baseUrl,
+    val email: String = "",
     val password: String = "",
     val submitting: Boolean = false,
     val error: String? = null,
+    // Server URL is configured in a settings dialog, not on the main form.
+    val showSettings: Boolean = false,
+    val serverUrl: String = AppSession.baseUrl,
 )
 
 class LoginViewModel : ViewModel() {
     private val _state = MutableStateFlow(LoginUiState())
     val state: StateFlow<LoginUiState> = _state.asStateFlow()
 
-    fun onServerUrlChange(value: String) =
-        _state.update { it.copy(serverUrl = value, error = null) }
+    fun onEmailChange(value: String) =
+        _state.update { it.copy(email = value, error = null) }
 
     fun onPasswordChange(value: String) =
         _state.update { it.copy(password = value, error = null) }
 
+    fun openSettings() =
+        _state.update { it.copy(showSettings = true, serverUrl = AppSession.baseUrl) }
+
+    fun dismissSettings() =
+        _state.update { it.copy(showSettings = false) }
+
+    fun onServerUrlChange(value: String) =
+        _state.update { it.copy(serverUrl = value) }
+
+    fun saveServerUrl() {
+        AppSession.baseUrl = _state.value.serverUrl
+        _state.update { it.copy(showSettings = false, serverUrl = AppSession.baseUrl) }
+    }
+
     fun submit(onSuccess: () -> Unit) {
         val current = _state.value
         if (current.submitting) return
-        if (current.password.isBlank()) {
-            _state.update { it.copy(error = "Parolni kiriting") }
+        if (current.email.isBlank() || current.password.isBlank()) {
+            _state.update { it.copy(error = "Email va parolni kiriting") }
             return
         }
         _state.update { it.copy(submitting = true, error = null) }
-        AppSession.baseUrl = current.serverUrl
         viewModelScope.launch {
-            runCatching { KitchenApi.login(current.password) }
+            runCatching { KitchenApi.login(current.email.trim(), current.password) }
                 .onSuccess {
                     _state.update { it.copy(submitting = false) }
                     onSuccess()

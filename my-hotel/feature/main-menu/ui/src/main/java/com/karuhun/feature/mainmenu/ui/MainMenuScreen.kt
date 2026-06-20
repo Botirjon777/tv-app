@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices.TV_720p
@@ -123,9 +124,18 @@ fun MainMenuScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
+                            // Backend apps provide an image URL; device apps
+                            // resolve their launcher icon from the package.
+                            val context = LocalContext.current
+                            val iconModel: Any? = remember(application.packageName, application.image) {
+                                if (!application.image.isNullOrEmpty()) application.image
+                                else application.packageName?.let { pkg ->
+                                    runCatching { context.packageManager.getApplicationIcon(pkg) }.getOrNull()
+                                }
+                            }
                             AsyncImage(
                                 modifier = Modifier.size(64.dp),
-                                model = application.image,
+                                model = iconModel,
                                 contentDescription = application.name.orEmpty(),
                                 colorFilter = if (application.image.isNullOrEmpty()) null else ColorFilter.tint(Color(0xFFEFEFEF))
                             )

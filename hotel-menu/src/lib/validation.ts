@@ -81,7 +81,14 @@ export const recommendationInput = z.object({
   sortOrder: z.number().int().optional(),
 });
 
-export const loginInput = z.object({
-  role: z.enum(["admin", "pos"]),
-  password: z.string().min(1),
-});
+// Login accepts EITHER `{ role, password }` (web admin/POS forms) OR
+// `{ email, password }` (native apps that sign in by email).
+export const loginInput = z
+  .object({
+    role: z.enum(["admin", "pos"]).optional(),
+    email: z.string().email().optional(),
+    password: z.string().min(1),
+  })
+  .refine((v) => Boolean(v.role) || Boolean(v.email), {
+    message: "role or email is required",
+  });

@@ -33,9 +33,9 @@ object KitchenApi {
 
     private fun url(path: String) = "${AppSession.baseUrl}$path"
 
-    /** POST /api/auth/login — role "pos". Throws [ApiException] on bad password. */
-    suspend fun login(password: String): Unit = withContext(Dispatchers.IO) {
-        val body = json.encodeToString(LoginRequest.serializer(), LoginRequest("pos", password))
+    /** POST /api/auth/login — email + password. Throws [ApiException] on failure. */
+    suspend fun login(email: String, password: String): Unit = withContext(Dispatchers.IO) {
+        val body = json.encodeToString(LoginRequest.serializer(), LoginRequest(email, password))
             .toRequestBody(jsonMedia)
         val request = Request.Builder().url(url("/api/auth/login")).post(body).build()
         client.newCall(request).execute().use { resp ->

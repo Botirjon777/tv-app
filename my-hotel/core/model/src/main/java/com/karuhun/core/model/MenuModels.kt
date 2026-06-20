@@ -50,3 +50,9 @@ data class PlacedOrder(
     val total: Int,
     val roomNumber: String,
 )
+
+// The guest currently checked into this room (from the backend).
+data class MenuGuest(
+    val fullName: String = "",
+    val hasGuest: Boolean = false,
+)

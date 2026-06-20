@@ -68,3 +68,26 @@ export function checkPassword(role: Role, password: string): boolean {
       : process.env.POS_PASSWORD || "kitchen123";
   return password === expected;
 }
+
+// Configured login email per role (env-based, no users table). Mirrors the
+// admin convention used elsewhere in the project.
+function emailForRole(role: Role): string {
+  return role === "admin"
+    ? process.env.ADMIN_EMAIL || "admin@gmail.com"
+    : process.env.POS_EMAIL || "kitchen@gmail.com";
+}
+
+// Resolve a role from an email + password pair. Returns null if neither the
+// admin nor POS credentials match. Used by native apps that sign in by email.
+export function resolveRoleByEmail(
+  email: string,
+  password: string
+): Role | null {
+  const normalized = email.trim().toLowerCase();
+  for (const role of ["admin", "pos"] as const) {
+    if (normalized === emailForRole(role).toLowerCase() && checkPassword(role, password)) {
+      return role;
+    }
+  }
+  return null;
+}

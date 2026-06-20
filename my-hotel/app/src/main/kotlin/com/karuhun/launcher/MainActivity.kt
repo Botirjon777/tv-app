@@ -45,6 +45,10 @@ import kotlinx.coroutines.flow.emptyFlow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+// Warm hotel-room interior used as the launcher background.
+private const val DEFAULT_ROOM_BACKGROUND =
+    "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1920&q=80"
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,9 +93,9 @@ fun LauncherApplication(
     Box(
         modifier = modifier,
     ) {
-        // Background Image
+        // Background Image — a warm in-room interior (matches the welcome design).
         AsyncImage(
-            model = uiState.hotelProfile?.backgroundPhoto,
+            model = DEFAULT_ROOM_BACKGROUND,
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize(),
@@ -101,7 +105,7 @@ fun LauncherApplication(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)),
+                .background(Color.Black.copy(alpha = 0.35f)),
         )
 
         Column(

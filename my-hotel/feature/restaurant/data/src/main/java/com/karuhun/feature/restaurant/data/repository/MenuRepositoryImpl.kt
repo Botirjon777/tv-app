@@ -4,6 +4,7 @@ import com.karuhun.core.common.Resource
 import com.karuhun.core.common.map
 import com.karuhun.core.domain.repository.MenuRepository
 import com.karuhun.core.model.MenuCategory
+import com.karuhun.core.model.MenuGuest
 import com.karuhun.core.model.MenuHotel
 import com.karuhun.core.model.MenuProduct
 import com.karuhun.core.model.OrderLine
@@ -38,6 +39,10 @@ class MenuRepositoryImpl @Inject constructor(
                 availableOnly = if (availableOnly) "1" else null,
             )
         }.map { it.data?.toProductDomainList() ?: emptyList() }
+
+    override suspend fun getGuest(hotelSlug: String, roomNumber: String): Resource<MenuGuest> =
+        safeApiCall { api.getGuest(hotelSlug, roomNumber) }
+            .map { it.data?.toDomain() ?: MenuGuest() }
 
     override suspend fun placeOrder(
         hotelSlug: String,

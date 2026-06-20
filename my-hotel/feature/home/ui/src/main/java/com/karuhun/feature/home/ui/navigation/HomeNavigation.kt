@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
 
 fun NavGraphBuilder.homeScreen(
     onMenuItemClick: (String) -> Unit,
+    onOpenMenu: () -> Unit,
     onGoToMainMenu: () -> Unit,
 ){
     composable<Home> {
@@ -25,6 +26,7 @@ fun NavGraphBuilder.homeScreen(
         val uiAction = viewModel::onAction
         HomeScreen(
             onMenuItemClick = onMenuItemClick,
+            onOpenMenu = onOpenMenu,
             uiState = uiState,
             uiAction = uiAction,
             uiEffect = uiEffect,

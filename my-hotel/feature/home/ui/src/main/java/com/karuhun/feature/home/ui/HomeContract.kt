@@ -8,7 +8,11 @@ internal object HomeContract {
     data class UiState(
         val isLoading: Boolean = false,
         val hotelProfile: HotelProfile? = HotelProfile.Empty,
-        val roomDetail: RoomDetail? = RoomDetail.Empty
+        val roomDetail: RoomDetail? = RoomDetail.Empty,
+        // From the device booking + backend guest lookup.
+        val roomNumber: String = "",
+        val hotelName: String = "",
+        val guestName: String = "",
     )
     sealed interface UiAction {
         data object OnMenuItemClick : UiAction

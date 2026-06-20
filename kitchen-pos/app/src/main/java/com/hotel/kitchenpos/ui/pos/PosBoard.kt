@@ -288,9 +288,9 @@ private fun StatusColumn(
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                    start = 20.dp, end = 20.dp, bottom = 20.dp,
+                    start = 12.dp, end = 12.dp, bottom = 12.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(orders, key = { it.id }) { order ->
                     OrderTicket(order = order, onUpdateStatus = onUpdateStatus)
