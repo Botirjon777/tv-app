@@ -40,7 +40,11 @@ internal class HomeViewModel @Inject constructor(
     private fun observeBookingAndGuest() = viewModelScope.launch {
         getBookingUseCase().collect { booking ->
             updateUiState {
-                copy(roomNumber = booking.roomNumber, hotelName = booking.hotelName)
+                copy(
+                    roomNumber = booking.roomNumber,
+                    hotelName = booking.hotelName,
+                    languageCode = booking.preferredLanguage.ifBlank { "en" },
+                )
             }
             currentHotelSlug = booking.hotelSlug
             currentRoomNumber = booking.roomNumber

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,6 +46,7 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
+import com.karuhun.feature.home.ui.model.LanguageOption
 import com.karuhun.feature.home.ui.model.MenuItem
 import com.karuhun.launcher.core.designsystem.R
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
@@ -68,6 +70,7 @@ internal fun HomeScreen(
     onMenuItemClick: (String) -> Unit = { _ -> },
     onOpenMenu: () -> Unit = {},
     onGoToMainMenu: () -> Unit,
+    onOpenLanguage: () -> Unit = {},
 ) {
     uiEffect.collectWithLifecycle { effect ->
         when (effect) {
@@ -93,6 +96,12 @@ internal fun HomeScreen(
         GuestGreeting(
             modifier = Modifier.align(Alignment.TopStart),
             guestName = guestName,
+        )
+
+        LanguageChip(
+            modifier = Modifier.align(Alignment.TopCenter),
+            languageCode = uiState.languageCode,
+            onClick = onOpenLanguage,
         )
 
         RoomInfoPanel(
@@ -270,6 +279,33 @@ private fun AppDock(
                 icon = SettingSvgrepoCom,
                 modifier = Modifier.width(165.dp),
                 onClick = { onMenuItemClick("Settings") },
+            )
+        }
+    }
+}
+
+@Composable
+private fun LanguageChip(
+    modifier: Modifier = Modifier,
+    languageCode: String,
+    onClick: () -> Unit,
+) {
+    val lang = LanguageOption.byCode(languageCode)
+    LauncherCard(
+        onClick = onClick,
+        modifier = modifier.height(48.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxHeight().padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(text = lang.flag, fontSize = 22.sp)
+            Text(
+                text = lang.code.uppercase(),
+                color = Color.White,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
             )
         }
     }

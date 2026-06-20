@@ -20,6 +20,8 @@ data class HotelProfile(
     val bookingHotelName: String = "",
     val bookingRoomNumber: String = "",
     val onboardingComplete: Boolean = false,
+    val preferredLanguage: String = "",
+    val wallpaperUrl: String = "",
 ) {
     companion object {
         val Empty = HotelProfile(
@@ -41,7 +43,9 @@ data class HotelProfile(
             bookingHotelSlug = "",
             bookingHotelName = "",
             bookingRoomNumber = "",
-            onboardingComplete = false
+            onboardingComplete = false,
+            preferredLanguage = "",
+            wallpaperUrl = "",
         )
     }
 }

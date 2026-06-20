@@ -15,6 +15,8 @@ object MainContract {
         val weather: Weather? = null,
         val isOnboardingCompleted: Boolean = false,
         val roomNumber: String = "",
+        // Locally-chosen launcher wallpaper (blank → built-in default).
+        val wallpaperUrl: String = "",
         // A short order-status message shown as a top-left toast overlay.
         val orderStatusToast: String? = null,
     )

@@ -15,6 +15,8 @@ internal object HomeContract {
         val guestName: String = "",
         // True when the guest has an in-progress dining order (PENDING/PREPARING/READY).
         val hasActiveOrder: Boolean = false,
+        // Locally-selected TV language code (e.g. "en", "ru", "uz"); drives the flag chip.
+        val languageCode: String = "en",
     )
     sealed interface UiAction {
         data object OnMenuItemClick : UiAction

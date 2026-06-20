@@ -56,6 +56,7 @@ fun MainMenuScreen(
     uiAction: (MainMenuContract.UiAction) -> Unit,
     onNavigateToContentItems: (Content) -> Unit,
     onNavigateToRestaurant: () -> Unit,
+    onOpenSettings: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
 
@@ -88,6 +89,38 @@ fun MainMenuScreen(
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
             ) {
+                // Launcher's own settings (wallpaper + room number).
+                item {
+                    LauncherCard(
+                        modifier = Modifier
+                            .width(250.dp)
+                            .padding(8.dp),
+                        onClick = onOpenSettings,
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(
+                                imageVector = HotelProfile,
+                                contentDescription = "My Hotel Settings",
+                                modifier = Modifier.size(64.dp),
+                                tint = Color(0xFFEFEFEF),
+                            )
+                            Text(
+                                text = "My Hotel Settings",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                    }
+                }
                 // System / device apps that live outside this launcher.
                 items(uiState.applications, key = { it.id!! }) { application ->
                     LauncherCard(

@@ -97,9 +97,10 @@ fun LauncherApplication(
     Box(
         modifier = modifier,
     ) {
-        // Background Image — a warm in-room interior (matches the welcome design).
+        // Background Image — the staff-selected wallpaper, or a warm in-room
+        // interior default when none has been chosen.
         AsyncImage(
-            model = DEFAULT_ROOM_BACKGROUND,
+            model = uiState.wallpaperUrl.ifBlank { DEFAULT_ROOM_BACKGROUND },
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize(),

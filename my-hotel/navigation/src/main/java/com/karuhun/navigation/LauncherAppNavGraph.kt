@@ -5,6 +5,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.karuhun.feature.home.ui.navigation.Home
+import com.karuhun.feature.home.ui.navigation.LanguageSelect
+import com.karuhun.feature.home.ui.navigation.MyHotelSettings
+import com.karuhun.feature.home.ui.navigation.languageSelectScreen
+import com.karuhun.feature.home.ui.navigation.myHotelSettingsScreen
 import com.karuhun.feature.itemlist.ui.navigation.contentScreen
 import com.karuhun.feature.home.ui.navigation.homeScreen
 import com.karuhun.feature.itemlist.ui.navigation.ContentDetail
@@ -57,6 +61,15 @@ fun MainAppNavGraph(
             onGoToMainMenu = {
                 navController.navigate(MainMenu)
             },
+            onOpenLanguage = {
+                navController.navigate(LanguageSelect)
+            },
+        )
+        languageSelectScreen(
+            onBack = { navController.popBackStack() },
+        )
+        myHotelSettingsScreen(
+            onBack = { navController.popBackStack() },
         )
         mainMenuScreen(
             onNavigateToContentItems = { content ->
@@ -70,6 +83,9 @@ fun MainAppNavGraph(
             },
             onNavigateToRestaurant = {
                 navController.navigate(MenuOrder)
+            },
+            onOpenSettings = {
+                navController.navigate(MyHotelSettings)
             },
             onBack = { navController.popBackStack() },
         )

@@ -95,3 +95,15 @@ class SaveBookingUseCase @Inject constructor(
     suspend operator fun invoke(hotelSlug: String, hotelName: String, roomNumber: String) =
         repository.saveBooking(hotelSlug, hotelName, roomNumber)
 }
+
+class SavePreferredLanguageUseCase @Inject constructor(
+    private val repository: BookingRepository,
+) {
+    suspend operator fun invoke(language: String) = repository.setPreferredLanguage(language)
+}
+
+class SaveWallpaperUseCase @Inject constructor(
+    private val repository: BookingRepository,
+) {
+    suspend operator fun invoke(url: String) = repository.setWallpaper(url)
+}

@@ -25,4 +25,8 @@ message Hotel {
     string booking_hotel_name = 17;
     string booking_room_number = 18;
     bool onboarding_complete = 19;
+
+    // Locally-chosen TV preferences (used when no backend guest is checked in).
+    string preferred_language = 20;
+    string wallpaper_url = 21;
 }

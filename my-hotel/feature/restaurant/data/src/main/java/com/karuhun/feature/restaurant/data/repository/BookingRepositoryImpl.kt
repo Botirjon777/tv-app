@@ -17,6 +17,8 @@ class BookingRepositoryImpl @Inject constructor(
             hotelName = it.bookingHotelName,
             roomNumber = it.bookingRoomNumber,
             onboardingComplete = it.onboardingComplete,
+            preferredLanguage = it.preferredLanguage,
+            wallpaperUrl = it.wallpaperUrl,
         )
     }
 
@@ -33,5 +35,13 @@ class BookingRepositoryImpl @Inject constructor(
                 onboardingComplete = true,
             )
         }
+    }
+
+    override suspend fun setPreferredLanguage(language: String) {
+        datastore.updateHotelData { copy(preferredLanguage = language) }
+    }
+
+    override suspend fun setWallpaper(url: String) {
+        datastore.updateHotelData { copy(wallpaperUrl = url) }
     }
 }

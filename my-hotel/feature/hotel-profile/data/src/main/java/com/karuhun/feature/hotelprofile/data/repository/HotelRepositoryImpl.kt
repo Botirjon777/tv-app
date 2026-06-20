@@ -63,8 +63,12 @@ class HotelRepositoryImpl @Inject constructor(
                 hotelProfile.toModel()?.data.toDomain()
             },
             saveData = { hotel ->
+                // IMPORTANT: copy() over the existing record so the device's booking
+                // (hotel/room), onboarding flag and local preferences are preserved —
+                // building a fresh HotelProfile here would wipe them and bounce the
+                // guest back into onboarding on every sync.
                 launcherDatastore.updateHotelData {
-                    HotelProfile(
+                    copy(
                         id = hotel.id.orZero(),
                         name = hotel.name.orEmpty(),
                         phone = hotel.phone.orEmpty(),
@@ -79,7 +83,7 @@ class HotelRepositoryImpl @Inject constructor(
                         backgroundPhoto = hotel.backgroundPhoto.orEmpty(),
                         introVideo = hotel.introVideo.orEmpty(),
                         welcomeText = hotel.welcomeText.orEmpty(),
-                        runningText = hotel.runningText.orEmpty()
+                        runningText = hotel.runningText.orEmpty(),
                     )
                 }
 

@@ -35,6 +35,8 @@ data class Booking(
     val hotelName: String = "",
     val roomNumber: String = "",
     val onboardingComplete: Boolean = false,
+    val preferredLanguage: String = "",
+    val wallpaperUrl: String = "",
 )
 
 // A single line in a placed order.

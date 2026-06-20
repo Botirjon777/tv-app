@@ -19,6 +19,7 @@ import kotlinx.serialization.Serializable
 fun NavGraphBuilder.mainMenuScreen(
     onNavigateToContentItems: (Content) -> Unit,
     onNavigateToRestaurant: () -> Unit,
+    onOpenSettings: () -> Unit = {},
     onBack: () -> Unit = {},
 ) {
     composable<MainMenu> {
@@ -33,6 +34,7 @@ fun NavGraphBuilder.mainMenuScreen(
             uiAction = uiAction,
             onNavigateToContentItems = onNavigateToContentItems,
             onNavigateToRestaurant = onNavigateToRestaurant,
+            onOpenSettings = onOpenSettings,
             onBack = onBack,
         )
     }

@@ -87,7 +87,9 @@ class LauncherPreferencesDatastore @Inject constructor(
                         bookingHotelSlug = currentPreferences.bookingHotelSlug,
                         bookingHotelName = currentPreferences.bookingHotelName,
                         bookingRoomNumber = currentPreferences.bookingRoomNumber,
-                        onboardingComplete = currentPreferences.onboardingComplete
+                        onboardingComplete = currentPreferences.onboardingComplete,
+                        preferredLanguage = currentPreferences.preferredLanguage,
+                        wallpaperUrl = currentPreferences.wallpaperUrl,
                     )
                 )
 
@@ -111,6 +113,8 @@ class LauncherPreferencesDatastore @Inject constructor(
                     bookingHotelName = updatedPreferences.bookingHotelName
                     bookingRoomNumber = updatedPreferences.bookingRoomNumber
                     onboardingComplete = updatedPreferences.onboardingComplete
+                    preferredLanguage = updatedPreferences.preferredLanguage
+                    wallpaperUrl = updatedPreferences.wallpaperUrl
                 }
             }
         } catch (ioException: IOException) {

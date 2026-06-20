@@ -49,10 +49,15 @@ class MainViewModel @Inject constructor(
         getBookingUseCase().collect { booking ->
             hotelSlug = booking.hotelSlug
             roomNumber = booking.roomNumber
+            // Onboarding is done once a hotel + room exist on the device — derive it
+            // from their presence (not just the flag) so a stray write that drops the
+            // flag can never bounce the guest back into hotel/room selection.
+            val hasBooking = booking.hotelSlug.isNotBlank() && booking.roomNumber.isNotBlank()
             updateUiState {
                 copy(
-                    isOnboardingCompleted = booking.onboardingComplete,
+                    isOnboardingCompleted = booking.onboardingComplete || hasBooking,
                     roomNumber = booking.roomNumber,
+                    wallpaperUrl = booking.wallpaperUrl,
                 )
             }
         }
