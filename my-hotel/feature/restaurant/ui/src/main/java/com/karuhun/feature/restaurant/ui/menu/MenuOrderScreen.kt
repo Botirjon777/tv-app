@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -19,9 +21,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -50,6 +58,7 @@ fun MenuOrderScreen(
     onOrderPlaced: (String) -> Unit = {},
     onBack: () -> Unit = {},
     onTrackOrder: (String) -> Unit = {},
+    onPastOrders: () -> Unit = {},
 ) {
     uiEffect.collectWithLifecycle { effect ->
         when (effect) {
@@ -77,7 +86,7 @@ fun MenuOrderScreen(
             if (uiState.pastOrders.isNotEmpty()) {
                 PillButton(
                     text = "Past orders (${uiState.pastOrders.size})",
-                    onClick = { onAction(MenuOrderContract.UiAction.ShowPastOrders) },
+                    onClick = onPastOrders,
                 )
             }
             if (uiState.isEditing) {
@@ -114,7 +123,7 @@ fun MenuOrderScreen(
                 items(uiState.products, key = { it.id }) { product ->
                     ProductCard(
                         product = product,
-                        onClick = { onAction(MenuOrderContract.UiAction.AddToCart(product)) },
+                        onClick = { onAction(MenuOrderContract.UiAction.OpenQuantity(product)) },
                     )
                 }
             }
@@ -128,14 +137,98 @@ fun MenuOrderScreen(
         }
       }
 
-      // Past orders overlay
-      if (uiState.showPastOrders) {
-          PastOrdersPanel(
-              modifier = Modifier.align(Alignment.Center),
-              orders = uiState.pastOrders,
-              onClose = { onAction(MenuOrderContract.UiAction.HidePastOrders) },
+      // Quantity picker modal
+      uiState.quantityProduct?.let { product ->
+          QuantityModal(
+              product = product,
+              quantity = uiState.quantityValue,
+              inCart = uiState.quantityInCart,
+              onInc = { onAction(MenuOrderContract.UiAction.IncQuantity) },
+              onDec = { onAction(MenuOrderContract.UiAction.DecQuantity) },
+              onConfirm = { onAction(MenuOrderContract.UiAction.ConfirmQuantity) },
+              onDelete = { onAction(MenuOrderContract.UiAction.DeleteFromCart) },
+              onDismiss = { onAction(MenuOrderContract.UiAction.DismissQuantity) },
           )
       }
+    }
+}
+
+@Composable
+private fun QuantityModal(
+    product: MenuProduct,
+    quantity: Int,
+    inCart: Boolean,
+    onInc: () -> Unit,
+    onDec: () -> Unit,
+    onConfirm: () -> Unit,
+    onDelete: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // A Dialog traps D-pad focus inside the modal so navigation can't leak to the
+    // menu behind it; we also request initial focus on the primary action.
+    val primaryFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { primaryFocus.requestFocus() }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.4f)
+                .background(Color(0xFF1C1714), RoundedCornerShape(16.dp))
+                .padding(24.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Text(product.name, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
+                Text(formatSom(product.price), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(20.dp))
+                // − [qty] +
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
+                    QtyStepper(text = "−", onClick = onDec)
+                    Text("$quantity", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineMedium)
+                    QtyStepper(text = "+", onClick = onInc)
+                }
+                Spacer(Modifier.height(24.dp))
+                if (inCart) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ModalButton(text = "Delete", filled = false, modifier = Modifier.weight(1f), onClick = onDelete)
+                        ModalButton(text = "Update", filled = true, modifier = Modifier.weight(1f).focusRequester(primaryFocus), onClick = onConfirm)
+                    }
+                } else {
+                    ModalButton(text = "Add to cart", filled = true, modifier = Modifier.fillMaxWidth().focusRequester(primaryFocus), onClick = onConfirm)
+                }
+                Spacer(Modifier.height(8.dp))
+                ModalButton(text = "Cancel", filled = false, modifier = Modifier.fillMaxWidth(), onClick = onDismiss)
+            }
+        }
+    }
+}
+
+@Composable
+private fun QtyStepper(text: String, onClick: () -> Unit) {
+    LauncherCard(onClick = onClick, modifier = Modifier.size(52.dp)) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.headlineSmall)
+        }
+    }
+}
+
+@Composable
+private fun ModalButton(text: String, filled: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    LauncherCard(
+        onClick = onClick,
+        modifier = modifier.height(48.dp),
+        color = if (filled) androidx.tv.material3.CardDefaults.colors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
+        ) else androidx.tv.material3.CardDefaults.colors(
+            containerColor = Color.White.copy(alpha = 0.08f),
+            contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
+        ),
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text, color = Color.White, fontWeight = FontWeight.Bold)
+        }
     }
 }
 
@@ -161,59 +254,24 @@ private fun statusLabel(status: String): String = when (status) {
 }
 
 @Composable
-private fun PastOrdersPanel(
-    modifier: Modifier = Modifier,
-    orders: List<com.karuhun.core.model.PlacedOrder>,
-    onClose: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth(0.6f)
-            .fillMaxHeight(0.8f)
-            .background(Color(0xFF14100E), RoundedCornerShape(16.dp))
-            .padding(20.dp),
-    ) {
-        Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("Past orders", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                PillButton(text = "Close", onClick = onClose)
-            }
-            androidx.compose.foundation.layout.Spacer(Modifier.height(12.dp))
-            if (orders.isEmpty()) {
-                Text("No past orders yet.", color = Color.White.copy(alpha = 0.6f))
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(orders, key = { it.id }) { order ->
-                        LauncherCard(onClick = {}, modifier = Modifier.fillMaxWidth()) {
-                            Column(Modifier.fillMaxWidth().padding(12.dp)) {
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text(
-                                        "Order #${order.id.takeLast(5).uppercase()} • ${statusLabel(order.status)}",
-                                        color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                    Text(formatSom(order.total), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                                }
-                                Text(
-                                    order.items.joinToString(", ") { "${it.quantity}× ${it.name}" },
-                                    color = Color.White.copy(alpha = 0.7f),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 2,
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 private fun CategoryRow(category: MenuCategory, selected: Boolean, onClick: () -> Unit) {
+    // A selected (but unfocused) category gets a soft, lighter-orange fill — clearly
+    // distinct from the solid orange focus border so the two aren't confused.
+    val selectedColors = androidx.tv.material3.CardDefaults.colors(
+        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
+        contentColor = Color.White,
+        focusedContentColor = Color.White,
+        pressedContentColor = Color.White,
+    )
     LauncherCard(
         onClick = onClick,
-        isSelected = selected,
         modifier = Modifier.fillMaxWidth().height(56.dp),
+        color = if (selected) selectedColors else androidx.tv.material3.CardDefaults.colors(
+            containerColor = Color.Black.copy(alpha = 0.60f),
+            contentColor = Color.White,
+            focusedContentColor = Color.White,
+            pressedContentColor = Color.White,
+        ),
     ) {
         Box(Modifier.fillMaxSize().padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
             Text(

@@ -6,6 +6,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.karuhun.feature.restaurant.ui.pastorders.PastOrdersScreen
+import com.karuhun.feature.restaurant.ui.pastorders.PastOrdersViewModel
 import com.karuhun.feature.restaurant.ui.tracking.OrderTrackingScreen
 import com.karuhun.feature.restaurant.ui.tracking.OrderTrackingViewModel
 import kotlinx.serialization.Serializable
@@ -15,6 +17,9 @@ data class MenuOrder(val editOrderId: String? = null)
 
 @Serializable
 data class OrderTracking(val orderId: String)
+
+@Serializable
+data object PastOrders
 
 fun NavGraphBuilder.menuOrderGraph(navController: NavHostController) {
     composable<MenuOrder> {
@@ -29,6 +34,7 @@ fun NavGraphBuilder.menuOrderGraph(navController: NavHostController) {
             },
             onBack = { navController.popBackStack() },
             onTrackOrder = { orderId -> navController.navigate(OrderTracking(orderId)) },
+            onPastOrders = { navController.navigate(PastOrders) },
         )
     }
 
@@ -40,6 +46,15 @@ fun NavGraphBuilder.menuOrderGraph(navController: NavHostController) {
             uiEffect = viewModel.uiEffect,
             onBackToMenu = { navController.popBackStack() },
             onEdit = { orderId -> navController.navigate(MenuOrder(orderId)) },
+        )
+    }
+
+    composable<PastOrders> {
+        val viewModel = hiltViewModel<PastOrdersViewModel>()
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+        PastOrdersScreen(
+            uiState = uiState,
+            onBack = { navController.popBackStack() },
         )
     }
 }

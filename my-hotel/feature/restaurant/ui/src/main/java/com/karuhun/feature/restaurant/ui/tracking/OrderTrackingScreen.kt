@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.DeliveryDining
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.component.VerticalScrollArrows
 import kotlinx.coroutines.flow.Flow
 
 private fun formatSom(value: Int): String =
@@ -58,13 +60,15 @@ fun OrderTrackingScreen(
     val order = uiState.order
     val currentIndex = OrderTrackingContract.STEPS.indexOfFirst { it.status == order?.status }
         .coerceAtLeast(0)
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
 
     Box(modifier = modifier.fillMaxSize().padding(horizontal = 64.dp, vertical = 24.dp)) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .align(Alignment.TopCenter)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(scrollState),
         ) {
             Text(
                 text = "Order status",
@@ -158,6 +162,8 @@ fun OrderTrackingScreen(
                 }
             }
         }
+
+        VerticalScrollArrows(scrollState = scrollState, scope = scope)
     }
 }
 

@@ -15,11 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.DeliveryDining
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,6 +75,12 @@ internal fun HomeScreen(
         }
     }
 
+    // Re-check the active-order state whenever the home screen comes back to the
+    // foreground (e.g. after placing/closing an order) so the Menu card updates.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        uiAction(HomeContract.UiAction.RefreshActiveOrder)
+    }
+
     // Greet the checked-in guest from the backend; room from the device booking.
     val guestName = uiState.guestName
     val roomNumber = uiState.roomNumber
@@ -99,6 +108,7 @@ internal fun HomeScreen(
             onMenuItemClick = onMenuItemClick,
             onOpenMenu = onOpenMenu,
             onGoToMainMenu = onGoToMainMenu,
+            hasActiveOrder = uiState.hasActiveOrder,
         )
     }
 }
@@ -197,6 +207,7 @@ private fun AppDock(
     onMenuItemClick: (String) -> Unit,
     onOpenMenu: () -> Unit,
     onGoToMainMenu: () -> Unit,
+    hasActiveOrder: Boolean = false,
 ) {
     val quickApps = MenuItem.quickApps
 
@@ -208,6 +219,7 @@ private fun AppDock(
         // Large "Menu" card with food image -> opens in-room dining ordering
         MenuHeroCard(
             onClick = onOpenMenu,
+            hasActiveOrder = hasActiveOrder,
         )
 
         // Center cluster: quick apps on top, service / all apps below
@@ -266,6 +278,7 @@ private fun AppDock(
 @Composable
 private fun MenuHeroCard(
     onClick: () -> Unit,
+    hasActiveOrder: Boolean = false,
 ) {
     LauncherCard(
         onClick = onClick,
@@ -276,8 +289,10 @@ private fun MenuHeroCard(
             .height(138.dp),
     ) {
         Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+            // When there's an in-progress order, swap the spoon/fork for a delivery
+            // scooter and relabel so the guest knows they can track it here.
             Icon(
-                imageVector = Icons.Filled.Restaurant,
+                imageVector = if (hasActiveOrder) Icons.Filled.DeliveryDining else Icons.Filled.Restaurant,
                 contentDescription = "Menu",
                 modifier = Modifier
                     .size(56.dp)
@@ -285,11 +300,13 @@ private fun MenuHeroCard(
                 tint = Color.White,
             )
             Text(
-                text = "Menu",
+                text = if (hasActiveOrder) "Menu (Track Order)" else "Menu",
                 modifier = Modifier.align(Alignment.BottomCenter),
-                fontSize = 18.sp,
+                fontSize = if (hasActiveOrder) 14.sp else 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
             )
         }
     }

@@ -48,13 +48,35 @@ class MenuOrderViewModel @Inject constructor(
         when (action) {
             MenuOrderContract.UiAction.Load -> load()
             is MenuOrderContract.UiAction.SelectCategory -> selectCategory(action.id)
-            is MenuOrderContract.UiAction.AddToCart -> addToCart(action.product)
             is MenuOrderContract.UiAction.RemoveFromCart -> removeFromCart(action.productId)
             MenuOrderContract.UiAction.PlaceOrder -> placeOrder()
             MenuOrderContract.UiAction.DismissMessage ->
                 updateUiState { copy(placedMessage = null, errorMessage = null) }
-            MenuOrderContract.UiAction.ShowPastOrders -> updateUiState { copy(showPastOrders = true) }
-            MenuOrderContract.UiAction.HidePastOrders -> updateUiState { copy(showPastOrders = false) }
+            // Quantity modal
+            is MenuOrderContract.UiAction.OpenQuantity -> updateUiState {
+                copy(
+                    quantityProduct = action.product,
+                    quantityValue = cart[action.product.id]?.quantity ?: 1,
+                )
+            }
+            MenuOrderContract.UiAction.IncQuantity -> updateUiState {
+                copy(quantityValue = (quantityValue + 1).coerceAtMost(99))
+            }
+            MenuOrderContract.UiAction.DecQuantity -> updateUiState {
+                copy(quantityValue = (quantityValue - 1).coerceAtLeast(1))
+            }
+            MenuOrderContract.UiAction.ConfirmQuantity -> updateUiState {
+                val product = quantityProduct ?: return@updateUiState this
+                copy(
+                    cart = cart + (product.id to MenuOrderContract.CartLine(product, quantityValue)),
+                    quantityProduct = null,
+                )
+            }
+            MenuOrderContract.UiAction.DeleteFromCart -> updateUiState {
+                val product = quantityProduct ?: return@updateUiState this
+                copy(cart = cart - product.id, quantityProduct = null)
+            }
+            MenuOrderContract.UiAction.DismissQuantity -> updateUiState { copy(quantityProduct = null) }
         }
     }
 
@@ -116,14 +138,6 @@ class MenuOrderViewModel @Inject constructor(
         getMenuProductsUseCase(categoryId = id, availableOnly = true)
             .onSuccess { products -> updateUiState { copy(products = products) } }
             .onFailure { e -> updateUiState { copy(errorMessage = e.message) } }
-    }
-
-    private fun addToCart(product: MenuProduct) {
-        updateUiState {
-            val existing = cart[product.id]
-            val line = MenuOrderContract.CartLine(product, (existing?.quantity ?: 0) + 1)
-            copy(cart = cart + (product.id to line))
-        }
     }
 
     private fun removeFromCart(productId: String) {

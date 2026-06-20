@@ -8,6 +8,7 @@ import com.karuhun.core.domain.usecase.GetBookingUseCase
 import com.karuhun.core.domain.usecase.GetHotelProfileUseCase
 import com.karuhun.core.domain.usecase.GetMenuGuestUseCase
 import com.karuhun.core.domain.usecase.GetRoomDetailUseCase
+import com.karuhun.core.domain.usecase.GetRoomOrdersUseCase
 import com.karuhun.core.ui.navigation.delegate.mvi.MVI
 import com.karuhun.core.ui.navigation.delegate.mvi.mvi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +21,13 @@ internal class HomeViewModel @Inject constructor(
     private val getRoomDetailUseCase: GetRoomDetailUseCase,
     private val getBookingUseCase: GetBookingUseCase,
     private val getMenuGuestUseCase: GetMenuGuestUseCase,
+    private val getRoomOrdersUseCase: GetRoomOrdersUseCase,
 ) : ViewModel(),
     MVI<HomeContract.UiState, HomeContract.UiAction, HomeContract.UiEffect> by mvi(initialState = HomeContract.UiState()) {
+
+    // Latest booking, kept so we can re-query active orders on demand.
+    private var currentHotelSlug: String = ""
+    private var currentRoomNumber: String = ""
 
     init {
         onAction(HomeContract.UiAction.LoadMenuItems)
@@ -36,10 +42,13 @@ internal class HomeViewModel @Inject constructor(
             updateUiState {
                 copy(roomNumber = booking.roomNumber, hotelName = booking.hotelName)
             }
+            currentHotelSlug = booking.hotelSlug
+            currentRoomNumber = booking.roomNumber
             if (booking.hotelSlug.isNotBlank() && booking.roomNumber.isNotBlank()) {
                 getMenuGuestUseCase(booking.hotelSlug, booking.roomNumber)
                     .onSuccess { guest -> updateUiState { copy(guestName = guest.fullName) } }
                     .onFailure { updateUiState { copy(guestName = "") } }
+                refreshActiveOrder()
             }
         }
     }
@@ -52,7 +61,14 @@ internal class HomeViewModel @Inject constructor(
             HomeContract.UiAction.OnMenuItemClick -> {}
             HomeContract.UiAction.OnMoreClick -> {}
             HomeContract.UiAction.LoadRoomDetail -> { loadRoomDetail() }
+            HomeContract.UiAction.RefreshActiveOrder -> { refreshActiveOrder() }
         }
+    }
+
+    private fun refreshActiveOrder() = viewModelScope.launch {
+        if (currentHotelSlug.isBlank() || currentRoomNumber.isBlank()) return@launch
+        getRoomOrdersUseCase(currentHotelSlug, currentRoomNumber, activeOnly = true)
+            .onSuccess { orders -> updateUiState { copy(hasActiveOrder = orders.isNotEmpty()) } }
     }
 
     private fun loadMenuItems() = viewModelScope.launch {
