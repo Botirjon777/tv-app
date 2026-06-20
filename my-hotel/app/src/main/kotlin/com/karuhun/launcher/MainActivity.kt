@@ -135,7 +135,7 @@ fun LauncherApplication(
                 TopBar(
                     modifier = Modifier
                         .height(80.dp),
-                    roomNumber = DeviceUtil.getDeviceName(LocalContext.current),
+                    roomNumber = uiState.roomNumber.ifBlank { "—" },
                     date = formattedDate,
                     temperature = "20°C",
                     imageUrl = uiState.hotelProfile?.logoWhite.orEmpty(),

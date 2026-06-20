@@ -242,11 +242,12 @@ model MenuGuest {
   id          String   @id @default(cuid())
   hotelId     String
   hotel       MenuHotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
-  roomNumber  String
-  fullName    String
-  checkIn     DateTime  @default(now())
-  checkOut    DateTime
-  createdAt   DateTime  @default(now())
+  roomNumber       String
+  fullName         String
+  preferredLanguage String  @default("")
+  checkIn          DateTime  @default(now())
+  checkOut         DateTime
+  createdAt        DateTime  @default(now())
 
   @@index([hotelId, roomNumber])
   @@map("menu_guests")

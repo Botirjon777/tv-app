@@ -107,7 +107,7 @@ class MenuOrderViewModel @Inject constructor(
                         placedMessage = "Order placed! Room ${order.roomNumber}",
                     )
                 }
-                emitUiEffect(MenuOrderContract.UiEffect.OrderPlaced)
+                emitUiEffect(MenuOrderContract.UiEffect.OrderPlaced(order.id))
             }
             .onFailure { e ->
                 updateUiState { copy(isPlacing = false, errorMessage = e.message) }

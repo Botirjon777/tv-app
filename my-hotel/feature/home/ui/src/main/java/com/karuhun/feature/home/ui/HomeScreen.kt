@@ -269,46 +269,28 @@ private fun MenuHeroCard(
 ) {
     LauncherCard(
         onClick = onClick,
+        // Height = the two-row dock cluster (64 + 10 + 64) so the card's top
+        // edge lines up with the Reception card above it.
         modifier = Modifier
             .width(150.dp)
-            .height(150.dp),
+            .height(138.dp),
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                modifier = Modifier.fillMaxSize(),
-                painter = painterResource(R.drawable.core_designsystem_promo_2),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-            )
-            Box(
+        Box(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+            Icon(
+                imageVector = Icons.Filled.Restaurant,
+                contentDescription = "Menu",
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                        ),
-                    ),
+                    .size(56.dp)
+                    .align(Alignment.Center),
+                tint = Color.White,
             )
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Restaurant,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp),
-                    tint = Color.White,
-                )
-                Text(
-                    text = "Menu",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                )
-            }
+            Text(
+                text = "Menu",
+                modifier = Modifier.align(Alignment.BottomCenter),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+            )
         }
     }
 }

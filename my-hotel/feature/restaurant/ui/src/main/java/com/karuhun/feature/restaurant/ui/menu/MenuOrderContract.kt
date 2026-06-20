@@ -33,6 +33,6 @@ object MenuOrderContract {
 
     sealed interface UiEffect {
         data class ShowError(val message: String) : UiEffect
-        data object OrderPlaced : UiEffect
+        data class OrderPlaced(val orderId: String) : UiEffect
     }
 }

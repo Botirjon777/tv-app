@@ -14,6 +14,7 @@ object MainContract {
         val isSyncing: Boolean = false,
         val weather: Weather? = null,
         val isOnboardingCompleted: Boolean = false,
+        val roomNumber: String = "",
     )
     sealed interface UiEffect {
         data class ShowError(val message: String) : UiEffect

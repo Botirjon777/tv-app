@@ -43,16 +43,24 @@ data class OrderLine(
     val quantity: Int,
 )
 
-// Result of a successful order.
+// Result of a successful order / a tracked order.
 data class PlacedOrder(
     val id: String,
     val status: String,
     val total: Int,
     val roomNumber: String,
+    val items: List<PlacedOrderItem> = emptyList(),
+)
+
+data class PlacedOrderItem(
+    val name: String,
+    val price: Int,
+    val quantity: Int,
 )
 
 // The guest currently checked into this room (from the backend).
 data class MenuGuest(
     val fullName: String = "",
     val hasGuest: Boolean = false,
+    val preferredLanguage: String = "",
 )

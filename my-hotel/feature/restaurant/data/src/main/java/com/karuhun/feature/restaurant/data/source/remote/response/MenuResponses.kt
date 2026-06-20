@@ -78,11 +78,18 @@ data class OrderItemRequest(
     val quantity: Int,
 )
 
+data class OrderItemResponse(
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("price") val price: Int? = null,
+    @SerializedName("quantity") val quantity: Int? = null,
+)
+
 data class PlacedOrderResponse(
     @SerializedName("id") val id: String? = null,
     @SerializedName("status") val status: String? = null,
     @SerializedName("total") val total: Int? = null,
     @SerializedName("roomNumber") val roomNumber: String? = null,
+    @SerializedName("items") val items: List<OrderItemResponse>? = null,
 )
 
 fun PlacedOrderResponse.toDomain() = PlacedOrder(
@@ -90,14 +97,29 @@ fun PlacedOrderResponse.toDomain() = PlacedOrder(
     status = status.orEmpty(),
     total = total ?: 0,
     roomNumber = roomNumber.orEmpty(),
+    items = items.orEmpty().map {
+        com.karuhun.core.model.PlacedOrderItem(
+            name = it.name.orEmpty(),
+            price = it.price ?: 0,
+            quantity = it.quantity ?: 0,
+        )
+    },
 )
 
 data class MenuGuestResponse(
     @SerializedName("fullName") val fullName: String? = null,
     @SerializedName("hasGuest") val hasGuest: Boolean? = null,
+    @SerializedName("preferredLanguage") val preferredLanguage: String? = null,
 )
 
 fun MenuGuestResponse.toDomain() = MenuGuest(
     fullName = fullName.orEmpty(),
     hasGuest = hasGuest ?: false,
+    preferredLanguage = preferredLanguage.orEmpty(),
+)
+
+data class SetLanguageRequest(
+    val hotelSlug: String,
+    val roomNumber: String,
+    val language: String,
 )

@@ -7,9 +7,11 @@ import com.karuhun.feature.restaurant.data.source.remote.response.MenuHotelRespo
 import com.karuhun.feature.restaurant.data.source.remote.response.MenuProductResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlacedOrderResponse
+import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 // Talks to the hotel-menu backend (Node/Fastify) via the @Named("menu") Retrofit.
@@ -32,6 +34,12 @@ interface MenuApiService {
         @Query("roomNumber") roomNumber: String,
     ): BaseResponse<MenuGuestResponse>
 
+    @POST("menu/guest/language")
+    suspend fun setGuestLanguage(@Body body: SetLanguageRequest): BaseResponse<Unit>
+
     @POST("menu/orders")
     suspend fun placeOrder(@Body body: PlaceOrderRequest): BaseResponse<PlacedOrderResponse>
+
+    @GET("menu/orders/{id}")
+    suspend fun getOrder(@Path("id") id: String): BaseResponse<PlacedOrderResponse>
 }

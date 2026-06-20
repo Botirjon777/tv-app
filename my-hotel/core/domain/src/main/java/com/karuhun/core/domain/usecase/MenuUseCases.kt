@@ -52,6 +52,20 @@ class GetMenuGuestUseCase @Inject constructor(
         repository.getGuest(hotelSlug, roomNumber)
 }
 
+class SaveGuestLanguageUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(hotelSlug: String, roomNumber: String, language: String) =
+        repository.setGuestLanguage(hotelSlug, roomNumber, language)
+}
+
+class GetOrderUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(orderId: String): Resource<PlacedOrder> =
+        repository.getOrder(orderId)
+}
+
 class GetBookingUseCase @Inject constructor(
     private val repository: BookingRepository,
 ) {

@@ -128,9 +128,38 @@ export async function menuApiRoutes(server: FastifyInstance) {
     return ok(reply, {
       fullName: guest?.fullName ?? '',
       hasGuest: !!guest,
+      preferredLanguage: guest?.preferredLanguage ?? '',
       checkIn: guest?.checkIn?.toISOString() ?? null,
       checkOut: guest?.checkOut?.toISOString() ?? null,
     });
+  });
+
+  /* ── POST /menu/guest/language ────────────────────────────────────────
+     Save the guest's preferred TV language so it can be skipped next time. */
+  const langBody = z.object({
+    hotelSlug: z.string().min(1),
+    roomNumber: z.string().min(1),
+    language: z.string().min(1),
+  });
+  server.post('/menu/guest/language', async (req, reply) => {
+    const parsed = langBody.safeParse(req.body);
+    if (!parsed.success) return err(reply, 'Invalid language payload', 422);
+    const { hotelSlug, roomNumber, language } = parsed.data;
+    const hotel = await prisma.menuHotel.findUnique({ where: { slug: hotelSlug } });
+    if (!hotel) return err(reply, 'Hotel not found', 404);
+
+    const now = new Date();
+    const guest = await prisma.menuGuest.findFirst({
+      where: { hotelId: hotel.id, roomNumber, checkIn: { lte: now }, checkOut: { gte: now } },
+      orderBy: { checkIn: 'desc' },
+    });
+    if (!guest) return err(reply, 'No checked-in guest for this room', 404);
+
+    await prisma.menuGuest.update({
+      where: { id: guest.id },
+      data: { preferredLanguage: language },
+    });
+    return ok(reply, { fullName: guest.fullName, preferredLanguage: language });
   });
 
   /* ── POST /menu/guest ─────────────────────────────────────────────────
@@ -171,6 +200,29 @@ export async function menuApiRoutes(server: FastifyInstance) {
       201,
       'Guest checked in'
     );
+  });
+
+  /* ── GET /menu/orders/:id ─────────────────────────────────────────────
+     One order's current status + items, for the TV order-tracking screen. */
+  server.get('/menu/orders/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { items: true, room: true },
+    });
+    if (!order) return err(reply, 'Order not found', 404);
+    return ok(reply, {
+      id: order.id,
+      status: order.status,
+      total: order.total,
+      roomNumber: order.room?.number ?? '',
+      items: order.items.map((it) => ({
+        name: it.name,
+        price: it.price,
+        quantity: it.quantity,
+      })),
+      createdAt: order.createdAt.toISOString(),
+    });
   });
 
   /* ── POST /menu/orders ────────────────────────────────────────────── */

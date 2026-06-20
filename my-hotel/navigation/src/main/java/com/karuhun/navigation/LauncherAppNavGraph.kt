@@ -15,6 +15,10 @@ import com.karuhun.feature.restaurant.ui.navigation.RestaurantCategory
 import com.karuhun.feature.restaurant.ui.navigation.restaurantGraph
 import com.karuhun.feature.restaurant.ui.menu.MenuOrder
 import com.karuhun.feature.restaurant.ui.menu.menuOrderGraph
+import com.karuhun.feature.onboarding.presentation.navigation.GuestLanguage
+import com.karuhun.feature.onboarding.presentation.navigation.Splash
+import com.karuhun.feature.onboarding.presentation.navigation.languageDestination
+import com.karuhun.feature.onboarding.presentation.navigation.splashDestination
 
 @Composable
 fun MainAppNavGraph(
@@ -24,8 +28,25 @@ fun MainAppNavGraph(
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = Home,
+        startDestination = Splash,
     ) {
+        splashDestination(
+            onGoToLanguage = { hotelSlug, roomNumber ->
+                navController.navigate(GuestLanguage(hotelSlug, roomNumber)) {
+                    popUpTo(Splash) { inclusive = true }
+                }
+            },
+            onGoToHome = {
+                navController.navigate(Home) { popUpTo(Splash) { inclusive = true } }
+            },
+        )
+        languageDestination(
+            onDone = {
+                navController.navigate(Home) {
+                    popUpTo<GuestLanguage> { inclusive = true }
+                }
+            },
+        )
         homeScreen(
             onMenuItemClick = { menuItem ->
 
@@ -50,6 +71,7 @@ fun MainAppNavGraph(
             onNavigateToRestaurant = {
                 navController.navigate(MenuOrder)
             },
+            onBack = { navController.popBackStack() },
         )
         contentScreen(
             onNavigateToDetail = {
@@ -64,6 +86,6 @@ fun MainAppNavGraph(
             },
         )
         restaurantGraph()
-        menuOrderGraph()
+        menuOrderGraph(navController)
     }
 }

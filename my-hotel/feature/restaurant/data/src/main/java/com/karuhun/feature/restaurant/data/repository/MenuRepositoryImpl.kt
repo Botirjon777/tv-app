@@ -13,6 +13,7 @@ import com.karuhun.core.network.safeApiCall
 import com.karuhun.feature.restaurant.data.source.MenuApiService
 import com.karuhun.feature.restaurant.data.source.remote.response.OrderItemRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
+import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.toCategoryDomainList
 import com.karuhun.feature.restaurant.data.source.remote.response.toDomain
 import com.karuhun.feature.restaurant.data.source.remote.response.toHotelDomainList
@@ -43,6 +44,19 @@ class MenuRepositoryImpl @Inject constructor(
     override suspend fun getGuest(hotelSlug: String, roomNumber: String): Resource<MenuGuest> =
         safeApiCall { api.getGuest(hotelSlug, roomNumber) }
             .map { it.data?.toDomain() ?: MenuGuest() }
+
+    override suspend fun setGuestLanguage(
+        hotelSlug: String,
+        roomNumber: String,
+        language: String,
+    ): Resource<Unit> =
+        safeApiCall {
+            api.setGuestLanguage(SetLanguageRequest(hotelSlug, roomNumber, language))
+        }.map { Unit }
+
+    override suspend fun getOrder(orderId: String): Resource<PlacedOrder> =
+        safeApiCall { api.getOrder(orderId) }
+            .map { it.data?.toDomain() ?: PlacedOrder("", "", 0, "") }
 
     override suspend fun placeOrder(
         hotelSlug: String,

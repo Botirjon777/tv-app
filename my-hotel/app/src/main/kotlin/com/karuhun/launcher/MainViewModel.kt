@@ -37,7 +37,12 @@ class MainViewModel @Inject constructor(
     // skip onboarding on every subsequent launch.
     private fun observeBooking() = viewModelScope.launch {
         getBookingUseCase().collect { booking ->
-            updateUiState { copy(isOnboardingCompleted = booking.onboardingComplete) }
+            updateUiState {
+                copy(
+                    isOnboardingCompleted = booking.onboardingComplete,
+                    roomNumber = booking.roomNumber,
+                )
+            }
         }
     }
 

@@ -39,6 +39,7 @@ import coil.compose.AsyncImage
 import com.karuhun.core.model.Application
 import com.karuhun.core.model.Content
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
+import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
 import com.karuhun.launcher.core.designsystem.component.MenuItemCard
 import com.karuhun.launcher.core.designsystem.icon.HotelProfile
@@ -55,6 +56,7 @@ fun MainMenuScreen(
     uiAction: (MainMenuContract.UiAction) -> Unit,
     onNavigateToContentItems: (Content) -> Unit,
     onNavigateToRestaurant: () -> Unit,
+    onBack: () -> Unit = {},
 ) {
 
     val gridState = rememberLazyGridState()
@@ -75,6 +77,10 @@ fun MainMenuScreen(
         Column(
             modifier = Modifier.padding(8.dp),
         ) {
+            BackButton(
+                onClick = onBack,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+            )
             LazyHorizontalGrid(
                 modifier = Modifier
                     .height(180.dp),
@@ -82,34 +88,7 @@ fun MainMenuScreen(
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
             ) {
-                item(
-                    span = {
-                        GridItemSpan(maxLineSpan)
-                    },
-                ) {
-                    MenuItemCard(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .padding(8.dp),
-                        icon = HotelProfile,
-                        onClick = {},
-                        title = "Hotel Profile",
-                    )
-                }
-                item(
-                    span = {
-                        GridItemSpan(maxLineSpan)
-                    },
-                ) {
-                    MenuItemCard(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .padding(8.dp),
-                        icon = Icons.Default.RestaurantMenu,
-                        onClick = { onNavigateToRestaurant() },
-                        title = "Restaurant",
-                    )
-                }
+                // System / device apps that live outside this launcher.
                 items(uiState.applications, key = { it.id!! }) { application ->
                     LauncherCard(
                         modifier = Modifier

@@ -16,6 +16,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,16 +27,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.tv.material3.Button
-import androidx.tv.material3.ButtonDefaults
-import androidx.tv.material3.Card
-import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.karuhun.core.model.MenuCategory
 import com.karuhun.core.model.MenuProduct
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
+import com.karuhun.launcher.core.designsystem.component.BackButton
+import com.karuhun.launcher.core.designsystem.component.LauncherCard
 import kotlinx.coroutines.flow.Flow
 
 private fun formatSom(value: Int): String =
@@ -46,15 +47,23 @@ fun MenuOrderScreen(
     uiState: MenuOrderContract.UiState,
     uiEffect: Flow<MenuOrderContract.UiEffect>,
     onAction: (MenuOrderContract.UiAction) -> Unit,
+    onOrderPlaced: (String) -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
-    uiEffect.collectWithLifecycle { /* state-driven banners below */ }
+    uiEffect.collectWithLifecycle { effect ->
+        when (effect) {
+            is MenuOrderContract.UiEffect.OrderPlaced -> onOrderPlaced(effect.orderId)
+            is MenuOrderContract.UiEffect.ShowError -> {}
+        }
+    }
 
-    Box(modifier = modifier.fillMaxSize().background(Color(0xFF1A120D))) {
-        Row(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        BackButton(onClick = onBack, modifier = Modifier.padding(bottom = 8.dp))
+        Row(modifier = Modifier.fillMaxSize()) {
             // ── Categories ──
             LazyColumn(
                 modifier = Modifier.fillMaxHeight().weight(0.22f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 items(uiState.categories, key = { it.id }) { category ->
                     CategoryRow(
@@ -87,54 +96,32 @@ fun MenuOrderScreen(
                 onAction = onAction,
             )
         }
-
-        // Order placed / error banner
-        val banner = uiState.placedMessage ?: uiState.errorMessage
-        if (banner != null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 16.dp)
-                    .background(
-                        if (uiState.placedMessage != null) MaterialTheme.colorScheme.primary
-                        else Color(0xFFB00020),
-                        RoundedCornerShape(12.dp),
-                    )
-                    .padding(horizontal = 24.dp, vertical = 12.dp),
-            ) {
-                Text(text = banner, color = Color.White, fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 
 @Composable
 private fun CategoryRow(category: MenuCategory, selected: Boolean, onClick: () -> Unit) {
-    Card(
+    LauncherCard(
         onClick = onClick,
+        isSelected = selected,
         modifier = Modifier.fillMaxWidth().height(56.dp),
-        colors = CardDefaults.colors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-            else Color.Black.copy(alpha = 0.4f),
-            focusedContainerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
-            focusedContentColor = Color.White,
-        ),
-        shape = CardDefaults.shape(RoundedCornerShape(10.dp)),
     ) {
         Box(Modifier.fillMaxSize().padding(horizontal = 16.dp), contentAlignment = Alignment.CenterStart) {
-            Text(text = category.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(
+                text = category.name,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         }
     }
 }
 
 @Composable
 private fun ProductCard(product: MenuProduct, onClick: () -> Unit) {
-    Card(
+    LauncherCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(170.dp),
-        colors = CardDefaults.colors(containerColor = Color.Black.copy(alpha = 0.4f), contentColor = Color.White),
-        shape = CardDefaults.shape(RoundedCornerShape(12.dp)),
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.BottomStart) {
             AsyncImage(
@@ -191,26 +178,28 @@ private fun CartPanel(
 
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(uiState.cart.values.toList(), key = { it.product.id }) { line ->
-                Card(
+                LauncherCard(
                     onClick = { onAction(MenuOrderContract.UiAction.RemoveFromCart(line.product.id)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.colors(
-                        containerColor = Color.Black.copy(alpha = 0.4f),
-                        focusedContainerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = Color.White,
-                        focusedContentColor = Color.White,
-                    ),
-                    shape = CardDefaults.shape(RoundedCornerShape(8.dp)),
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) {
                     Row(
-                        Modifier.fillMaxWidth().padding(10.dp),
+                        Modifier.fillMaxSize().padding(horizontal = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("${line.quantity}× ${line.product.name}", style = MaterialTheme.typography.bodySmall)
-                        Text(formatSom(line.product.price * line.quantity), style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            "${line.quantity}× ${line.product.name}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White,
+                        )
+                        Text(
+                            formatSom(line.product.price * line.quantity),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White,
+                        )
                     }
                 }
             }
@@ -223,20 +212,32 @@ private fun CartPanel(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp),
         )
-        Button(
+        // Primary action — keeps the focusable orange-border card style.
+        LauncherCard(
             onClick = { onAction(MenuOrderContract.UiAction.PlaceOrder) },
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            colors = ButtonDefaults.colors(
+            color = androidx.tv.material3.CardDefaults.colors(
                 containerColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.White,
                 contentColor = Color.White,
-                focusedContentColor = MaterialTheme.colorScheme.primary,
+                focusedContentColor = Color.White,
+                pressedContentColor = Color.White,
             ),
         ) {
-            Text(
-                text = if (uiState.isPlacing) "Placing…" else "Place Order (${uiState.cartCount})",
-                fontWeight = FontWeight.Bold,
-            )
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.ShoppingCart,
+                        contentDescription = null,
+                        modifier = Modifier.height(20.dp),
+                        tint = Color.White,
+                    )
+                    Text(
+                        text = if (uiState.isPlacing) "Placing…" else "Place Order (${uiState.cartCount})",
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                    )
+                }
+            }
         }
     }
 }
