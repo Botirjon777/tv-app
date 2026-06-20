@@ -1,6 +1,8 @@
 package com.karuhun.feature.restaurant.ui.tracking
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,11 +24,20 @@ import androidx.compose.material.icons.filled.DeliveryDining
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Icon
@@ -34,8 +45,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
-import com.karuhun.launcher.core.designsystem.component.VerticalScrollArrows
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 private fun formatSom(value: Int): String =
     "%,d".format(value).replace(',', ' ') + " so'm"
@@ -62,8 +73,35 @@ fun OrderTrackingScreen(
         .coerceAtLeast(0)
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
+    // D-pad drives the page directly: one DOWN jumps to the bottom and lands on the
+    // action buttons; one UP jumps back to the top. No need to focus an arrow + press OK.
+    val rootFocus = remember { FocusRequester() }
+    val buttonsFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { rootFocus.requestFocus() }
 
-    Box(modifier = modifier.fillMaxSize().padding(horizontal = 64.dp, vertical = 24.dp)) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .focusRequester(rootFocus)
+            .focusable()
+            .onPreviewKeyEvent { event ->
+                if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
+                when (event.key) {
+                    Key.DirectionDown -> {
+                        scope.launch { scrollState.animateScrollTo(scrollState.maxValue) }
+                        buttonsFocus.requestFocus()
+                        true
+                    }
+                    Key.DirectionUp -> {
+                        scope.launch { scrollState.animateScrollTo(0) }
+                        rootFocus.requestFocus()
+                        true
+                    }
+                    else -> false
+                }
+            }
+            .padding(horizontal = 64.dp, vertical = 24.dp),
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.6f)
@@ -134,7 +172,10 @@ fun OrderTrackingScreen(
             }
 
             Spacer(Modifier.height(20.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                Modifier.fillMaxWidth().focusRequester(buttonsFocus).focusGroup(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 // Editable only while the kitchen hasn't started it.
                 if (order?.status == "PENDING") {
                     LauncherCard(
@@ -162,8 +203,6 @@ fun OrderTrackingScreen(
                 }
             }
         }
-
-        VerticalScrollArrows(scrollState = scrollState, scope = scope)
     }
 }
 
