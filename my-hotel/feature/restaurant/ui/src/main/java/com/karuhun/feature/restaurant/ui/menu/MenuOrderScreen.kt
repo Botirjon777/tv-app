@@ -42,8 +42,12 @@ import coil.compose.AsyncImage
 import com.karuhun.core.model.MenuCategory
 import com.karuhun.core.model.MenuProduct
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
+import androidx.compose.foundation.layout.PaddingValues
 import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.component.LauncherLoadingOverlay
+import com.karuhun.launcher.core.designsystem.component.launcherPrimaryButtonColors
+import com.karuhun.launcher.core.designsystem.locale.tr
 import kotlinx.coroutines.flow.Flow
 
 private fun formatSom(value: Int): String =
@@ -79,13 +83,13 @@ fun MenuOrderScreen(
             val active = uiState.activeOrder
             if (active != null && !uiState.isEditing) {
                 PillButton(
-                    text = "Track order • ${statusLabel(active.status)}",
+                    text = "${tr("track_order")} • ${orderStatusText(active.status)}",
                     onClick = { onTrackOrder(active.id) },
                 )
             }
             if (uiState.pastOrders.isNotEmpty()) {
                 PillButton(
-                    text = "Past orders (${uiState.pastOrders.size})",
+                    text = "${tr("past_orders")} (${uiState.pastOrders.size})",
                     onClick = onPastOrders,
                 )
             }
@@ -103,6 +107,8 @@ fun MenuOrderScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxHeight().weight(0.22f),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
+                // Breathing room so a focused row scaling 1.2x isn't clipped.
+                contentPadding = PaddingValues(vertical = 8.dp, horizontal = 6.dp),
             ) {
                 items(uiState.categories, key = { it.id }) { category ->
                     CategoryRow(
@@ -119,6 +125,9 @@ fun MenuOrderScreen(
                 modifier = Modifier.fillMaxHeight().weight(0.5f).padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
+                // Top/side padding so a focused card scaling 1.2x is never clipped
+                // by the header above or the grid edges.
+                contentPadding = PaddingValues(top = 18.dp, bottom = 18.dp, start = 6.dp, end = 6.dp),
             ) {
                 items(uiState.products, key = { it.id }) { product ->
                     ProductCard(
@@ -149,6 +158,11 @@ fun MenuOrderScreen(
               onDelete = { onAction(MenuOrderContract.UiAction.DeleteFromCart) },
               onDismiss = { onAction(MenuOrderContract.UiAction.DismissQuantity) },
           )
+      }
+
+      // Orange busy spinner while the menu loads or an order is being placed.
+      if (uiState.isLoading || uiState.isPlacing) {
+          LauncherLoadingOverlay()
       }
     }
 }
@@ -191,14 +205,14 @@ private fun QuantityModal(
                 Spacer(Modifier.height(24.dp))
                 if (inCart) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ModalButton(text = "Delete", filled = false, modifier = Modifier.weight(1f), onClick = onDelete)
-                        ModalButton(text = "Update", filled = true, modifier = Modifier.weight(1f).focusRequester(primaryFocus), onClick = onConfirm)
+                        ModalButton(text = tr("delete"), filled = false, modifier = Modifier.weight(1f), onClick = onDelete)
+                        ModalButton(text = tr("update"), filled = true, modifier = Modifier.weight(1f).focusRequester(primaryFocus), onClick = onConfirm)
                     }
                 } else {
-                    ModalButton(text = "Add to cart", filled = true, modifier = Modifier.fillMaxWidth().focusRequester(primaryFocus), onClick = onConfirm)
+                    ModalButton(text = tr("add_to_cart"), filled = true, modifier = Modifier.fillMaxWidth().focusRequester(primaryFocus), onClick = onConfirm)
                 }
                 Spacer(Modifier.height(8.dp))
-                ModalButton(text = "Cancel", filled = false, modifier = Modifier.fillMaxWidth(), onClick = onDismiss)
+                ModalButton(text = tr("cancel"), filled = false, modifier = Modifier.fillMaxWidth(), onClick = onDismiss)
             }
         }
     }
@@ -218,10 +232,7 @@ private fun ModalButton(text: String, filled: Boolean, modifier: Modifier = Modi
     LauncherCard(
         onClick = onClick,
         modifier = modifier.height(48.dp),
-        color = if (filled) androidx.tv.material3.CardDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
-        ) else androidx.tv.material3.CardDefaults.colors(
+        color = if (filled) launcherPrimaryButtonColors() else androidx.tv.material3.CardDefaults.colors(
             containerColor = Color.White.copy(alpha = 0.08f),
             contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
         ),
@@ -244,12 +255,13 @@ private fun PillButton(text: String, onClick: () -> Unit) {
     }
 }
 
-private fun statusLabel(status: String): String = when (status) {
-    "PENDING" -> "Received"
-    "PREPARING" -> "Preparing"
-    "READY" -> "On its way"
-    "DELIVERED" -> "Delivered"
-    "CANCELLED" -> "Cancelled"
+@Composable
+private fun orderStatusText(status: String): String = when (status) {
+    "PENDING" -> tr("order_received")
+    "PREPARING" -> tr("order_preparing")
+    "READY" -> tr("order_on_its_way")
+    "DELIVERED" -> tr("order_delivered")
+    "CANCELLED" -> tr("order_cancelled")
     else -> status
 }
 
@@ -331,7 +343,7 @@ private fun CartPanel(
             .padding(16.dp),
     ) {
         Text(
-            text = "Your Order  •  Room ${uiState.booking.roomNumber.ifEmpty { "—" }}",
+            text = "${tr("your_order")}  •  ${tr("room")} ${uiState.booking.roomNumber.ifEmpty { "—" }}",
             style = MaterialTheme.typography.titleMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold,
@@ -346,10 +358,13 @@ private fun CartPanel(
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
         ) {
             items(uiState.cart.values.toList(), key = { it.product.id }) { line ->
                 LauncherCard(
-                    onClick = { onAction(MenuOrderContract.UiAction.RemoveFromCart(line.product.id)) },
+                    // Tapping a cart line re-opens the quantity modal (− n + with
+                    // Delete / Update) so the guest can edit it like when adding.
+                    onClick = { onAction(MenuOrderContract.UiAction.OpenQuantity(line.product)) },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
                 ) {
                     Row(
@@ -373,22 +388,17 @@ private fun CartPanel(
         }
 
         Text(
-            text = "Total: ${formatSom(uiState.cartTotal)}",
+            text = "${tr("total")}: ${formatSom(uiState.cartTotal)}",
             style = MaterialTheme.typography.titleMedium,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 8.dp),
         )
-        // Primary action — keeps the focusable orange-border card style.
+        // Primary action — orange button that lightens on focus.
         LauncherCard(
             onClick = { onAction(MenuOrderContract.UiAction.PlaceOrder) },
             modifier = Modifier.fillMaxWidth().height(52.dp),
-            color = androidx.tv.material3.CardDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                focusedContentColor = Color.White,
-                pressedContentColor = Color.White,
-            ),
+            color = launcherPrimaryButtonColors(),
         ) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -400,9 +410,9 @@ private fun CartPanel(
                     )
                     Text(
                         text = when {
-                            uiState.isPlacing -> "Saving…"
-                            uiState.isEditing -> "Update Order (${uiState.cartCount})"
-                            else -> "Place Order (${uiState.cartCount})"
+                            uiState.isPlacing -> tr("saving")
+                            uiState.isEditing -> "${tr("update_order")} (${uiState.cartCount})"
+                            else -> "${tr("place_order")} (${uiState.cartCount})"
                         },
                         fontWeight = FontWeight.Bold,
                         color = Color.White,

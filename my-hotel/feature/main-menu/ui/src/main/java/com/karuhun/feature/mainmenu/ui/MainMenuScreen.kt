@@ -42,6 +42,7 @@ import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
 import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
 import com.karuhun.launcher.core.designsystem.component.MenuItemCard
+import com.karuhun.launcher.core.designsystem.locale.tr
 import com.karuhun.launcher.core.designsystem.icon.HotelProfile
 import com.karuhun.launcher.core.designsystem.theme.AppTheme
 import kotlinx.coroutines.flow.Flow
@@ -84,10 +85,11 @@ fun MainMenuScreen(
             )
             LazyHorizontalGrid(
                 modifier = Modifier
-                    .height(180.dp),
+                    .height(190.dp),
                 rows = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(0.dp),
                 horizontalArrangement = Arrangement.spacedBy(0.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp),
             ) {
                 // Launcher's own settings (wallpaper + room number).
                 item {
@@ -111,7 +113,7 @@ fun MainMenuScreen(
                                 tint = Color(0xFFEFEFEF),
                             )
                             Text(
-                                text = "My Hotel Settings",
+                                text = tr("my_hotel_settings"),
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 2,

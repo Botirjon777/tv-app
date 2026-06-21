@@ -22,6 +22,7 @@ import androidx.tv.material3.Text
 import com.karuhun.core.model.PlacedOrder
 import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.locale.tr
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -34,9 +35,10 @@ private fun formatDateTime(iso: String): String = runCatching {
     Instant.parse(iso).atZone(ZoneId.systemDefault()).format(DATE_FMT)
 }.getOrDefault("")
 
+@androidx.compose.runtime.Composable
 private fun statusLabel(status: String): String = when (status) {
-    "DELIVERED" -> "Delivered"
-    "CANCELLED" -> "Cancelled"
+    "DELIVERED" -> tr("order_delivered")
+    "CANCELLED" -> tr("order_cancelled")
     else -> status
 }
 
@@ -58,7 +60,7 @@ fun PastOrdersScreen(
         ) {
             BackButton(onClick = onBack)
             Text(
-                text = "Past orders",
+                text = tr("past_orders"),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -70,7 +72,7 @@ fun PastOrdersScreen(
         if (uiState.orders.isEmpty()) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = if (uiState.isLoading) "Loading…" else "No past orders yet.",
+                    text = if (uiState.isLoading) tr("loading") else tr("no_past_orders"),
                     color = Color.White.copy(alpha = 0.6f),
                 )
             }

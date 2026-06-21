@@ -45,6 +45,8 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.component.launcherPrimaryButtonColors
+import com.karuhun.launcher.core.designsystem.locale.tr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -109,7 +111,7 @@ fun OrderTrackingScreen(
                 .verticalScroll(scrollState),
         ) {
             Text(
-                text = "Order status",
+                text = tr("order_status"),
                 style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -124,7 +126,7 @@ fun OrderTrackingScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Thanks! Your order is in.", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(tr("thanks_order"), color = Color.White, fontWeight = FontWeight.Bold)
                     Text(
                         text = "Order #${order?.id?.takeLast(5)?.uppercase() ?: "—"}  ·  Room ${order?.roomNumber ?: "—"}",
                         color = MaterialTheme.colorScheme.primary,
@@ -139,7 +141,7 @@ fun OrderTrackingScreen(
             OrderTrackingContract.STEPS.forEachIndexed { index, step ->
                 StepRow(
                     icon = STEP_ICONS[index],
-                    title = step.title,
+                    title = stepTitle(step.status, step.title),
                     done = index <= currentIndex,
                     active = index == currentIndex,
                     showConnector = index < OrderTrackingContract.STEPS.lastIndex,
@@ -155,7 +157,7 @@ fun OrderTrackingScreen(
                         .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(12.dp))
                         .padding(16.dp),
                 ) {
-                    Text("Order summary", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(tr("order_summary"), color = Color.White, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(8.dp))
                     order.items.forEach { item ->
                         Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -165,7 +167,7 @@ fun OrderTrackingScreen(
                     }
                     Spacer(Modifier.height(8.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("Total", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(tr("total"), color = Color.White, fontWeight = FontWeight.Bold)
                         Text(formatSom(order.total), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -181,15 +183,10 @@ fun OrderTrackingScreen(
                     LauncherCard(
                         onClick = { onEdit(order.id) },
                         modifier = Modifier.weight(1f).height(52.dp),
-                        color = androidx.tv.material3.CardDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = Color.White,
-                            focusedContentColor = Color.White,
-                            pressedContentColor = Color.White,
-                        ),
+                        color = launcherPrimaryButtonColors(),
                     ) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Edit order", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(tr("edit_order"), color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -198,12 +195,21 @@ fun OrderTrackingScreen(
                     modifier = Modifier.weight(1f).height(52.dp),
                 ) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Back to menu", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(tr("back_to_menu"), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun stepTitle(status: String, fallback: String): String = when (status) {
+    "PENDING" -> tr("step_received")
+    "PREPARING" -> tr("step_preparing")
+    "READY" -> tr("step_on_way")
+    "DELIVERED" -> tr("step_delivered")
+    else -> fallback
 }
 
 @Composable
