@@ -30,22 +30,26 @@ fun LauncherCard(
     borderWidth: Dp = 1.dp,
     content: @Composable () -> Unit,
 ) {
-    val border = Border(
-        border = BorderStroke(
-            width = borderWidth,
-            color = borderColor
-        )
+    // Selected (but unfocused) state keeps the brand-orange border. The focused
+    // state uses a thick WHITE border so the pointer is clearly visible on ANY
+    // background — including orange-filled buttons where an orange border vanishes.
+    val selectedBorder = Border(
+        border = BorderStroke(width = borderWidth, color = borderColor)
+    )
+    val focusBorder = Border(
+        border = BorderStroke(width = 3.dp, color = Color.White)
     )
 
     Card(
         onClick = onClick,
         modifier = modifier,
         border = CardDefaults.border(
-            focusedBorder = border,
-            border = if (isSelected) border else Border.None
+            focusedBorder = focusBorder,
+            border = if (isSelected) selectedBorder else Border.None
         ),
         scale = CardDefaults.scale(
-            focusedScale = 1.05f
+            // Pointer feedback: focused control grows noticeably (1.2x).
+            focusedScale = 1.2f
         ),
         colors = color,
         shape = CardDefaults.shape(RoundedCornerShape(radius))
@@ -53,3 +57,20 @@ fun LauncherCard(
         content()
     }
 }
+
+/** A lighter orange shown when an orange primary button is focused. */
+val FocusedOrange = Color(0xFFFF8A3D)
+
+/**
+ * Colors for an orange "primary" LauncherCard button. On focus the fill lightens
+ * to [FocusedOrange] so the pointer is obvious (a same-orange focus border alone
+ * would be invisible on an orange button).
+ */
+@Composable
+fun launcherPrimaryButtonColors(): CardColors = CardDefaults.colors(
+    containerColor = MaterialTheme.colorScheme.primary,
+    focusedContainerColor = FocusedOrange,
+    contentColor = Color.White,
+    focusedContentColor = Color.White,
+    pressedContentColor = Color.White,
+)
