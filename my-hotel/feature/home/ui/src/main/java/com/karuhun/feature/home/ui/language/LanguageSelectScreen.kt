@@ -24,6 +24,7 @@ import androidx.tv.material3.Text
 import com.karuhun.feature.home.ui.model.LanguageOption
 import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.locale.tr
 
 @Composable
 fun LanguageSelectScreen(
@@ -44,7 +45,7 @@ fun LanguageSelectScreen(
         ) {
             BackButton(onClick = onBack)
             Text(
-                text = "Choose your language",
+                text = tr("choose_language"),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -56,6 +57,7 @@ fun LanguageSelectScreen(
         LazyColumn(
             modifier = Modifier.fillMaxWidth(0.6f),
             verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 8.dp, horizontal = 6.dp),
         ) {
             items(LanguageOption.ALL, key = { it.code }) { lang ->
                 LanguageRow(

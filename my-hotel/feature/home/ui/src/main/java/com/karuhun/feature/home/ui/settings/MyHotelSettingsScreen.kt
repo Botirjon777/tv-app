@@ -1,5 +1,6 @@
 package com.karuhun.feature.home.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,9 +9,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,16 +33,19 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.karuhun.launcher.core.designsystem.component.BackButton
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.component.launcherPrimaryButtonColors
+import com.karuhun.launcher.core.designsystem.locale.tr
 
 // A handful of warm hotel-room/lobby wallpapers the staff can pick from (entering a
-// URL on a TV remote is impractical, so we offer presets).
+// URL on a TV remote is impractical, so we offer presets). Served from our own
+// backend so TVs never depend on an external CDN being reachable.
 private val WALLPAPERS = listOf(
-    "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1280&q=80",
-    "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1280&q=80",
-    "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=1280&q=80",
-    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1280&q=80",
-    "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1280&q=80",
-    "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=1280&q=80",
+    "http://10.0.2.2:3000/img/walls/photo-1618773928121-c32242e63f39.jpg",
+    "http://10.0.2.2:3000/img/walls/photo-1582719478250-c89cae4dc85b.jpg",
+    "http://10.0.2.2:3000/img/walls/photo-1611892440504-42a792e24d32.jpg",
+    "http://10.0.2.2:3000/img/walls/photo-1566073771259-6a8506099945.jpg",
+    "http://10.0.2.2:3000/img/walls/photo-1631049307264-da0ec9d70304.jpg",
+    "http://10.0.2.2:3000/img/walls/photo-1445019980597-93fa8acb246c.jpg",
 )
 
 @Composable
@@ -61,7 +67,7 @@ fun MyHotelSettingsScreen(
         ) {
             BackButton(onClick = onBack)
             Text(
-                text = "My Hotel Settings",
+                text = tr("my_hotel_settings"),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -78,17 +84,76 @@ fun MyHotelSettingsScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-            RoomSection(
-                modifier = Modifier.fillMaxHeight().weight(0.36f),
-                uiState = uiState,
-                onAction = onAction,
-            )
-            WallpaperSection(
-                modifier = Modifier.fillMaxHeight().weight(0.64f),
-                currentUrl = uiState.wallpaperUrl,
-                onSelect = { onAction(MyHotelSettingsContract.UiAction.SelectWallpaper(it)) },
-            )
+        if (!uiState.unlocked) {
+            PinGate(uiState = uiState, onAction = onAction)
+        } else {
+            Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+                RoomSection(
+                    modifier = Modifier.fillMaxHeight().weight(0.36f),
+                    uiState = uiState,
+                    onAction = onAction,
+                )
+                WallpaperSection(
+                    modifier = Modifier.fillMaxHeight().weight(0.64f),
+                    currentUrl = uiState.wallpaperUrl,
+                    onSelect = { onAction(MyHotelSettingsContract.UiAction.SelectWallpaper(it)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PinGate(
+    uiState: MyHotelSettingsContract.UiState,
+    onAction: (MyHotelSettingsContract.UiAction) -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            text = if (uiState.pinError) tr("wrong_pin") else tr("enter_pin"),
+            color = if (uiState.pinError) MaterialTheme.colorScheme.primary else Color.White,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
+        )
+        Spacer(Modifier.height(16.dp))
+        // Six dots showing how many digits entered.
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            repeat(6) { i ->
+                val filled = i < uiState.pinInput.length
+                Box(
+                    Modifier.size(18.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (filled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.18f)),
+                )
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+        val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "")
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(8.dp),
+            modifier = Modifier.width(320.dp),
+        ) {
+            items(keys) { key ->
+                if (key.isEmpty()) {
+                    Box(Modifier.fillMaxWidth().height(56.dp))
+                } else {
+                    KeypadButton(
+                        label = key,
+                        onClick = {
+                            if (key == "⌫") onAction(MyHotelSettingsContract.UiAction.PinBackspace)
+                            else onAction(MyHotelSettingsContract.UiAction.PinDigit(key))
+                        },
+                        highlight = false,
+                    )
+                }
+            }
         }
     }
 }
@@ -109,7 +174,7 @@ private fun RoomSection(
             color = Color.White.copy(alpha = 0.7f),
             style = MaterialTheme.typography.bodyMedium,
         )
-        Text("Room number", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        Text(tr("room_number"), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         Box(
             Modifier.fillMaxWidth().height(56.dp)
@@ -130,6 +195,7 @@ private fun RoomSection(
             columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
             items(keys) { key ->
@@ -154,10 +220,7 @@ private fun KeypadButton(label: String, onClick: () -> Unit, highlight: Boolean)
     LauncherCard(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(52.dp),
-        color = if (highlight) CardDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
-        ) else CardDefaults.colors(
+        color = if (highlight) launcherPrimaryButtonColors() else CardDefaults.colors(
             containerColor = Color.Black.copy(alpha = 0.55f),
             contentColor = Color.White, focusedContentColor = Color.White, pressedContentColor = Color.White,
         ),
@@ -175,12 +238,13 @@ private fun WallpaperSection(
     onSelect: (String) -> Unit,
 ) {
     Column(modifier = modifier) {
-        Text("Wallpaper", color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+        Text(tr("wallpaper"), color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(3),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(12.dp),
             modifier = Modifier.fillMaxSize(),
         ) {
             items(WALLPAPERS) { url ->

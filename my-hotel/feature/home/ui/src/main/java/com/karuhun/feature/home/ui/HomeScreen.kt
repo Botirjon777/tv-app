@@ -50,6 +50,7 @@ import com.karuhun.feature.home.ui.model.LanguageOption
 import com.karuhun.feature.home.ui.model.MenuItem
 import com.karuhun.launcher.core.designsystem.R
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
+import com.karuhun.launcher.core.designsystem.locale.tr
 import com.karuhun.launcher.core.designsystem.icon.MoreSvgrepoCom
 import com.karuhun.launcher.core.designsystem.icon.Service
 import com.karuhun.launcher.core.designsystem.icon.SettingSvgrepoCom
@@ -129,7 +130,7 @@ private fun GuestGreeting(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = greetingForNow(),
+            text = tr(greetingKey()),
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = Color(0xFFEFEFEF),
                 fontSize = 34.sp,
@@ -137,7 +138,7 @@ private fun GuestGreeting(
             ),
         )
         Text(
-            text = guestName.ifBlank { "Guest" },
+            text = guestName.ifBlank { tr("guest") },
             style = MaterialTheme.typography.headlineLarge.copy(
                 color = Color.White,
                 fontSize = 52.sp,
@@ -170,7 +171,7 @@ private fun RoomInfoPanel(
         horizontalAlignment = Alignment.End,
     ) {
         Text(
-            text = if (roomNumber.isBlank()) "ROOM" else "ROOM ${roomNumber.uppercase(Locale.getDefault())}",
+            text = if (roomNumber.isBlank()) tr("room") else "${tr("room")} ${roomNumber.uppercase(Locale.getDefault())}",
             style = MaterialTheme.typography.headlineMedium.copy(
                 color = Color.White,
                 fontSize = 30.sp,
@@ -178,7 +179,7 @@ private fun RoomInfoPanel(
             ),
         )
         Text(
-            text = "Have a nice day${if (guestName.isBlank()) "" else " $guestName"}",
+            text = "${tr("have_nice_day")}${if (guestName.isBlank()) "" else " $guestName"}",
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = Color(0xFFD8D8D8),
                 fontWeight = FontWeight.Light,
@@ -201,7 +202,7 @@ private fun RoomInfoPanel(
             ),
         )
         Text(
-            text = "Have a pleasant stay with us",
+            text = tr("pleasant_stay"),
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = Color(0xFFD8D8D8),
                 fontWeight = FontWeight.Light,
@@ -236,7 +237,7 @@ private fun AppDock(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 quickApps.take(4).forEach { item ->
                     DockTile(
-                        title = item.title,
+                        title = localizedTitle(item.title),
                         icon = item.icon,
                         modifier = Modifier.width(118.dp),
                         onClick = { onMenuItemClick(item.title) },
@@ -245,13 +246,13 @@ private fun AppDock(
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 DockTile(
-                    title = "Service",
+                    title = localizedTitle("Service"),
                     icon = Service,
                     modifier = Modifier.width(246.dp),
                     onClick = { onMenuItemClick("Service") },
                 )
                 DockTile(
-                    title = "All apps",
+                    title = localizedTitle("All apps"),
                     icon = MoreSvgrepoCom,
                     modifier = Modifier.width(246.dp),
                     onClick = onGoToMainMenu,
@@ -263,19 +264,19 @@ private fun AppDock(
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             val wifi = quickApps.first { it.title == "Wi-Fi" }
             DockTile(
-                title = wifi.title,
+                title = localizedTitle(wifi.title),
                 icon = wifi.icon,
                 modifier = Modifier.width(165.dp),
                 onClick = { onMenuItemClick(wifi.title) },
             )
             DockTile(
-                title = "Coming soon",
+                title = localizedTitle("Coming soon"),
                 icon = Icons.Filled.WarningAmber,
                 modifier = Modifier.width(165.dp),
                 onClick = {},
             )
             DockTile(
-                title = "Settings",
+                title = localizedTitle("Settings"),
                 icon = SettingSvgrepoCom,
                 modifier = Modifier.width(165.dp),
                 onClick = { onMenuItemClick("Settings") },
@@ -336,7 +337,7 @@ private fun MenuHeroCard(
                 tint = Color.White,
             )
             Text(
-                text = if (hasActiveOrder) "Menu (Track Order)" else "Menu",
+                text = if (hasActiveOrder) tr("menu_track") else tr("menu"),
                 modifier = Modifier.align(Alignment.BottomCenter),
                 fontSize = if (hasActiveOrder) 14.sp else 18.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -385,12 +386,25 @@ private fun DockTile(
     }
 }
 
-private fun greetingForNow(): String {
+// Translates known dock labels; unknown brand names (YouTube, Netflix, Wi-Fi) pass through.
+@Composable
+private fun localizedTitle(title: String): String = when (title) {
+    "Reseption" -> tr("reception")
+    "Alarm" -> tr("alarm")
+    "Service" -> tr("service")
+    "All apps" -> tr("all_apps")
+    "Settings" -> tr("settings")
+    "Coming soon" -> tr("coming_soon")
+    "Menu" -> tr("menu")
+    else -> title
+}
+
+private fun greetingKey(): String {
     return when (Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) {
-        in 5..11 -> "Good morning!"
-        in 12..16 -> "Good afternoon!"
-        in 17..20 -> "Good evening!"
-        else -> "Good night!"
+        in 5..11 -> "greeting_morning"
+        in 12..16 -> "greeting_afternoon"
+        in 17..20 -> "greeting_evening"
+        else -> "greeting_night"
     }
 }
 

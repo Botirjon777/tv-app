@@ -17,6 +17,8 @@ object MainContract {
         val roomNumber: String = "",
         // Locally-chosen launcher wallpaper (blank → built-in default).
         val wallpaperUrl: String = "",
+        // Selected UI language code (drives app-wide translations).
+        val languageCode: String = "en",
         // A short order-status message shown as a top-left toast overlay.
         val orderStatusToast: String? = null,
     )

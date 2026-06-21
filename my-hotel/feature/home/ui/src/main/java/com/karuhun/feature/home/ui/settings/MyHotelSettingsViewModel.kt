@@ -21,6 +21,10 @@ object MyHotelSettingsContract {
         val roomInput: String = "",
         val wallpaperUrl: String = "",
         val savedMessage: String? = null,
+        // PIN gate (default 111111) — settings stay locked until entered.
+        val unlocked: Boolean = false,
+        val pinInput: String = "",
+        val pinError: Boolean = false,
     )
     sealed interface UiAction {
         data class RoomDigit(val digit: String) : UiAction
@@ -28,6 +32,8 @@ object MyHotelSettingsContract {
         data object SaveRoom : UiAction
         data class SelectWallpaper(val url: String) : UiAction
         data object DismissMessage : UiAction
+        data class PinDigit(val digit: String) : UiAction
+        data object PinBackspace : UiAction
     }
     sealed interface UiEffect
 }
@@ -69,6 +75,18 @@ class MyHotelSettingsViewModel @Inject constructor(
             MyHotelSettingsContract.UiAction.SaveRoom -> saveRoom()
             is MyHotelSettingsContract.UiAction.SelectWallpaper -> selectWallpaper(action.url)
             MyHotelSettingsContract.UiAction.DismissMessage -> updateUiState { copy(savedMessage = null) }
+            is MyHotelSettingsContract.UiAction.PinDigit -> updateUiState {
+                if (unlocked || pinInput.length >= 6) return@updateUiState this
+                val next = pinInput + action.digit
+                when {
+                    next.length < 6 -> copy(pinInput = next, pinError = false)
+                    next == SETTINGS_PIN -> copy(pinInput = next, unlocked = true, pinError = false)
+                    else -> copy(pinInput = "", pinError = true)
+                }
+            }
+            MyHotelSettingsContract.UiAction.PinBackspace -> updateUiState {
+                copy(pinInput = pinInput.dropLast(1), pinError = false)
+            }
         }
     }
 
@@ -86,5 +104,10 @@ class MyHotelSettingsViewModel @Inject constructor(
     private fun selectWallpaper(url: String) = viewModelScope.launch {
         saveWallpaperUseCase(url)
         updateUiState { copy(wallpaperUrl = url, savedMessage = "Wallpaper updated") }
+    }
+
+    companion object {
+        // Default staff PIN to reach hotel settings.
+        const val SETTINGS_PIN = "111111"
     }
 }

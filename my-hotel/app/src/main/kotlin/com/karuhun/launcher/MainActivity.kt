@@ -17,11 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.karuhun.launcher.core.designsystem.locale.LocalAppLanguage
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -49,9 +51,10 @@ import kotlinx.coroutines.flow.emptyFlow
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-// Warm hotel-room interior used as the launcher background.
+// Warm hotel-room interior used as the launcher background — served from our own
+// backend (not an external CDN) so it always renders on hotel networks.
 private const val DEFAULT_ROOM_BACKGROUND =
-    "https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=1920&q=80"
+    "http://10.0.2.2:3000/img/walls/photo-1618773928121-c32242e63f39.jpg"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -63,22 +66,24 @@ class MainActivity : ComponentActivity() {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val navController = rememberNavController()
 
-                if (uiState.isOnboardingCompleted) {
-                    LauncherApplication(
-                        modifier = Modifier.fillMaxSize(),
-                        appState = rememberAppState(navController = navController),
-                        uiState = uiState,
-                        uiEffect = viewModel.uiEffect,
-                        onAction = viewModel::onAction,
-                        onMenuItemClick = {},
-                    )
-                } else {
-                    OnboardingNavGraph(
-                        navController = navController,
-                        onOnboardingComplete = {
-                            viewModel.onAction(MainContract.UiAction.OnboardingCompleted)
-                        }
-                    )
+                CompositionLocalProvider(LocalAppLanguage provides uiState.languageCode) {
+                    if (uiState.isOnboardingCompleted) {
+                        LauncherApplication(
+                            modifier = Modifier.fillMaxSize(),
+                            appState = rememberAppState(navController = navController),
+                            uiState = uiState,
+                            uiEffect = viewModel.uiEffect,
+                            onAction = viewModel::onAction,
+                            onMenuItemClick = {},
+                        )
+                    } else {
+                        OnboardingNavGraph(
+                            navController = navController,
+                            onOnboardingComplete = {
+                                viewModel.onAction(MainContract.UiAction.OnboardingCompleted)
+                            }
+                        )
+                    }
                 }
             }
         }

@@ -58,6 +58,7 @@ class MainViewModel @Inject constructor(
                     isOnboardingCompleted = booking.onboardingComplete || hasBooking,
                     roomNumber = booking.roomNumber,
                     wallpaperUrl = booking.wallpaperUrl,
+                    languageCode = booking.preferredLanguage.ifBlank { "en" },
                 )
             }
         }
