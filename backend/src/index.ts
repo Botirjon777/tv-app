@@ -13,6 +13,7 @@ import { adminRoutes } from './routes/admin';
 import { deviceRoutes } from './routes/devices';
 import { menuDataRoutes } from './routes/menuData';
 import { menuApiRoutes } from './routes/menuApi';
+import { serviceRequestRoutes } from './routes/serviceRequests';
 
 const server = Fastify({
   logger: {
@@ -25,7 +26,7 @@ const server = Fastify({
 async function bootstrap() {
   await server.register(cors, {
     origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
 
   await server.register(jwt, {
@@ -46,6 +47,7 @@ async function bootstrap() {
   await server.register(deviceRoutes,  { prefix: '/api/v1' });
   await server.register(menuDataRoutes, { prefix: '/api/v1' });
   await server.register(menuApiRoutes,  { prefix: '/api/v1' });
+  await server.register(serviceRequestRoutes, { prefix: '/api/v1' });
 
   server.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
 

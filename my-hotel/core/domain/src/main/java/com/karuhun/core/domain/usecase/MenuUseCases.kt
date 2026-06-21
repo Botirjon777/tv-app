@@ -45,6 +45,17 @@ class PlaceMenuOrderUseCase @Inject constructor(
     ): Resource<PlacedOrder> = repository.placeOrder(hotelSlug, roomNumber, note, items)
 }
 
+class CreateServiceRequestUseCase @Inject constructor(
+    private val repository: MenuRepository,
+) {
+    suspend operator fun invoke(
+        hotelSlug: String,
+        roomNumber: String,
+        type: String,
+        note: String = "",
+    ): Resource<Unit> = repository.createServiceRequest(hotelSlug, roomNumber, type, note)
+}
+
 class GetMenuGuestUseCase @Inject constructor(
     private val repository: MenuRepository,
 ) {

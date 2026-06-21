@@ -1,5 +1,10 @@
 import { getToken, clearToken } from './auth';
-import type { Room, HotelService, HotelContent } from '@/types';
+import type {
+  Room,
+  HotelService,
+  HotelContent,
+  ServiceRequest,
+} from '@/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 const HOTEL_ID = process.env.NEXT_PUBLIC_HOTEL_ID ?? '';
@@ -88,6 +93,17 @@ export const api = {
 
   /* ── Devices ── */
   getDevices: () => req<Room[]>('/admin/devices'),
+
+  /* ── Service requests (alarm / reception / taxi) ── */
+  getRequests: (status?: string) =>
+    req<{ data: ServiceRequest[] }>(
+      `/admin/requests${status ? `?status=${status}` : ''}`,
+    ).then((r) => r.data),
+  updateRequest: (id: string, status: string) =>
+    req<{ data: ServiceRequest }>(`/admin/requests/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }).then((r) => r.data),
 
   /* ── Media ── */
   presignUpload: (filename: string, contentType: string) =>

@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, Hotel, Wrench, Image, Tv,
-  Settings, LogOut, MonitorPlay,
+  Settings, LogOut, MonitorPlay, BellRing,
 } from 'lucide-react';
 import { clearToken } from '@/lib/auth';
 import { clsx } from 'clsx';
 
 const NAV = [
   { href: '/dashboard',          label: 'Dashboard',  icon: LayoutDashboard },
+  { href: '/dashboard/requests', label: 'Requests',   icon: BellRing },
   { href: '/dashboard/rooms',    label: 'Rooms',      icon: Hotel },
   { href: '/dashboard/services', label: 'Services',   icon: Wrench },
   { href: '/dashboard/content',  label: 'Content',    icon: Image },

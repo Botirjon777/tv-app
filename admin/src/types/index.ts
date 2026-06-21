@@ -61,6 +61,27 @@ export interface Device extends Room {
   online: boolean;
 }
 
+export type ServiceRequestType = 'ALARM' | 'RECEPTION' | 'TAXI';
+export type ServiceRequestStatus =
+  | 'PENDING'
+  | 'ACKNOWLEDGED'
+  | 'RESOLVED'
+  | 'CANCELLED';
+
+export interface ServiceRequest {
+  id: string;
+  type: ServiceRequestType | string;
+  status: ServiceRequestStatus | string;
+  roomNumber: string;
+  guestName: string;
+  note: string;
+  source: string;
+  hotelName: string;
+  hotelSlug: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export function getLabel(label: Record<string, string> | string | undefined, lang = 'en'): string {
   if (!label) return '';
   if (typeof label === 'string') return label;

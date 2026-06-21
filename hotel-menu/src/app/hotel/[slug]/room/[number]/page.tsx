@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { MenuClient } from "@/components/client/MenuClient";
+import { RoomExperience } from "@/components/client/RoomExperience";
 import { DoorClosed } from "lucide-react";
 import { parseI18n, type Lang } from "@/lib/i18n";
 import type { MenuCategoryDTO, ProductDTO } from "@/types";
@@ -108,8 +108,12 @@ export default async function RoomMenuPage({
   );
 
   return (
-    <MenuClient
-      hotel={{ slug: hotel.slug, name: hotel.name }}
+    <RoomExperience
+      hotel={{
+        slug: hotel.slug,
+        name: hotel.name,
+        imageUrl: (hotel as { imageUrl?: string }).imageUrl ?? "",
+      }}
       room={{ id: room.id, number: room.number, name: room.name }}
       menu={menu}
       recommendations={recommendations}

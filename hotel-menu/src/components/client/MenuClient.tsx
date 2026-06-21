@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { Minus, Plus, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import { ArrowLeft, Minus, Plus, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import type { MenuCategoryDTO, ProductDTO } from "@/types";
 import { useCart } from "./useCart";
 import { cn } from "@/lib/utils";
@@ -30,27 +30,40 @@ export function MenuClient({
   room,
   menu,
   recommendations = [],
+  lang: controlledLang,
+  onChangeLang,
+  onBack,
 }: {
   hotel: Hotel;
   room: Room;
   menu: MenuCategoryDTO[];
   recommendations?: ProductDTO[];
+  lang?: Lang;
+  onChangeLang?: (l: Lang) => void;
+  onBack?: () => void;
 }) {
   const cart = useCart(`${hotel.slug}:${room.number}`);
-  const [lang, setLang] = useState<Lang>(DEFAULT_LANG);
+  const [internalLang, setInternalLang] = useState<Lang>(DEFAULT_LANG);
+  const lang = controlledLang ?? internalLang;
   const [activeCategory, setActiveCategory] = useState(menu[0]?.id ?? "");
   const [cartOpen, setCartOpen] = useState(false);
   const [trackedOrderId, setTrackedOrderId] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  // Restore the guest's language choice.
+  // Restore the guest's language choice (only when uncontrolled — otherwise the
+  // parent owns the language).
   useEffect(() => {
+    if (controlledLang !== undefined) return;
     const saved = localStorage.getItem(LANG_KEY);
-    if (saved && isLang(saved)) setLang(saved);
-  }, []);
+    if (saved && isLang(saved)) setInternalLang(saved);
+  }, [controlledLang]);
 
   const changeLang = (l: Lang) => {
-    setLang(l);
+    if (onChangeLang) {
+      onChangeLang(l);
+      return;
+    }
+    setInternalLang(l);
     try {
       localStorage.setItem(LANG_KEY, l);
     } catch {
@@ -91,9 +104,19 @@ export function MenuClient({
         <div className="mx-auto max-w-2xl px-2.5 py-2.5 lg:px-5 lg:py-5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-900/40">
-                <UtensilsCrossed className="h-5 w-5" />
-              </div>
+              {onBack ? (
+                <button
+                  onClick={onBack}
+                  aria-label={t(lang, "close")}
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </button>
+              ) : (
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-lg shadow-brand-900/40">
+                  <UtensilsCrossed className="h-5 w-5" />
+                </div>
+              )}
               <div className="min-w-0">
                 <p className="truncate font-serif text-[15px] font-semibold leading-tight text-zinc-50">
                   {hotel.name}

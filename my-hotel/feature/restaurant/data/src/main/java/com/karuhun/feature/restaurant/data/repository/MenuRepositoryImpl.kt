@@ -11,6 +11,7 @@ import com.karuhun.core.model.OrderLine
 import com.karuhun.core.model.PlacedOrder
 import com.karuhun.core.network.safeApiCall
 import com.karuhun.feature.restaurant.data.source.MenuApiService
+import com.karuhun.feature.restaurant.data.source.remote.response.CreateServiceRequestBody
 import com.karuhun.feature.restaurant.data.source.remote.response.OrderItemRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
@@ -90,4 +91,21 @@ class MenuRepositoryImpl @Inject constructor(
                 )
             )
         }.map { it.data?.toDomain() ?: PlacedOrder("", "", 0, roomNumber) }
+
+    override suspend fun createServiceRequest(
+        hotelSlug: String,
+        roomNumber: String,
+        type: String,
+        note: String,
+    ): Resource<Unit> =
+        safeApiCall {
+            api.createServiceRequest(
+                CreateServiceRequestBody(
+                    hotelSlug = hotelSlug,
+                    roomNumber = roomNumber,
+                    type = type,
+                    note = note,
+                )
+            )
+        }.map { Unit }
 }

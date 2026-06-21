@@ -27,14 +27,19 @@ fun LauncherCard(
         pressedContentColor = Color.White
     ),
     borderColor: Color = MaterialTheme.colorScheme.primary,
-    borderWidth: Dp = 1.dp,
+    borderWidth: Dp = 2.dp,
     content: @Composable () -> Unit,
 ) {
+    val shape = RoundedCornerShape(radius)
+    // The focus border must share the card's rounded shape — without an explicit
+    // shape the border defaults to a rectangle and renders square corners over a
+    // rounded card (the "not fitting" highlight).
     val border = Border(
         border = BorderStroke(
             width = borderWidth,
             color = borderColor
-        )
+        ),
+        shape = shape,
     )
 
     Card(
@@ -45,10 +50,10 @@ fun LauncherCard(
             border = if (isSelected) border else Border.None
         ),
         scale = CardDefaults.scale(
-            focusedScale = 1.05f
+            focusedScale = 1.08f
         ),
         colors = color,
-        shape = CardDefaults.shape(RoundedCornerShape(radius))
+        shape = CardDefaults.shape(shape)
     ) {
         content()
     }

@@ -13,11 +13,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.LocalTaxi
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.RoomService
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,11 +49,9 @@ import androidx.tv.material3.Icon
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.karuhun.core.ui.navigation.extension.collectWithLifecycle
-import com.karuhun.feature.home.ui.model.MenuItem
 import com.karuhun.launcher.core.designsystem.R
 import com.karuhun.launcher.core.designsystem.component.LauncherCard
 import com.karuhun.launcher.core.designsystem.icon.MoreSvgrepoCom
-import com.karuhun.launcher.core.designsystem.icon.Service
 import com.karuhun.launcher.core.designsystem.icon.SettingSvgrepoCom
 import com.karuhun.launcher.core.designsystem.theme.AppTheme
 import com.karuhun.core.common.util.DeviceUtil
@@ -66,9 +71,31 @@ internal fun HomeScreen(
     onOpenMenu: () -> Unit = {},
     onGoToMainMenu: () -> Unit,
 ) {
+    val context = LocalContext.current
+    var toast by remember { mutableStateOf<String?>(null) }
+
     uiEffect.collectWithLifecycle { effect ->
         when (effect) {
-            is HomeContract.UiEffect.ShowError -> {}
+            is HomeContract.UiEffect.ShowError -> { toast = effect.message }
+            is HomeContract.UiEffect.ServiceRequested -> {
+                toast = serviceConfirmation(effect.type)
+            }
+        }
+    }
+
+    // Auto-dismiss the confirmation toast.
+    LaunchedEffect(toast) {
+        if (toast != null) {
+            kotlinx.coroutines.delay(2800L)
+            toast = null
+        }
+    }
+
+    fun openSystem(action: String) {
+        runCatching {
+            context.startActivity(
+                Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
         }
     }
 
@@ -96,11 +123,38 @@ internal fun HomeScreen(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth(),
-            onMenuItemClick = onMenuItemClick,
             onOpenMenu = onOpenMenu,
             onGoToMainMenu = onGoToMainMenu,
+            onRequestService = { type ->
+                uiAction(HomeContract.UiAction.RequestService(type))
+            },
+            onOpenWifi = { openSystem(Settings.ACTION_WIFI_SETTINGS) },
+            onOpenSettings = { openSystem(Settings.ACTION_SETTINGS) },
         )
+
+        if (toast != null) {
+            Text(
+                text = toast!!,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .background(
+                        Color(0xFF1F1B16).copy(alpha = 0.95f),
+                        RoundedCornerShape(12.dp),
+                    )
+                    .padding(horizontal = 24.dp, vertical = 12.dp),
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
+}
+
+private fun serviceConfirmation(type: String): String = when (type.uppercase(Locale.getDefault())) {
+    "ALARM" -> "Wake-up call requested — staff notified"
+    "RECEPTION" -> "Reception is on the way"
+    "TAXI" -> "Taxi requested — staff notified"
+    else -> "Request sent — staff notified"
 }
 
 @Composable
@@ -194,12 +248,12 @@ private fun RoomInfoPanel(
 @Composable
 private fun AppDock(
     modifier: Modifier = Modifier,
-    onMenuItemClick: (String) -> Unit,
     onOpenMenu: () -> Unit,
     onGoToMainMenu: () -> Unit,
+    onRequestService: (String) -> Unit,
+    onOpenWifi: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
-    val quickApps = MenuItem.quickApps
-
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -210,54 +264,57 @@ private fun AppDock(
             onClick = onOpenMenu,
         )
 
-        // Center cluster: quick apps on top, service / all apps below
+        // Center cluster: guest service requests on top, system tiles below
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                quickApps.take(4).forEach { item ->
-                    DockTile(
-                        title = item.title,
-                        icon = item.icon,
-                        modifier = Modifier.width(118.dp),
-                        onClick = { onMenuItemClick(item.title) },
-                    )
-                }
+                DockTile(
+                    title = "Reception",
+                    icon = Icons.Filled.RoomService,
+                    modifier = Modifier.width(160.dp),
+                    onClick = { onRequestService("RECEPTION") },
+                )
+                DockTile(
+                    title = "Call taxi",
+                    icon = Icons.Filled.LocalTaxi,
+                    modifier = Modifier.width(160.dp),
+                    onClick = { onRequestService("TAXI") },
+                )
+                DockTile(
+                    title = "Wake-up",
+                    icon = Icons.Filled.Alarm,
+                    modifier = Modifier.width(160.dp),
+                    onClick = { onRequestService("ALARM") },
+                )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                DockTile(
-                    title = "Service",
-                    icon = Service,
-                    modifier = Modifier.width(246.dp),
-                    onClick = { onMenuItemClick("Service") },
-                )
                 DockTile(
                     title = "All apps",
                     icon = MoreSvgrepoCom,
                     modifier = Modifier.width(246.dp),
                     onClick = onGoToMainMenu,
                 )
+                DockTile(
+                    title = "Wi-Fi",
+                    icon = Icons.Filled.Wifi,
+                    modifier = Modifier.width(246.dp),
+                    onClick = onOpenWifi,
+                )
             }
         }
 
-        // Right column: Wi-Fi, Coming soon, Settings
+        // Right column: Settings, Coming soon
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            val wifi = quickApps.first { it.title == "Wi-Fi" }
             DockTile(
-                title = wifi.title,
-                icon = wifi.icon,
+                title = "Settings",
+                icon = SettingSvgrepoCom,
                 modifier = Modifier.width(165.dp),
-                onClick = { onMenuItemClick(wifi.title) },
+                onClick = onOpenSettings,
             )
             DockTile(
                 title = "Coming soon",
                 icon = Icons.Filled.WarningAmber,
                 modifier = Modifier.width(165.dp),
                 onClick = {},
-            )
-            DockTile(
-                title = "Settings",
-                icon = SettingSvgrepoCom,
-                modifier = Modifier.width(165.dp),
-                onClick = { onMenuItemClick("Settings") },
             )
         }
     }

@@ -5,6 +5,8 @@ import com.karuhun.feature.restaurant.data.source.remote.response.MenuCategoryRe
 import com.karuhun.feature.restaurant.data.source.remote.response.MenuGuestResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.MenuHotelResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.MenuProductResponse
+import com.karuhun.feature.restaurant.data.source.remote.response.CreateServiceRequestBody
+import com.karuhun.feature.restaurant.data.source.remote.response.ServiceRequestResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.PlaceOrderRequest
 import com.karuhun.feature.restaurant.data.source.remote.response.PlacedOrderResponse
 import com.karuhun.feature.restaurant.data.source.remote.response.SetLanguageRequest
@@ -38,6 +40,11 @@ interface MenuApiService {
 
     @POST("menu/guest/language")
     suspend fun setGuestLanguage(@Body body: SetLanguageRequest): BaseResponse<Unit>
+
+    @POST("menu/requests")
+    suspend fun createServiceRequest(
+        @Body body: CreateServiceRequestBody,
+    ): BaseResponse<ServiceRequestResponse>
 
     @POST("menu/orders")
     suspend fun placeOrder(@Body body: PlaceOrderRequest): BaseResponse<PlacedOrderResponse>

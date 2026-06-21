@@ -180,12 +180,38 @@ model MenuHotel {
   floors        Int        @default(1)
   roomsPerFloor Int        @default(0)
   active        Boolean    @default(true)
+  imageUrl      String     @default("")
   rooms         MenuRoom[]
   guests        MenuGuest[]
+  requests      ServiceRequest[]
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
   @@map("menu_hotels")
+}
+
+// Guest-raised service requests (alarm / reception / taxi) from the TV or the
+// in-room web page. Surfaced live in the admin dashboard and forwarded to
+// Telegram. status is a plain string (mirrors Order) — PENDING | ACKNOWLEDGED |
+// RESOLVED | CANCELLED. type — ALARM | RECEPTION | TAXI (extensible).
+model ServiceRequest {
+  id         String    @id @default(cuid())
+  hotelId    String
+  hotel      MenuHotel @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  roomNumber String
+  guestName  String    @default("")
+  type       String
+  status     String    @default("PENDING")
+  note       String    @default("")
+  payload    String    @default("{}")
+  source     String    @default("web")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([hotelId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("service_requests")
 }
 
 model MenuRoom {

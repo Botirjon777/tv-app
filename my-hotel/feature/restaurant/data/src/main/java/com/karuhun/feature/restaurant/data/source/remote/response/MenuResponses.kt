@@ -133,3 +133,20 @@ data class SetLanguageRequest(
     val roomNumber: String,
     val language: String,
 )
+
+// Guest service request (alarm / reception / taxi) raised from the TV.
+data class CreateServiceRequestBody(
+    val hotelSlug: String,
+    val roomNumber: String,
+    val type: String,
+    val note: String = "",
+    val guestName: String = "",
+    val source: String = "tv",
+)
+
+data class ServiceRequestResponse(
+    @SerializedName("id") val id: String? = null,
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("roomNumber") val roomNumber: String? = null,
+)

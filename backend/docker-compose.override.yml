@@ -1,0 +1,10 @@
+# Local-dev override: publish Postgres & Redis to the host so the backend
+# can run on the host (npm run dev) against the containerized infra.
+# Non-destructive; only adds host port mappings.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+  redis:
+    ports:
+      - "6379:6379"

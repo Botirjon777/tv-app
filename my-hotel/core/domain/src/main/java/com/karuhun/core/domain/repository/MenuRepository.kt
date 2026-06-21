@@ -23,4 +23,10 @@ interface MenuRepository {
         note: String,
         items: List<OrderLine>,
     ): Resource<PlacedOrder>
+    suspend fun createServiceRequest(
+        hotelSlug: String,
+        roomNumber: String,
+        type: String,
+        note: String,
+    ): Resource<Unit>
 }

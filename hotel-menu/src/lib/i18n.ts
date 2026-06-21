@@ -74,7 +74,25 @@ type UIKey =
   | "cancelledSub"
   | "couldNotPlace"
   | "couldNotLoad"
-  | "recommendedToday";
+  | "recommendedToday"
+  | "welcome"
+  | "howCanWeHelp"
+  | "services"
+  | "openMenu"
+  | "menuSubtitle"
+  | "svcAlarm"
+  | "svcAlarmSub"
+  | "svcReception"
+  | "svcReceptionSub"
+  | "svcTaxi"
+  | "svcTaxiSub"
+  | "requestNotePlaceholder"
+  | "send"
+  | "cancel"
+  | "requestSent"
+  | "requestSentSub"
+  | "requestFailed"
+  | "close";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -105,6 +123,24 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     couldNotPlace: "Could not place your order",
     couldNotLoad: "We couldn’t load your order.",
     recommendedToday: "Recommended today",
+    welcome: "Welcome",
+    howCanWeHelp: "How can we help you today?",
+    services: "Services",
+    openMenu: "In-room dining",
+    menuSubtitle: "Browse the menu & order to your room",
+    svcAlarm: "Wake-up call",
+    svcAlarmSub: "Request an alarm or wake-up",
+    svcReception: "Reception",
+    svcReceptionSub: "Call the front desk",
+    svcTaxi: "Taxi",
+    svcTaxiSub: "Request a taxi",
+    requestNotePlaceholder: "Add a note (optional)",
+    send: "Send request",
+    cancel: "Cancel",
+    requestSent: "Request sent",
+    requestSentSub: "Our staff have been notified and will assist you shortly.",
+    requestFailed: "Could not send your request. Please try again.",
+    close: "Close",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -134,6 +170,24 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     couldNotPlace: "Не удалось оформить заказ",
     couldNotLoad: "Не удалось загрузить ваш заказ.",
     recommendedToday: "Рекомендуем сегодня",
+    welcome: "Добро пожаловать",
+    howCanWeHelp: "Чем можем помочь?",
+    services: "Услуги",
+    openMenu: "Обслуживание в номере",
+    menuSubtitle: "Посмотрите меню и закажите в номер",
+    svcAlarm: "Будильник",
+    svcAlarmSub: "Запросить будильник",
+    svcReception: "Рецепция",
+    svcReceptionSub: "Позвонить на стойку регистрации",
+    svcTaxi: "Такси",
+    svcTaxiSub: "Вызвать такси",
+    requestNotePlaceholder: "Добавить примечание (необязательно)",
+    send: "Отправить запрос",
+    cancel: "Отмена",
+    requestSent: "Запрос отправлен",
+    requestSentSub: "Персонал уведомлён и скоро вам поможет.",
+    requestFailed: "Не удалось отправить запрос. Попробуйте снова.",
+    close: "Закрыть",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -163,6 +217,24 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     couldNotPlace: "Buyurtma berib bo‘lmadi",
     couldNotLoad: "Buyurtmangizni yuklab bo‘lmadi.",
     recommendedToday: "Bugungi tavsiya",
+    welcome: "Xush kelibsiz",
+    howCanWeHelp: "Sizga qanday yordam bera olamiz?",
+    services: "Xizmatlar",
+    openMenu: "Xona xizmati",
+    menuSubtitle: "Menyuni ko‘ring va xonangizga buyurtma bering",
+    svcAlarm: "Uyg‘otish",
+    svcAlarmSub: "Budilnik so‘rash",
+    svcReception: "Qabulxona",
+    svcReceptionSub: "Qabulxonaga qo‘ng‘iroq qilish",
+    svcTaxi: "Taksi",
+    svcTaxiSub: "Taksi chaqirish",
+    requestNotePlaceholder: "Izoh qo‘shish (ixtiyoriy)",
+    send: "So‘rov yuborish",
+    cancel: "Bekor qilish",
+    requestSent: "So‘rov yuborildi",
+    requestSentSub: "Xodimlarimiz xabardor qilindi va tez orada yordam berishadi.",
+    requestFailed: "So‘rovni yuborib bo‘lmadi. Qayta urinib ko‘ring.",
+    close: "Yopish",
   },
 };
 
