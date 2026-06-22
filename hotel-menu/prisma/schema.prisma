@@ -60,6 +60,17 @@ model Hotel {
   floors        Int      @default(1)
   roomsPerFloor Int      @default(0)
   active        Boolean  @default(true)
+
+  // Branding & guest-landing content (surfaced on the in-room web page).
+  logoUrl        String @default("")
+  tripadvisorUrl String @default("")
+  googleMapsUrl  String @default("")
+  yandexMapsUrl  String @default("")
+  wifiName       String @default("")
+  wifiPassword   String @default("")
+  instagramUrl   String @default("")
+  telegramUrl    String @default("")
+
   rooms         Room[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

@@ -7,14 +7,14 @@
  *   GET  /api/v1/admin/requests           (JWT)     staff list (filter by status)
  *   PATCH/api/v1/admin/requests/:id       (JWT)     staff update status
  *
- * Request types: ALARM | RECEPTION | TAXI (free string, extensible).
+ * Request types: ALARM | SERVICE | TAXI | RECEPTION | PROBLEM (free string, extensible).
  * Statuses: PENDING | ACKNOWLEDGED | RESOLVED | CANCELLED.
  */
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { sendTelegram, formatRequestMessage } from '../services/telegramService';
 
-const REQUEST_TYPES = ['ALARM', 'RECEPTION', 'TAXI'] as const;
+const REQUEST_TYPES = ['ALARM', 'SERVICE', 'TAXI', 'RECEPTION', 'PROBLEM'] as const;
 const REQUEST_STATUSES = ['PENDING', 'ACKNOWLEDGED', 'RESOLVED', 'CANCELLED'] as const;
 
 function ok<T>(reply: FastifyReply, data: T, code = 200, message = 'OK') {

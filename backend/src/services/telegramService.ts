@@ -62,10 +62,14 @@ export function requestTypeLabel(type: string): string {
   switch (type.toUpperCase()) {
     case 'ALARM':
       return '⏰ Alarm / wake-up';
+    case 'SERVICE':
+      return '🧹 Service request';
     case 'RECEPTION':
       return '🛎️ Reception call';
     case 'TAXI':
       return '🚕 Taxi request';
+    case 'PROBLEM':
+      return '⚠️ Reported problem';
     default:
       return type;
   }

@@ -113,6 +113,14 @@ export default async function RoomMenuPage({
         slug: hotel.slug,
         name: hotel.name,
         imageUrl: (hotel as { imageUrl?: string }).imageUrl ?? "",
+        logoUrl: hotel.logoUrl,
+        tripadvisorUrl: hotel.tripadvisorUrl,
+        googleMapsUrl: hotel.googleMapsUrl,
+        yandexMapsUrl: hotel.yandexMapsUrl,
+        wifiName: hotel.wifiName,
+        wifiPassword: hotel.wifiPassword,
+        instagramUrl: hotel.instagramUrl,
+        telegramUrl: hotel.telegramUrl,
       }}
       room={{ id: room.id, number: room.number, name: room.name }}
       menu={menu}

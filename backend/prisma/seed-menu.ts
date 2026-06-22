@@ -17,8 +17,34 @@ function generateRooms(floors: number, roomsPerFloor: number) {
 }
 
 const HOTELS = [
-  { name: "Grand Plaza Hotel", slug: "grand-plaza", floors: 3, roomsPerFloor: 6 },
-  { name: "Seaside Resort", slug: "seaside-resort", floors: 2, roomsPerFloor: 5 },
+  {
+    name: "Grand Plaza Hotel",
+    slug: "grand-plaza",
+    floors: 3,
+    roomsPerFloor: 6,
+    logoUrl: "",
+    tripadvisorUrl: "https://www.tripadvisor.com/",
+    googleMapsUrl: "https://maps.google.com/",
+    yandexMapsUrl: "https://yandex.com/maps/",
+    wifiName: "GrandPlaza_Guest",
+    wifiPassword: "welcome2024",
+    instagramUrl: "https://instagram.com/",
+    telegramUrl: "https://t.me/",
+  },
+  {
+    name: "Seaside Resort",
+    slug: "seaside-resort",
+    floors: 2,
+    roomsPerFloor: 5,
+    logoUrl: "",
+    tripadvisorUrl: "https://www.tripadvisor.com/",
+    googleMapsUrl: "https://maps.google.com/",
+    yandexMapsUrl: "https://yandex.com/maps/",
+    wifiName: "Seaside_Guest",
+    wifiPassword: "seaview123",
+    instagramUrl: "https://instagram.com/",
+    telegramUrl: "https://t.me/",
+  },
 ];
 
 // Prices are integer UZS (so'm).
@@ -357,6 +383,14 @@ async function main() {
         slug: h.slug,
         floors: h.floors,
         roomsPerFloor: h.roomsPerFloor,
+        logoUrl: h.logoUrl,
+        tripadvisorUrl: h.tripadvisorUrl,
+        googleMapsUrl: h.googleMapsUrl,
+        yandexMapsUrl: h.yandexMapsUrl,
+        wifiName: h.wifiName,
+        wifiPassword: h.wifiPassword,
+        instagramUrl: h.instagramUrl,
+        telegramUrl: h.telegramUrl,
         rooms: { create: generateRooms(h.floors, h.roomsPerFloor) },
       },
     });

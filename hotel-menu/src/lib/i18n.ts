@@ -82,10 +82,25 @@ type UIKey =
   | "menuSubtitle"
   | "svcAlarm"
   | "svcAlarmSub"
+  | "svcService"
+  | "svcServiceSub"
   | "svcReception"
   | "svcReceptionSub"
   | "svcTaxi"
   | "svcTaxiSub"
+  | "svcProblem"
+  | "svcProblemSub"
+  | "writeReview"
+  | "writeReviewSub"
+  | "reviewModalSub"
+  | "wifi"
+  | "wifiSub"
+  | "wifiNetwork"
+  | "wifiPasswordLabel"
+  | "copy"
+  | "copied"
+  | "followUs"
+  | "askReception"
   | "requestNotePlaceholder"
   | "send"
   | "cancel"
@@ -130,10 +145,25 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     menuSubtitle: "Browse the menu & order to your room",
     svcAlarm: "Wake-up call",
     svcAlarmSub: "Request an alarm or wake-up",
+    svcService: "Services",
+    svcServiceSub: "Request housekeeping or assistance",
     svcReception: "Reception",
     svcReceptionSub: "Call the front desk",
     svcTaxi: "Taxi",
     svcTaxiSub: "Request a taxi",
+    svcProblem: "Report a problem",
+    svcProblemSub: "Tell us about an issue",
+    writeReview: "Write a review",
+    writeReviewSub: "Share your experience",
+    reviewModalSub: "We'd love your feedback — choose where to leave a review:",
+    wifi: "Wi-Fi",
+    wifiSub: "Connect to our network",
+    wifiNetwork: "Network",
+    wifiPasswordLabel: "Password",
+    copy: "Copy",
+    copied: "Copied",
+    followUs: "Follow us on social media",
+    askReception: "Not available yet — please contact the front desk.",
     requestNotePlaceholder: "Add a note (optional)",
     send: "Send request",
     cancel: "Cancel",
@@ -177,10 +207,25 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     menuSubtitle: "Посмотрите меню и закажите в номер",
     svcAlarm: "Будильник",
     svcAlarmSub: "Запросить будильник",
+    svcService: "Услуги",
+    svcServiceSub: "Запросить уборку или помощь",
     svcReception: "Рецепция",
     svcReceptionSub: "Позвонить на стойку регистрации",
     svcTaxi: "Такси",
     svcTaxiSub: "Вызвать такси",
+    svcProblem: "Сообщить о проблеме",
+    svcProblemSub: "Расскажите нам о неполадке",
+    writeReview: "Оставить отзыв",
+    writeReviewSub: "Поделитесь впечатлениями",
+    reviewModalSub: "Будем рады вашему отзыву — выберите, где его оставить:",
+    wifi: "Wi-Fi",
+    wifiSub: "Подключитесь к нашей сети",
+    wifiNetwork: "Сеть",
+    wifiPasswordLabel: "Пароль",
+    copy: "Копировать",
+    copied: "Скопировано",
+    followUs: "Подписывайтесь на нас в соцсетях",
+    askReception: "Пока недоступно — обратитесь на стойку регистрации.",
     requestNotePlaceholder: "Добавить примечание (необязательно)",
     send: "Отправить запрос",
     cancel: "Отмена",
@@ -222,12 +267,27 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     services: "Xizmatlar",
     openMenu: "Xona xizmati",
     menuSubtitle: "Menyuni ko‘ring va xonangizga buyurtma bering",
-    svcAlarm: "Uyg‘otish",
+    svcAlarm: "Budilnik",
     svcAlarmSub: "Budilnik so‘rash",
+    svcService: "Xizmatlar",
+    svcServiceSub: "Tozalash yoki yordam so‘rash",
     svcReception: "Qabulxona",
     svcReceptionSub: "Qabulxonaga qo‘ng‘iroq qilish",
-    svcTaxi: "Taksi",
+    svcTaxi: "Taksi chaqirish",
     svcTaxiSub: "Taksi chaqirish",
+    svcProblem: "Muammo haqida xabar berish",
+    svcProblemSub: "Muammo haqida bizga xabar bering",
+    writeReview: "Sharh qoldirish",
+    writeReviewSub: "Taassurotlaringiz bilan o‘rtoqlashing",
+    reviewModalSub: "Fikringizdan mamnun bo‘lamiz — sharhni qayerda qoldirishni tanlang:",
+    wifi: "Wi-Fi",
+    wifiSub: "Tarmog‘imizga ulaning",
+    wifiNetwork: "Tarmoq",
+    wifiPasswordLabel: "Parol",
+    copy: "Nusxa olish",
+    copied: "Nusxa olindi",
+    followUs: "Bizni ijtimoiy tarmoqlarda kuzatib boring",
+    askReception: "Hozircha mavjud emas — qabulxonaga murojaat qiling.",
     requestNotePlaceholder: "Izoh qo‘shish (ixtiyoriy)",
     send: "So‘rov yuborish",
     cancel: "Bekor qilish",

@@ -218,6 +218,17 @@ function HotelForm({
   const [roomsPerFloor, setRoomsPerFloor] = useState(
     String(hotel?.roomsPerFloor ?? 10)
   );
+  // Guest-landing branding fields.
+  const [logoUrl, setLogoUrl] = useState(hotel?.logoUrl ?? "");
+  const [tripadvisorUrl, setTripadvisorUrl] = useState(
+    hotel?.tripadvisorUrl ?? ""
+  );
+  const [googleMapsUrl, setGoogleMapsUrl] = useState(hotel?.googleMapsUrl ?? "");
+  const [yandexMapsUrl, setYandexMapsUrl] = useState(hotel?.yandexMapsUrl ?? "");
+  const [wifiName, setWifiName] = useState(hotel?.wifiName ?? "");
+  const [wifiPassword, setWifiPassword] = useState(hotel?.wifiPassword ?? "");
+  const [instagramUrl, setInstagramUrl] = useState(hotel?.instagramUrl ?? "");
+  const [telegramUrl, setTelegramUrl] = useState(hotel?.telegramUrl ?? "");
   const [error, setError] = useState<string | null>(null);
 
   // Auto-fill the slug from the name until the user edits it manually.
@@ -229,16 +240,28 @@ function HotelForm({
   const totalRooms =
     (parseInt(floors) || 0) * (parseInt(roomsPerFloor) || 0);
 
+  const branding = {
+    logoUrl,
+    tripadvisorUrl,
+    googleMapsUrl,
+    yandexMapsUrl,
+    wifiName,
+    wifiPassword,
+    instagramUrl,
+    telegramUrl,
+  };
+
   const save = useMutation({
     mutationFn: () => {
       if (isEdit) {
-        return api.patch(`/api/hotels/${hotel!.id}`, { name, slug });
+        return api.patch(`/api/hotels/${hotel!.id}`, { name, slug, ...branding });
       }
       return api.post("/api/hotels", {
         name,
         slug: slug || undefined,
         floors: parseInt(floors),
         roomsPerFloor: parseInt(roomsPerFloor),
+        ...branding,
       });
     },
     onSuccess: onSaved,
@@ -326,6 +349,82 @@ function HotelForm({
             </p>
           </div>
         )}
+
+        <div className="space-y-2.5 border-t border-slate-100 pt-4 lg:space-y-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Guest landing page
+          </p>
+          <div>
+            <Label>Logo URL</Label>
+            <Input
+              value={logoUrl}
+              onChange={(e) => setLogoUrl(e.target.value)}
+              placeholder="https://…/logo.png"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 lg:gap-5">
+            <div>
+              <Label>Wi-Fi network</Label>
+              <Input
+                value={wifiName}
+                onChange={(e) => setWifiName(e.target.value)}
+                placeholder="Hotel_Guest"
+              />
+            </div>
+            <div>
+              <Label>Wi-Fi password</Label>
+              <Input
+                value={wifiPassword}
+                onChange={(e) => setWifiPassword(e.target.value)}
+                placeholder="welcome123"
+              />
+            </div>
+          </div>
+          <div>
+            <Label>TripAdvisor URL</Label>
+            <Input
+              value={tripadvisorUrl}
+              onChange={(e) => setTripadvisorUrl(e.target.value)}
+              placeholder="https://www.tripadvisor.com/…"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 lg:gap-5">
+            <div>
+              <Label>Google Maps URL</Label>
+              <Input
+                value={googleMapsUrl}
+                onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                placeholder="https://maps.google.com/…"
+              />
+            </div>
+            <div>
+              <Label>Yandex Maps URL</Label>
+              <Input
+                value={yandexMapsUrl}
+                onChange={(e) => setYandexMapsUrl(e.target.value)}
+                placeholder="https://yandex.com/maps/…"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5 lg:gap-5">
+            <div>
+              <Label>Instagram URL</Label>
+              <Input
+                value={instagramUrl}
+                onChange={(e) => setInstagramUrl(e.target.value)}
+                placeholder="https://instagram.com/…"
+              />
+            </div>
+            <div>
+              <Label>Telegram URL</Label>
+              <Input
+                value={telegramUrl}
+                onChange={(e) => setTelegramUrl(e.target.value)}
+                placeholder="https://t.me/…"
+              />
+            </div>
+          </div>
+        </div>
 
         {error && (
           <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">

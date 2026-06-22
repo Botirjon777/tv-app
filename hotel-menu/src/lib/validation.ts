@@ -21,6 +21,20 @@ export const productInput = z.object({
 
 export const productUpdateInput = productInput.partial();
 
+// Guest-landing branding fields (logo, review links, Wi-Fi, social). All
+// optional free-text — links aren't strictly URL-validated so staff can paste
+// share links of any shape; Wi-Fi name/password are plain strings.
+const hotelBranding = {
+  logoUrl: z.string().trim().max(1000).optional(),
+  tripadvisorUrl: z.string().trim().max(1000).optional(),
+  googleMapsUrl: z.string().trim().max(1000).optional(),
+  yandexMapsUrl: z.string().trim().max(1000).optional(),
+  wifiName: z.string().trim().max(120).optional(),
+  wifiPassword: z.string().trim().max(120).optional(),
+  instagramUrl: z.string().trim().max(1000).optional(),
+  telegramUrl: z.string().trim().max(1000).optional(),
+};
+
 export const hotelInput = z.object({
   name: z.string().trim().min(1, "Hotel name is required").max(80),
   slug: z
@@ -31,6 +45,7 @@ export const hotelInput = z.object({
     .optional(),
   floors: z.number().int().min(1, "At least 1 floor").max(50),
   roomsPerFloor: z.number().int().min(1, "At least 1 room per floor").max(99),
+  ...hotelBranding,
 });
 
 export const hotelUpdateInput = z.object({
@@ -42,6 +57,7 @@ export const hotelUpdateInput = z.object({
     .max(60)
     .optional(),
   active: z.boolean().optional(),
+  ...hotelBranding,
 });
 
 export const roomInput = z.object({

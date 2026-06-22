@@ -12,18 +12,45 @@ export async function GET() {
       orderBy: { name: "asc" },
       include: { _count: { select: { rooms: true } } },
     });
-    return ok(
-      hotels.map((h) => ({
-        id: h.id,
-        name: h.name,
-        slug: h.slug,
-        floors: h.floors,
-        roomsPerFloor: h.roomsPerFloor,
-        active: h.active,
-        roomCount: h._count.rooms,
-      }))
-    );
+    return ok(hotels.map(toHotelDTO));
   });
+}
+
+// Shared DTO shape for hotels — keeps branding fields in one place.
+function toHotelDTO(h: {
+  id: string;
+  name: string;
+  slug: string;
+  floors: number;
+  roomsPerFloor: number;
+  active: boolean;
+  logoUrl: string;
+  tripadvisorUrl: string;
+  googleMapsUrl: string;
+  yandexMapsUrl: string;
+  wifiName: string;
+  wifiPassword: string;
+  instagramUrl: string;
+  telegramUrl: string;
+  _count?: { rooms: number };
+}) {
+  return {
+    id: h.id,
+    name: h.name,
+    slug: h.slug,
+    floors: h.floors,
+    roomsPerFloor: h.roomsPerFloor,
+    active: h.active,
+    logoUrl: h.logoUrl,
+    tripadvisorUrl: h.tripadvisorUrl,
+    googleMapsUrl: h.googleMapsUrl,
+    yandexMapsUrl: h.yandexMapsUrl,
+    wifiName: h.wifiName,
+    wifiPassword: h.wifiPassword,
+    instagramUrl: h.instagramUrl,
+    telegramUrl: h.telegramUrl,
+    roomCount: h._count?.rooms,
+  };
 }
 
 // Find a slug that isn't reserved and isn't already taken.
@@ -54,28 +81,20 @@ export async function POST(req: Request) {
 
     const rooms = generateRooms(data.floors, data.roomsPerFloor);
 
+    const { name, floors, roomsPerFloor, slug: _slug, ...branding } = data;
+
     const hotel = await prisma.hotel.create({
       data: {
-        name: data.name,
+        name,
         slug,
-        floors: data.floors,
-        roomsPerFloor: data.roomsPerFloor,
+        floors,
+        roomsPerFloor,
+        ...branding,
         rooms: { create: rooms },
       },
       include: { _count: { select: { rooms: true } } },
     });
 
-    return ok(
-      {
-        id: hotel.id,
-        name: hotel.name,
-        slug: hotel.slug,
-        floors: hotel.floors,
-        roomsPerFloor: hotel.roomsPerFloor,
-        active: hotel.active,
-        roomCount: hotel._count.rooms,
-      },
-      201
-    );
+    return ok(toHotelDTO(hotel), 201);
   });
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { MenuCategoryDTO, ProductDTO } from "@/types";
 import { DEFAULT_LANG, isLang, type Lang } from "@/lib/i18n";
 import { MenuClient } from "./MenuClient";
-import { RoomLanding } from "./RoomLanding";
+import { RoomLanding, type LandingHotel } from "./RoomLanding";
 
 const LANG_KEY = "hotel-menu-lang";
 
@@ -19,7 +19,7 @@ export function RoomExperience({
   menu,
   recommendations = [],
 }: {
-  hotel: { slug: string; name: string; imageUrl?: string };
+  hotel: LandingHotel;
   room: { id: string; number: string; name: string };
   menu: MenuCategoryDTO[];
   recommendations?: ProductDTO[];

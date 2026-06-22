@@ -181,6 +181,17 @@ model MenuHotel {
   roomsPerFloor Int        @default(0)
   active        Boolean    @default(true)
   imageUrl      String     @default("")
+
+  // Branding & guest-landing content (surfaced on the in-room web page).
+  logoUrl        String @default("")
+  tripadvisorUrl String @default("")
+  googleMapsUrl  String @default("")
+  yandexMapsUrl  String @default("")
+  wifiName       String @default("")
+  wifiPassword   String @default("")
+  instagramUrl   String @default("")
+  telegramUrl    String @default("")
+
   rooms         MenuRoom[]
   guests        MenuGuest[]
   requests      ServiceRequest[]
@@ -193,7 +204,7 @@ model MenuHotel {
 // Guest-raised service requests (alarm / reception / taxi) from the TV or the
 // in-room web page. Surfaced live in the admin dashboard and forwarded to
 // Telegram. status is a plain string (mirrors Order) — PENDING | ACKNOWLEDGED |
-// RESOLVED | CANCELLED. type — ALARM | RECEPTION | TAXI (extensible).
+// RESOLVED | CANCELLED. type — ALARM | SERVICE | TAXI | RECEPTION | PROBLEM (extensible).
 model ServiceRequest {
   id         String    @id @default(cuid())
   hotelId    String
