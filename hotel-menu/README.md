@@ -4,15 +4,15 @@ A full-stack **Next.js 14** app for multi-hotel in-room dining with three surfac
 
 | Surface | Route | Audience | Device |
 | --- | --- | --- | --- |
-| **Guest menu** | `/hotel/[slug]/room/[number]` | Hotel guests (via room QR) | Mobile |
+| **Guest menu** | `/[slug]/[number]` | Hotel guests (via room QR) | Mobile |
 | **Kitchen POS** | `/pos` | Chefs / kitchen staff | Tablet |
 | **Admin panel** | `/admin` | Hotel managers | Desktop |
 
 **Multi-hotel:** an admin creates a hotel by entering its name + floors + rooms
 per floor; the app **auto-generates the rooms** (floor-based: 101–1xx, 201–2xx…)
 and a URL slug, and lets you **download every room's QR code as a single PDF**
-for printing. Each room's QR opens `/hotel/[slug]/room/[number]`
-(e.g. `/hotel/grand-plaza/room/101`). The **menu (products & categories) is
+for printing. Each room's QR opens `/[slug]/[number]`
+(e.g. `/safir/101`). The **menu (products & categories) is
 shared across all hotels**.
 
 Guests browse, build a cart and place an order — which appears **instantly** on
@@ -53,11 +53,11 @@ tap-to-add — managed under **Admin → Recommendations**.
 cd hotel-menu
 npm install
 npm run setup     # generate client + create db + seed demo data
-npm run dev       # http://localhost:3001
+npm run dev       # http://localhost:3000
 ```
 
 `npm run setup` runs `prisma generate && prisma db push && prisma db seed`,
-seeding 5 categories, ~18 products and 2 demo hotels (Grand Plaza, Seaside
+seeding 5 categories, ~18 products and 2 demo hotels (Safir, Seaside
 Resort) with auto-generated rooms.
 
 ### Default passwords (set in `.env`)
@@ -71,7 +71,7 @@ Change `ADMIN_PASSWORD`, `POS_PASSWORD` and `AUTH_SECRET` before deploying.
 
 ```
 Guest (mobile)                 Kitchen (tablet)            Manager (desktop)
- /hotel/grand-plaza/room/101      /pos                        /admin
+ /safir/101                       /pos                        /admin
         |  POST /api/orders         ^  SSE: order.created        |  CRUD
         v   {hotelSlug, room}       |   (filtered by hotel)      v
    ┌──────────────────────────  Next.js route handlers  ──────────────────────┐
@@ -90,7 +90,7 @@ hotel** (`@@unique([hotelId, number])`).
 
 | Script | Description |
 | --- | --- |
-| `npm run dev` | Dev server on port 3001 |
+| `npm run dev` | Dev server on port 3000 |
 | `npm run setup` | Generate client, push schema, seed |
 | `npm run db:studio` | Open Prisma Studio |
 | `npm run db:reset` | Wipe + reseed the database |

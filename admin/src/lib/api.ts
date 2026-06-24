@@ -6,7 +6,7 @@ import type {
   ServiceRequest,
 } from '@/types';
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002';
 const HOTEL_ID = process.env.NEXT_PUBLIC_HOTEL_ID ?? '';
 
 async function req<T>(path: string, options?: RequestInit): Promise<T> {

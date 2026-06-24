@@ -41,7 +41,11 @@ describe("tampering", () => {
 
   it("rejects a token with a broken signature", async () => {
     const token = await createToken("admin");
-    expect(await verifyToken(`${token.slice(0, -1)}0`)).toBeNull();
+    // Flip the last signature char to a guaranteed-different hex digit so the
+    // tamper is deterministic regardless of the random nonce.
+    const last = token[token.length - 1];
+    const tampered = token.slice(0, -1) + (last === "a" ? "b" : "a");
+    expect(await verifyToken(tampered)).toBeNull();
   });
 
   it("rejects empty and malformed tokens", async () => {

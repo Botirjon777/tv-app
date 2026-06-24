@@ -18,15 +18,15 @@ function generateRooms(floors: number, roomsPerFloor: number) {
 
 const HOTELS = [
   {
-    name: "Grand Plaza Hotel",
-    slug: "grand-plaza",
+    name: "Safir Hotel",
+    slug: "safir",
     floors: 3,
     roomsPerFloor: 6,
     logoUrl: "",
     tripadvisorUrl: "https://www.tripadvisor.com/",
     googleMapsUrl: "https://maps.google.com/",
     yandexMapsUrl: "https://yandex.com/maps/",
-    wifiName: "GrandPlaza_Guest",
+    wifiName: "Safir_Guest",
     wifiPassword: "welcome2024",
     instagramUrl: "https://instagram.com/",
     telegramUrl: "https://t.me/",

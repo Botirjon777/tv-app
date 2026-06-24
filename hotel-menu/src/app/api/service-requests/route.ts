@@ -7,7 +7,7 @@
  */
 import { NextResponse } from "next/server";
 
-const BASE = process.env.MENU_DATA_API_URL ?? "http://localhost:3000/api/v1";
+const BASE = process.env.MENU_DATA_API_URL ?? "http://localhost:3002/api/v1";
 
 const TYPES = new Set(["ALARM", "SERVICE", "TAXI", "RECEPTION", "PROBLEM"]);
 

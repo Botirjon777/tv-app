@@ -107,7 +107,9 @@ type UIKey =
   | "requestSent"
   | "requestSentSub"
   | "requestFailed"
-  | "close";
+  | "close"
+  | "lightMode"
+  | "darkMode";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -141,7 +143,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     welcome: "Welcome",
     howCanWeHelp: "How can we help you today?",
     services: "Services",
-    openMenu: "In-room dining",
+    openMenu: "Menu",
     menuSubtitle: "Browse the menu & order to your room",
     svcAlarm: "Wake-up call",
     svcAlarmSub: "Request an alarm or wake-up",
@@ -171,6 +173,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     requestSentSub: "Our staff have been notified and will assist you shortly.",
     requestFailed: "Could not send your request. Please try again.",
     close: "Close",
+    lightMode: "Switch to light mode",
+    darkMode: "Switch to dark mode",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -203,7 +207,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     welcome: "Добро пожаловать",
     howCanWeHelp: "Чем можем помочь?",
     services: "Услуги",
-    openMenu: "Обслуживание в номере",
+    openMenu: "Меню",
     menuSubtitle: "Посмотрите меню и закажите в номер",
     svcAlarm: "Будильник",
     svcAlarmSub: "Запросить будильник",
@@ -233,6 +237,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     requestSentSub: "Персонал уведомлён и скоро вам поможет.",
     requestFailed: "Не удалось отправить запрос. Попробуйте снова.",
     close: "Закрыть",
+    lightMode: "Светлая тема",
+    darkMode: "Тёмная тема",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -265,7 +271,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     welcome: "Xush kelibsiz",
     howCanWeHelp: "Sizga qanday yordam bera olamiz?",
     services: "Xizmatlar",
-    openMenu: "Xona xizmati",
+    openMenu: "Menyu",
     menuSubtitle: "Menyuni ko‘ring va xonangizga buyurtma bering",
     svcAlarm: "Budilnik",
     svcAlarmSub: "Budilnik so‘rash",
@@ -295,6 +301,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     requestSentSub: "Xodimlarimiz xabardor qilindi va tez orada yordam berishadi.",
     requestFailed: "So‘rovni yuborib bo‘lmadi. Qayta urinib ko‘ring.",
     close: "Yopish",
+    lightMode: "Yorug‘ rejim",
+    darkMode: "Tungi rejim",
   },
 };
 

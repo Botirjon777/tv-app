@@ -73,7 +73,7 @@ export default function HotelDetailPage({
   });
 
   const urlFor = (number: string) =>
-    `${baseUrl()}/hotel/${hotel?.slug}/room/${number}`;
+    `${baseUrl()}/${hotel?.slug}/${number}`;
 
   const downloadAll = async () => {
     if (!hotel || rooms.length === 0) return;
@@ -97,7 +97,7 @@ export default function HotelDetailPage({
       <PageHeader
         title={hotel?.name ?? "Hotel"}
         description={
-          hotel ? `/hotel/${hotel.slug} · ${rooms.length} rooms` : undefined
+          hotel ? `/${hotel.slug} · ${rooms.length} rooms` : undefined
         }
         action={
           <div className="flex gap-2">

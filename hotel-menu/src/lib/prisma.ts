@@ -1,19 +1,40 @@
-// Data layer for hotel-menu.
+// Data layer for hotel-menu. It runs in one of two modes:
 //
-// Historically this exported a local PrismaClient backed by SQLite. The app now
-// persists through the shared backend (Postgres) instead: every call of the
-// form `prisma.<model>.<operation>(args)` is forwarded over HTTP to the
-// backend's menu data API, which runs the identical Prisma operation and
-// returns the result. Because the same Prisma engine executes the query on the
-// far side, semantics (where / include / orderBy / nested create / _count /
-// aggregate) are unchanged, so every route handler keeps working as-is.
+//   • Standalone (default): a local PrismaClient backed by SQLite
+//     (prisma/dev.db). No external services needed.
 //
-// The exported value intentionally keeps the `prisma` name and the
-// `prisma.model.op(args)` shape so no call sites had to change.
+//   • Integrated: when MENU_DATA_API_URL is set, every call of the form
+//     `prisma.<model>.<operation>(args)` is forwarded over HTTP to the shared
+//     backend's menu data API, which runs the identical Prisma operation and
+//     returns the result. Because the same Prisma engine executes the query on
+//     the far side, semantics (where / include / orderBy / nested create /
+//     _count / aggregate) are unchanged, so every route handler works either
+//     way.
+//
+// The exported value keeps the `prisma` name and the `prisma.model.op(args)`
+// shape in both modes, so no call sites change.
 
-const BASE = process.env.MENU_DATA_API_URL ?? "http://localhost:3000/api/v1";
-const INTERNAL_KEY = process.env.INTERNAL_API_KEY ?? "";
+import { PrismaClient } from "@prisma/client";
 
+const REMOTE_BASE = process.env.MENU_DATA_API_URL;
+
+/* ----------------------------- Standalone mode ---------------------------- */
+// Reuse a single PrismaClient across hot reloads in development to avoid
+// exhausting database connections.
+function createLocalClient(): PrismaClient {
+  const globalForPrisma = globalThis as unknown as {
+    prisma: PrismaClient | undefined;
+  };
+  const client =
+    globalForPrisma.prisma ??
+    new PrismaClient({
+      log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
+    });
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  return client;
+}
+
+/* ----------------------------- Integrated mode ---------------------------- */
 // Models the app uses (hotel-menu naming). The backend maps hotel/room to its
 // MenuHotel/MenuRoom delegates.
 const MODELS = [
@@ -54,40 +75,47 @@ function revive(value: unknown): unknown {
   return value;
 }
 
-async function call(model: string, op: string, args: unknown): Promise<unknown> {
-  const res = await fetch(`${BASE}/menu/data/${model}/${op}`, {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      ...(INTERNAL_KEY ? { "x-internal-key": INTERNAL_KEY } : {}),
-    },
-    body: JSON.stringify(args ?? {}),
-  });
-  const text = await res.text();
-  const json = text ? JSON.parse(text) : {};
-  if (!res.ok) {
-    const err = new Error(
-      json?.error || `Data API ${model}.${op} failed (${res.status})`
-    ) as Error & { code?: string };
-    if (json?.code) err.code = json.code;
-    throw err;
-  }
-  return revive(json.data);
-}
+function createRemoteClient(base: string): PrismaClient {
+  const internalKey = process.env.INTERNAL_API_KEY ?? "";
 
-function makeModel(model: string) {
-  return new Proxy(
-    {},
-    {
-      get: (_target, op: string) => (args: unknown) => call(model, op, args),
+  async function call(model: string, op: string, args: unknown): Promise<unknown> {
+    const res = await fetch(`${base}/menu/data/${model}/${op}`, {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...(internalKey ? { "x-internal-key": internalKey } : {}),
+      },
+      body: JSON.stringify(args ?? {}),
+    });
+    const text = await res.text();
+    const json = text ? JSON.parse(text) : {};
+    if (!res.ok) {
+      const err = new Error(
+        json?.error || `Data API ${model}.${op} failed (${res.status})`
+      ) as Error & { code?: string };
+      if (json?.code) err.code = json.code;
+      throw err;
     }
-  );
+    return revive(json.data);
+  }
+
+  function makeModel(model: string) {
+    return new Proxy(
+      {},
+      {
+        get: (_target, op: string) => (args: unknown) => call(model, op, args),
+      }
+    );
+  }
+
+  // The shim only implements the subset of models/operations the app uses, so
+  // we present it as a PrismaClient to keep call sites typed.
+  return Object.fromEntries(
+    MODELS.map((m) => [m, makeModel(m)])
+  ) as unknown as PrismaClient;
 }
 
-// Same shape as a PrismaClient for the subset of models/operations the app uses.
-// Typed as `any` because it's a remote shim, not the generated client.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const prisma: any = Object.fromEntries(
-  MODELS.map((m) => [m, makeModel(m)])
-);
+export const prisma: PrismaClient = REMOTE_BASE
+  ? createRemoteClient(REMOTE_BASE)
+  : createLocalClient();
