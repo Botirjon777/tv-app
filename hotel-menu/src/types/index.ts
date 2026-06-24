@@ -66,7 +66,7 @@ export type OrderItemDTO = {
   id: string;
   productId: string;
   name: string;
-  price: number; // unit price, minor units
+  price: number; // unit price, integer UZS (so'm)
   quantity: number;
 };
 
@@ -79,7 +79,7 @@ export type OrderDTO = {
   hotelName: string;
   status: OrderStatus;
   note: string;
-  total: number; // minor units
+  total: number; // integer UZS (so'm)
   items: OrderItemDTO[];
   createdAt: string;
   updatedAt: string;

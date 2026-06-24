@@ -25,7 +25,7 @@ model Product {
   sourceLang  String      @default("en")
   nameI18n    String      @default("{}") // JSON: { en, ru, uz }
   descI18n    String      @default("{}") // JSON: { en, ru, uz }
-  price       Int // integer UZS (so'm), no minor units
+  price       Int // integer UZS (so'm) — whole units, no decimals/minor units
   imageUrl    String      @default("")
   available   Boolean     @default(true)
   sortOrder   Int         @default(0)
@@ -101,7 +101,7 @@ model Order {
   // (SQLite connector has no native enums — validated in app code, see src/lib/orders.ts)
   status    String      @default("PENDING")
   note      String      @default("")
-  total     Int         @default(0) // minor units, snapshot at order time
+  total     Int         @default(0) // integer UZS (so'm), snapshot at order time
   items     OrderItem[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -118,7 +118,7 @@ model OrderItem {
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   name      String // snapshot of product name at order time
-  price     Int // snapshot of unit price (minor units)
+  price     Int // snapshot of unit price — integer UZS (so'm)
   quantity  Int      @default(1)
 
   @@index([orderId])
