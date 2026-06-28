@@ -23,7 +23,7 @@ export async function getWeather(
   if (cached) {
     const age = Date.now() - cached.fetchedAt.getTime();
     if (age < TTL_MS) {
-      return cached.data as WeatherData;
+      return cached.data as unknown as WeatherData;
     }
   }
 
@@ -57,6 +57,6 @@ export async function getWeather(
 
     return data;
   } catch {
-    return cached ? (cached.data as WeatherData) : null;
+    return cached ? (cached.data as unknown as WeatherData) : null;
   }
 }

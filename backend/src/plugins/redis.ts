@@ -12,8 +12,10 @@ declare module 'fastify' {
 async function redisPlugin(server: FastifyInstance) {
   const url = process.env.REDIS_URL || 'redis://localhost:6379';
 
-  const redis    = new Redis(url, { lazyConnect: true });
-  const redisSub = new Redis(url, { lazyConnect: true });
+  // family: 0 enables dual-stack DNS so ioredis can reach Railway's
+  // IPv6-only private network hostnames (*.railway.internal).
+  const redis    = new Redis(url, { lazyConnect: true, family: 0 });
+  const redisSub = new Redis(url, { lazyConnect: true, family: 0 });
 
   await redis.connect();
   await redisSub.connect();

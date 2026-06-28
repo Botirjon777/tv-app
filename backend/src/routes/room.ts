@@ -6,7 +6,7 @@ import { roomChannel } from '../services/pushService';
 /** Resolve room from X-Device-Token header; throws 401/404 as needed */
 async function resolveRoom(server: FastifyInstance, req: FastifyRequest) {
   const token = req.headers['x-device-token'] as string | undefined;
-  if (!token) throw server.httpErrors?.unauthorized?.() ?? Object.assign(new Error('Unauthorized'), { statusCode: 401 });
+  if (!token) throw Object.assign(new Error('Unauthorized'), { statusCode: 401 });
 
   const room = await server.prisma.room.findUnique({
     where: { deviceToken: token },
