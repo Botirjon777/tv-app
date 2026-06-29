@@ -111,15 +111,20 @@ export const Textarea = ({
   <textarea className={cn(FIELD, "py-2", className)} {...props} />
 );
 
-// Native select styled like the other fields (keeps the browser's caret).
+// Native select styled like the other fields, with a custom chevron (the
+// browser's default caret is hidden via appearance-none). `className` sizes the
+// wrapper (e.g. pass `w-56`); the select fills it, so the chevron stays aligned.
 export const Select = ({
   className,
   children,
   ...props
 }: React.SelectHTMLAttributes<HTMLSelectElement>) => (
-  <select className={cn(FIELD, "h-11", className)} {...props}>
-    {children}
-  </select>
+  <div className={cn("relative", className)}>
+    <select className={cn(FIELD, "h-11 appearance-none pr-9")} {...props}>
+      {children}
+    </select>
+    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+  </div>
 );
 
 export function Label({

@@ -51,7 +51,7 @@ export default function MenuPage() {
   if (catLoading || prodLoading) return <CenteredSpinner label="Loading menu…" />;
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <div className="mb-5 flex items-end justify-between">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Menu</h2>

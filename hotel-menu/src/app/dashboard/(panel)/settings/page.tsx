@@ -65,7 +65,7 @@ export default function SettingsPage() {
   if (isLoading) return <CenteredSpinner label="Loading settings…" />;
 
   return (
-    <div className="max-w-xl">
+    <div>
       <h2 className="text-xl font-bold text-slate-900">Settings</h2>
       <p className="mt-1 text-sm text-slate-500">
         Service fee, preorder, social links and Wi-Fi for your hotel.

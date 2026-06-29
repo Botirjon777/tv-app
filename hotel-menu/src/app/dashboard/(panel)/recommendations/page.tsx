@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { X } from "lucide-react";
-import { CenteredSpinner } from "@/components/ui";
+import { CenteredSpinner, Select } from "@/components/ui";
 import {
   useProducts,
   useRecommendations,
@@ -46,7 +46,7 @@ export default function RecommendationsPage() {
   if (recsLoading || prodLoading) return <CenteredSpinner label="Loading…" />;
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <h2 className="text-xl font-bold text-slate-900">Recommendation of the day</h2>
       <p className="mt-1 text-sm text-slate-500">
         Feature a few dishes per weekday — guests see them at the top of the menu.
@@ -69,11 +69,11 @@ export default function RecommendationsPage() {
               >
                 <div className="flex items-center justify-between gap-3">
                   <h3 className="font-semibold text-slate-900">{d.label}</h3>
-                  <select
+                  <Select
                     value=""
                     disabled={busy || available.length === 0}
                     onChange={(e) => add(d.value, e.target.value)}
-                    className="h-9 rounded-lg border border-slate-300 bg-white px-2 text-sm outline-none focus:border-brand-500 disabled:opacity-50"
+                    className="w-56 flex-shrink-0"
                   >
                     <option value="">+ Feature a dish…</option>
                     {available.map((p) => (
@@ -81,7 +81,7 @@ export default function RecommendationsPage() {
                         {p.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
                 {featured.length > 0 && (
                   <div className="mt-2.5 flex flex-wrap gap-2">
