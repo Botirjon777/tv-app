@@ -111,6 +111,7 @@ export async function loadRoomMenu(
   const { hotel, room } = found;
 
   const categories = await prisma.category.findMany({
+    where: { hotelId: hotel.id },
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
       products: {
@@ -134,7 +135,7 @@ export async function loadRoomMenu(
   // Today's "recommendation of the day" (0=Sunday … 6=Saturday, server local).
   const today = new Date().getDay();
   const recs = await prisma.recommendation.findMany({
-    where: { dayOfWeek: today, product: { available: true } },
+    where: { hotelId: hotel.id, dayOfWeek: today, product: { available: true } },
     orderBy: { sortOrder: "asc" },
     include: { product: true },
   });

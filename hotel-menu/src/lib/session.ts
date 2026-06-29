@@ -21,3 +21,9 @@ export async function requireRole(allowed: Role[]): Promise<Role | null> {
   const session = await requireSession(allowed);
   return session ? session.role : null;
 }
+
+// The signed-in manager's hotel id, or null. Used to scope dashboard routes.
+export async function managerHotelId(): Promise<string | null> {
+  const session = await getServerSession();
+  return session?.role === "manager" ? session.hotelId : null;
+}

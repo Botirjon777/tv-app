@@ -1,21 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { productInput } from "@/lib/validation";
-import { handle, ok, unauthorized } from "@/lib/http";
-import { requireRole } from "@/lib/session";
+import { fail, handle, ok, unauthorized } from "@/lib/http";
+import { managerHotelId } from "@/lib/session";
 import { translateFields } from "@/lib/translate";
 import { serializeProduct } from "@/lib/serialize-menu";
 
-// GET /api/products — public. Optional ?categoryId= and ?availableOnly=1
-export async function GET(req: Request) {
+// GET /api/dashboard/menu/products — the manager's hotel products.
+export async function GET() {
   return handle(async () => {
-    const url = new URL(req.url);
-    const categoryId = url.searchParams.get("categoryId") || undefined;
-    const availableOnly = url.searchParams.get("availableOnly") === "1";
+    const hotelId = await managerHotelId();
+    if (!hotelId) return unauthorized();
     const products = await prisma.product.findMany({
-      where: {
-        ...(categoryId ? { categoryId } : {}),
-        ...(availableOnly ? { available: true } : {}),
-      },
+      where: { hotelId },
       orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
       include: { category: { select: { name: true } } },
     });
@@ -23,16 +19,24 @@ export async function GET(req: Request) {
   });
 }
 
-// POST /api/products — admin only. Auto-translates name + description.
+// POST — create a product under one of the manager's categories.
 export async function POST(req: Request) {
   return handle(async () => {
-    if (!(await requireRole(["admin"]))) return unauthorized();
-    const body = await req.json().catch(() => ({}));
-    const data = productInput.parse(body);
+    const hotelId = await managerHotelId();
+    if (!hotelId) return unauthorized();
+    const data = productInput.parse(await req.json().catch(() => ({})));
+
+    // The category must belong to this hotel.
+    const category = await prisma.category.findUnique({
+      where: { id: data.categoryId },
+    });
+    if (!category || category.hotelId !== hotelId) {
+      return fail("Category not found", 404);
+    }
+
     const count = await prisma.product.count({
       where: { categoryId: data.categoryId },
     });
-
     const translated = await translateFields(
       { name: data.name, description: data.description ?? "" },
       data.sourceLang
@@ -40,6 +44,8 @@ export async function POST(req: Request) {
 
     const product = await prisma.product.create({
       data: {
+        hotelId,
+        categoryId: data.categoryId,
         name: data.name,
         description: data.description ?? "",
         sourceLang: data.sourceLang,
@@ -49,7 +55,6 @@ export async function POST(req: Request) {
         imageUrl: data.imageUrl ?? "",
         available: data.available ?? true,
         sortOrder: data.sortOrder ?? count,
-        categoryId: data.categoryId,
       },
       include: { category: { select: { name: true } } },
     });

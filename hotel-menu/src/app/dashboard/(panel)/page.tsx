@@ -77,6 +77,7 @@ export default function DashboardHome() {
           : "Create categories and dishes guests can order.",
       done: hotel.productCount > 0,
       important: true,
+      href: "/dashboard/menu",
       icon: <ChefHat className="h-5 w-5" />,
     },
     {

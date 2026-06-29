@@ -31,8 +31,7 @@ export async function GET() {
 
     const [serviceCount, productCount] = await Promise.all([
       prisma.hotelService.count({ where: { hotelId: hotel.id } }),
-      // Menu is still shared platform-wide; becomes per-hotel in a later step.
-      prisma.product.count(),
+      prisma.product.count({ where: { hotelId: hotel.id } }),
     ]);
 
     return ok({

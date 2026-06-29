@@ -327,42 +327,11 @@ async function main() {
   await prisma.recommendation.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
+  await prisma.hotelService.deleteMany();
   await prisma.room.deleteMany();
   await prisma.hotel.deleteMany();
 
-  // English product name -> id, for wiring up recommendations below.
-  const productIdByName: Record<string, string> = {};
-
-  for (let c = 0; c < MENU.length; c++) {
-    const group = MENU[c];
-    const category = await prisma.category.create({
-      data: {
-        name: group.category.en,
-        sourceLang: "en",
-        nameI18n: JSON.stringify(group.category),
-        sortOrder: c,
-      },
-    });
-    for (let p = 0; p < group.products.length; p++) {
-      const prod = group.products[p];
-      const created = await prisma.product.create({
-        data: {
-          name: prod.name.en,
-          description: prod.desc.en,
-          sourceLang: "en",
-          nameI18n: JSON.stringify(prod.name),
-          descI18n: JSON.stringify(prod.desc),
-          price: prod.price,
-          imageUrl: prod.imageUrl,
-          sortOrder: p,
-          categoryId: category.id,
-        },
-      });
-      productIdByName[prod.name.en] = created.id;
-    }
-  }
-
-  // Recommendation of the day (0=Sunday … 6=Saturday).
+  // Recommendation of the day (0=Sunday … 6=Saturday), by product name.
   const RECS: Record<number, string[]> = {
     1: ["Grilled Ribeye Steak"],
     2: ["Spaghetti Carbonara"],
@@ -372,18 +341,10 @@ async function main() {
     6: ["Eggs Benedict", "Pancake Stack"],
     0: ["Chocolate Lava Cake", "Continental Breakfast"],
   };
-  for (const [dow, names] of Object.entries(RECS)) {
-    for (let i = 0; i < names.length; i++) {
-      const productId = productIdByName[names[i]];
-      if (!productId) continue;
-      await prisma.recommendation.create({
-        data: { dayOfWeek: Number(dow), productId, sortOrder: i },
-      });
-    }
-  }
 
+  // Each hotel gets its own copy of the demo menu (categories/products/recs).
   for (const h of HOTELS) {
-    await prisma.hotel.create({
+    const hotel = await prisma.hotel.create({
       data: {
         name: h.name,
         slug: h.slug,
@@ -403,14 +364,62 @@ async function main() {
         rooms: { create: generateRooms(h.floors, h.roomsPerFloor) },
       },
     });
+
+    const productIdByName: Record<string, string> = {};
+    for (let c = 0; c < MENU.length; c++) {
+      const group = MENU[c];
+      const category = await prisma.category.create({
+        data: {
+          hotelId: hotel.id,
+          name: group.category.en,
+          sourceLang: "en",
+          nameI18n: JSON.stringify(group.category),
+          sortOrder: c,
+        },
+      });
+      for (let p = 0; p < group.products.length; p++) {
+        const prod = group.products[p];
+        const created = await prisma.product.create({
+          data: {
+            hotelId: hotel.id,
+            name: prod.name.en,
+            description: prod.desc.en,
+            sourceLang: "en",
+            nameI18n: JSON.stringify(prod.name),
+            descI18n: JSON.stringify(prod.desc),
+            price: prod.price,
+            imageUrl: prod.imageUrl,
+            sortOrder: p,
+            categoryId: category.id,
+          },
+        });
+        productIdByName[prod.name.en] = created.id;
+      }
+    }
+
+    for (const [dow, names] of Object.entries(RECS)) {
+      for (let i = 0; i < names.length; i++) {
+        const productId = productIdByName[names[i]];
+        if (!productId) continue;
+        await prisma.recommendation.create({
+          data: {
+            hotelId: hotel.id,
+            dayOfWeek: Number(dow),
+            productId,
+            sortOrder: i,
+          },
+        });
+      }
+    }
   }
 
+  const categoryCount = await prisma.category.count();
   const productCount = await prisma.product.count();
   const hotelCount = await prisma.hotel.count();
   const roomCount = await prisma.room.count();
   const recCount = await prisma.recommendation.count();
   console.log(
-    `✅ Seeded ${MENU.length} categories, ${productCount} products, ${hotelCount} hotels, ${roomCount} rooms, ${recCount} recommendations (en/ru/uz).`
+    `✅ Seeded ${hotelCount} hotels, ${roomCount} rooms, ${categoryCount} categories, ${productCount} products, ${recCount} recommendations (en/ru/uz).`
   );
 }
 

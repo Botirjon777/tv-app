@@ -4,22 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
-  CalendarDays,
   LayoutDashboard,
   ListOrdered,
-  Tags,
   UtensilsCrossed,
 } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { cn } from "@/lib/utils";
 
+// Menus are now managed per-hotel in the manager dashboard, so the admin keeps
+// only the cross-hotel views.
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/orders", label: "Orders", icon: ListOrdered },
   { href: "/admin/hotels", label: "Hotels & QR", icon: Building2 },
-  { href: "/admin/products", label: "Products", icon: UtensilsCrossed },
-  { href: "/admin/categories", label: "Categories", icon: Tags },
-  { href: "/admin/recommendations", label: "Recommendations", icon: CalendarDays },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

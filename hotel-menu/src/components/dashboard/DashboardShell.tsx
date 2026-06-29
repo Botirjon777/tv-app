@@ -3,12 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Hotel, LayoutDashboard, Settings } from "lucide-react";
+import {
+  Hotel,
+  LayoutDashboard,
+  Settings,
+  UtensilsCrossed,
+} from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/menu", label: "Menu", icon: UtensilsCrossed },
   { href: "/dashboard/services", label: "Services", icon: Hotel },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
