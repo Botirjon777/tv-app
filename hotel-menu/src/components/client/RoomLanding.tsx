@@ -40,6 +40,42 @@ const tileItem: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
 };
 
+function localeFor(lang: Lang): string {
+  return lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-GB";
+}
+
+// Next 14 days as { YYYY-MM-DD, localized label } for the date dropdown.
+function buildDateOptions(lang: Lang): { value: string; label: string }[] {
+  const out: { value: string; label: string }[] = [];
+  const now = new Date();
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(d.getDate()).padStart(2, "0")}`;
+    out.push({
+      value,
+      label: d.toLocaleDateString(localeFor(lang), {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+      }),
+    });
+  }
+  return out;
+}
+
+// 30-minute slots for the time dropdown.
+const TIME_OPTIONS: string[] = (() => {
+  const out: string[] = [];
+  for (let h = 0; h < 24; h++) {
+    out.push(`${String(h).padStart(2, "0")}:00`);
+    out.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  return out;
+})();
+
 // Hotel data surfaced on the in-room landing.
 export type LandingHotel = {
   slug: string;
@@ -70,6 +106,9 @@ export function RoomLanding({
   const menuHref = `/${hotel.slug}/${room.number}/menu`;
   const [active, setActive] = useState<RequestType | null>(null);
   const [note, setNote] = useState("");
+  const [destination, setDestination] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,6 +162,9 @@ export function RoomLanding({
   const openRequest = (type: RequestType) => {
     setActive(type);
     setNote("");
+    setDestination("");
+    setDate("");
+    setTime("");
     setSent(false);
     setError(null);
   };
@@ -145,6 +187,9 @@ export function RoomLanding({
           roomNumber: room.number,
           type: active,
           note,
+          destination,
+          date,
+          time,
         }),
       });
       if (!res.ok) {
@@ -384,6 +429,60 @@ export function RoomLanding({
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
               {activeSvc?.sub()} · {t(lang, "room")} {room.number}
             </p>
+
+            {active === "TAXI" && (
+              <div>
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  {t(lang, "destination")}
+                </label>
+                <input
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  placeholder={t(lang, "destination")}
+                  className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+                />
+              </div>
+            )}
+
+            {(active === "TAXI" || active === "ALARM") && (
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    {t(lang, "dateLabel")}
+                  </label>
+                  <select
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  >
+                    <option value="">—</option>
+                    {buildDateOptions(lang).map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    {t(lang, "timeLabel")}
+                  </label>
+                  <select
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                  >
+                    <option value="">—</option>
+                    {TIME_OPTIONS.map((tm) => (
+                      <option key={tm} value={tm}>
+                        {tm}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
             <Textarea
               rows={3}
               value={note}

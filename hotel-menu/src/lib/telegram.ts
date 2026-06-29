@@ -58,6 +58,44 @@ export function setupInstructions(): string {
   ].join("\n");
 }
 
+const REQUEST_LABELS: Record<string, string> = {
+  ALARM: "Wake-up call",
+  SERVICE: "Service request",
+  TAXI: "Taxi",
+  RECEPTION: "Reception call",
+  PROBLEM: "Problem report",
+};
+
+// Formats a guest service request (taxi / alarm / …) for the staff group.
+export function formatRequestMessage(req: {
+  type: string;
+  roomNumber: string;
+  destination?: string;
+  scheduledFor?: string | null;
+  note?: string;
+  guestName?: string;
+}): string {
+  const label = REQUEST_LABELS[req.type] ?? req.type;
+  const lines = [
+    `🔔 <b>${label}</b> · Room <b>${escapeHtml(req.roomNumber)}</b>`,
+  ];
+  if (req.destination) lines.push(`📍 ${escapeHtml(req.destination)}`);
+  if (req.scheduledFor) {
+    const when = new Date(req.scheduledFor);
+    if (!Number.isNaN(when.getTime())) {
+      lines.push(
+        `🕒 ${when.toLocaleString("en-GB", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })}`
+      );
+    }
+  }
+  if (req.note) lines.push(`📝 ${escapeHtml(req.note)}`);
+  if (req.guestName) lines.push(`👤 ${escapeHtml(req.guestName)}`);
+  return lines.join("\n");
+}
+
 // Formats an order for the staff group.
 export function formatOrderMessage(order: OrderDTO): string {
   const lines = order.items.map(

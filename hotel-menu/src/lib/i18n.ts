@@ -113,7 +113,10 @@ type UIKey =
   | "backToTop"
   | "subtotal"
   | "serviceFee"
-  | "hotelServices";
+  | "hotelServices"
+  | "destination"
+  | "dateLabel"
+  | "timeLabel";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -183,6 +186,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     subtotal: "Subtotal",
     serviceFee: "Service fee",
     hotelServices: "Hotel services",
+    destination: "Destination",
+    dateLabel: "Date",
+    timeLabel: "Time",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -251,6 +257,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     subtotal: "Подытог",
     serviceFee: "Сервисный сбор",
     hotelServices: "Услуги отеля",
+    destination: "Пункт назначения",
+    dateLabel: "Дата",
+    timeLabel: "Время",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -319,6 +328,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     subtotal: "Oraliq jami",
     serviceFee: "Xizmat haqi",
     hotelServices: "Mehmonxona xizmatlari",
+    destination: "Manzil",
+    dateLabel: "Sana",
+    timeLabel: "Vaqt",
   },
 };
 
