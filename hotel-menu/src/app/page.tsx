@@ -89,14 +89,14 @@ export default async function HomePage() {
                 <p className="mb-2 text-sm font-semibold text-zinc-200">
                   {h.name}{" "}
                   <span className="font-normal text-zinc-500">
-                    /hotel/{h.slug}
+                    /{h.slug}
                   </span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {h.rooms.map((r) => (
                     <Link
                       key={r.id}
-                      href={`/hotel/${h.slug}/room/${r.number}`}
+                      href={`/${h.slug}/${r.number}`}
                       className="rounded-full border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-brand-500 hover:bg-brand-950/40 hover:text-brand-300"
                     >
                       Room {r.number}

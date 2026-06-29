@@ -64,7 +64,6 @@ export function CartSheet({
     <Modal
       open={open}
       onClose={onClose}
-      dark
       title={t(lang, "yourOrder")}
       footer={
         <div className="space-y-2.5 lg:space-y-5">
@@ -102,31 +101,31 @@ export function CartSheet({
             {cart.items.map((item) => (
               <li key={item.productId} className="flex items-center gap-3 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-zinc-100">
+                  <p className="truncate font-medium text-zinc-900 dark:text-zinc-100">
                     {item.name}
                   </p>
                   <PriceTag
                     uzs={item.price}
                     align="left"
-                    className="text-sm font-normal text-zinc-400"
+                    className="text-sm font-normal text-zinc-500 dark:text-zinc-400"
                     subClassName="text-zinc-600"
                   />
                 </div>
-                <div className="flex items-center gap-2.5 rounded-full bg-zinc-800 px-1.5 py-1">
+                <div className="flex items-center gap-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800 px-1.5 py-1">
                   <button
                     onClick={() =>
                       cart.setQuantity(item.productId, item.quantity - 1)
                     }
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-700 text-zinc-100"
+                    className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100"
                     aria-label="−"
                   >
                     {item.quantity === 1 ? (
-                      <Trash2 className="h-4 w-4 text-rose-400" />
+                      <Trash2 className="h-4 w-4 text-rose-600 dark:text-rose-400" />
                     ) : (
                       <Minus className="h-4 w-4" />
                     )}
                   </button>
-                  <span className="w-4 text-center text-sm font-bold text-zinc-100">
+                  <span className="w-4 text-center text-sm font-bold text-zinc-900 dark:text-zinc-100">
                     {item.quantity}
                   </span>
                   <button
@@ -148,7 +147,7 @@ export function CartSheet({
             placeholder={t(lang, "notePlaceholder")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-brand-500"
+            className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-brand-500"
           />
         </div>
       )}

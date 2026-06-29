@@ -73,7 +73,7 @@ export default function HotelDetailPage({
   });
 
   const urlFor = (number: string) =>
-    `${baseUrl()}/hotel/${hotel?.slug}/room/${number}`;
+    `${baseUrl()}/${hotel?.slug}/${number}`;
 
   const downloadAll = async () => {
     if (!hotel || rooms.length === 0) return;
@@ -97,7 +97,7 @@ export default function HotelDetailPage({
       <PageHeader
         title={hotel?.name ?? "Hotel"}
         description={
-          hotel ? `/hotel/${hotel.slug} · ${rooms.length} rooms` : undefined
+          hotel ? `/${hotel.slug} · ${rooms.length} rooms` : undefined
         }
         action={
           <div className="flex gap-2">
@@ -114,6 +114,50 @@ export default function HotelDetailPage({
           </div>
         }
       />
+
+      {hotel && (
+        <div className="mb-5 grid gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:grid-cols-3 lg:p-5">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              Connect code
+            </p>
+            <p className="mt-0.5 font-mono text-2xl font-bold text-slate-900">
+              {hotel.connectCode}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Send in the Telegram group to link · POS login id
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              POS password
+            </p>
+            <p className="mt-0.5 font-mono text-2xl font-bold text-slate-900">
+              {hotel.posPassword}
+            </p>
+            <p className="mt-0.5 text-xs text-slate-400">
+              Used with the code to sign in to the POS
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+              Telegram
+            </p>
+            <span
+              className={`mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold ${
+                hotel.telegramLinked
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-slate-100 text-slate-500"
+              }`}
+            >
+              {hotel.telegramLinked ? "Linked" : "Not linked"}
+            </span>
+            <p className="mt-1 text-xs text-slate-400">
+              Open the bot, add it to your group, send the code
+            </p>
+          </div>
+        </div>
+      )}
 
       {roomsQ.isLoading ? (
         <CenteredSpinner />

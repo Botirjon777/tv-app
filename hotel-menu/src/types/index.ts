@@ -42,6 +42,9 @@ export type HotelDTO = {
   floors: number;
   roomsPerFloor: number;
   active: boolean;
+  connectCode: string;
+  posPassword: string;
+  telegramLinked: boolean;
   logoUrl: string;
   tripadvisorUrl: string;
   googleMapsUrl: string;

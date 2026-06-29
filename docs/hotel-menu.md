@@ -21,7 +21,7 @@ The system has **three surfaces**, each tuned for a different device and user:
 
 | Surface | Route | Audience | Device |
 | --- | --- | --- | --- |
-| **Guest menu** | `/hotel/[slug]/room/[number]` | Hotel guests (via room QR) | Mobile (dark, responsive) |
+| **Guest menu** | `/[slug]/[number]` | Hotel guests (via room QR) | Mobile (dark, responsive) |
 | **Kitchen POS** | `/pos` | Chefs / kitchen staff | Tablet (live order board) |
 | **Admin panel** | `/admin` | Hotel managers | Desktop |
 
@@ -76,7 +76,7 @@ Runs on **port 3001** (so it does not clash with the `admin/` app on 3000).
 
 ```
 Guest (mobile)                 Kitchen (tablet)            Manager (desktop)
- /hotel/grand-plaza/room/101      /pos                        /admin
+ /safir/101                       /pos                        /admin
         |  POST /api/orders         ^  SSE: order.created        |  CRUD
         v   {hotelSlug, room}       |   (filtered by hotel)      v
    ┌──────────────────────────  Next.js route handlers  ──────────────────────┐
@@ -129,7 +129,7 @@ hotel-menu/
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx                       # landing (links to all surfaces)
-│   │   ├── hotel/[slug]/room/[number]/    # guest menu (server → MenuClient)
+│   │   ├── [slug]/[number]/              # guest landing + menu (server → client)
 │   │   ├── pos/                           # kitchen POS (+ /pos/login)
 │   │   ├── admin/                         # dashboard, orders, hotels, products, categories
 │   │   └── api/                           # route handlers (see API reference)

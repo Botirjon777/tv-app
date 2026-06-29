@@ -3,7 +3,6 @@ import { orderStatusInput } from "@/lib/validation";
 import { handle, notFound, ok, unauthorized } from "@/lib/http";
 import { requireRole } from "@/lib/session";
 import { serializeOrder, orderInclude } from "@/lib/serialize";
-import { publishOrderEvent } from "@/lib/events";
 
 type Params = { params: { id: string } };
 
@@ -38,7 +37,6 @@ export async function PATCH(req: Request, { params }: Params) {
     });
 
     const dto = serializeOrder(order);
-    publishOrderEvent({ type: "order.updated", order: dto });
     return ok(dto);
   });
 }

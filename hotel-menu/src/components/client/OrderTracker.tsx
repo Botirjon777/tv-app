@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Check, ChefHat, Clock, PartyPopper, X } from "lucide-react";
 import { Button, Spinner } from "@/components/ui";
 import { PriceTag } from "./PriceTag";
@@ -58,12 +59,12 @@ export function OrderTracker({
   const cancelled = order?.status === "CANCELLED";
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-950 text-zinc-100 animate-fade-in">
-      <header className="flex items-center justify-between border-b border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
+    <div className="fixed inset-0 z-50 flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 animate-fade-in">
+      <header className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
         <h2 className="font-serif text-lg font-bold">{t(lang, "orderStatus")}</h2>
         <button
           onClick={onClose}
-          className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-800"
+          className="rounded-full p-1.5 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -81,12 +82,51 @@ export function OrderTracker({
           </p>
         ) : (
           <>
-            <div className="mb-8 rounded-2xl border border-brand-900/50 bg-brand-950/40 p-2.5 text-center lg:p-5">
-              <p className="text-sm text-brand-200">{t(lang, "thanks")}</p>
-              <p className="mt-1 text-xs text-brand-400/70">
+            <div className="mb-8 flex flex-col items-center text-center">
+              <div className="relative mb-3 flex h-16 w-16 items-center justify-center">
+                <motion.span
+                  className="absolute inset-0 rounded-full bg-emerald-500/30"
+                  initial={{ scale: 0.6, opacity: 0.7 }}
+                  animate={{ scale: 1.9, opacity: 0 }}
+                  transition={{ duration: 1.1, ease: "easeOut" }}
+                />
+                <motion.div
+                  className="relative flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
+                  initial={{ scale: 0, rotate: -25 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                >
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      delay: 0.18,
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 14,
+                    }}
+                  >
+                    <Check className="h-8 w-8" strokeWidth={3} />
+                  </motion.span>
+                </motion.div>
+              </div>
+              <motion.p
+                className="text-base font-bold text-zinc-900 dark:text-zinc-50"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.25, duration: 0.35, ease: "easeOut" }}
+              >
+                {t(lang, "thanks")}
+              </motion.p>
+              <motion.p
+                className="mt-1 text-xs text-zinc-500 dark:text-zinc-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.38, duration: 0.4 }}
+              >
                 {t(lang, "orderNo")} #{order.id.slice(-6).toUpperCase()} ·{" "}
                 {t(lang, "room")} {order.roomNumber}
-              </p>
+              </motion.p>
             </div>
 
             {cancelled ? (
@@ -95,7 +135,12 @@ export function OrderTracker({
                 <p className="mt-1 text-sm">{t(lang, "cancelledSub")}</p>
               </div>
             ) : (
-              <ol className="relative space-y-1">
+              <motion.ol
+                className="relative space-y-1"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
+              >
                 {STEPS.map((step, idx) => {
                   const done = idx < currentIndex;
                   const active = idx === currentIndex;
@@ -107,7 +152,7 @@ export function OrderTracker({
                             "flex h-9 w-9 items-center justify-center rounded-full transition",
                             done && "bg-emerald-500 text-white",
                             active && "bg-brand-600 text-white animate-pulse-ring",
-                            !done && !active && "bg-zinc-800 text-zinc-500"
+                            !done && !active && "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
                           )}
                         >
                           {done ? <Check className="h-4 w-4" /> : step.icon}
@@ -118,7 +163,7 @@ export function OrderTracker({
                               "my-1 h-8 w-0.5",
                               idx < currentIndex
                                 ? "bg-emerald-500"
-                                : "bg-zinc-800"
+                                : "bg-zinc-100 dark:bg-zinc-800"
                             )}
                           />
                         )}
@@ -127,7 +172,7 @@ export function OrderTracker({
                         <p
                           className={cn(
                             "font-semibold",
-                            active ? "text-zinc-50" : "text-zinc-500"
+                            active ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-500"
                           )}
                         >
                           {t(lang, step.key)}
@@ -136,46 +181,51 @@ export function OrderTracker({
                     </li>
                   );
                 })}
-              </ol>
+              </motion.ol>
             )}
 
-            <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900 p-2.5 lg:p-5">
-              <h3 className="mb-2 text-sm font-bold text-zinc-200">
+            <motion.div
+              className="mt-8 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-2.5 lg:p-5"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.4, ease: "easeOut" }}
+            >
+              <h3 className="mb-2 text-sm font-bold text-zinc-700 dark:text-zinc-200">
                 {t(lang, "orderSummary")}
               </h3>
               <ul className="space-y-1.5 text-sm">
                 {order.items.map((it) => (
                   <li
                     key={it.id}
-                    className="flex justify-between gap-3 text-zinc-400"
+                    className="flex justify-between gap-3 text-zinc-500 dark:text-zinc-400"
                   >
                     <span>
                       {it.quantity}× {it.name}
                     </span>
                     <PriceTag
                       uzs={it.price * it.quantity}
-                      className="text-sm font-normal text-zinc-300"
+                      className="text-sm font-normal text-zinc-600 dark:text-zinc-300"
                       subClassName="text-zinc-600"
                     />
                   </li>
                 ))}
               </ul>
-              <div className="mt-3 flex items-center justify-between border-t border-zinc-800 pt-3 font-bold">
+              <div className="mt-3 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-3 font-bold">
                 <span>{t(lang, "total")}</span>
                 <PriceTag uzs={order.total} subClassName="text-zinc-500" />
               </div>
               {order.note && (
-                <p className="mt-3 rounded-lg bg-zinc-800 px-3 py-2 text-xs text-zinc-400">
+                <p className="mt-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
                   {t(lang, "note")}: {order.note}
                 </p>
               )}
-            </div>
+            </motion.div>
           </>
         )}
       </div>
 
-      <div className="safe-bottom border-t border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
-        <Button variant="outline" className="w-full border-zinc-700 bg-transparent text-zinc-200 hover:bg-zinc-800" onClick={onClose}>
+      <div className="safe-bottom border-t border-zinc-200 dark:border-zinc-800 px-2.5 py-2.5 lg:px-5 lg:py-5">
+        <Button variant="outline" className="w-full border-zinc-300 dark:border-zinc-700 bg-transparent text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800" onClick={onClose}>
           {t(lang, "backToMenu")}
         </Button>
       </div>

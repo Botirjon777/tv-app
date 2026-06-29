@@ -72,7 +72,7 @@ export default function HotelsPage() {
         hotelName: hotel.name,
         rooms,
         urlFor: (number) =>
-          `${baseUrl()}/hotel/${hotel.slug}/room/${number}`,
+          `${baseUrl()}/${hotel.slug}/${number}`,
       });
     } catch (e) {
       alert(e instanceof Error ? e.message : "Failed to build PDF");
@@ -117,7 +117,20 @@ export default function HotelsPage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-slate-900">{h.name}</h2>
-                    <p className="text-xs text-slate-400">/hotel/{h.slug}</p>
+                    <p className="text-xs text-slate-400">
+                      /{h.slug} · code{" "}
+                      <span className="font-mono font-semibold text-slate-600">
+                        {h.connectCode}
+                      </span>{" "}
+                      ·{" "}
+                      <span
+                        className={
+                          h.telegramLinked ? "text-emerald-600" : "text-slate-400"
+                        }
+                      >
+                        {h.telegramLinked ? "Telegram linked" : "Telegram off"}
+                      </span>
+                    </p>
                   </div>
                 </div>
                 <button
@@ -300,24 +313,24 @@ function HotelForm({
             autoFocus
             value={name}
             onChange={(e) => onNameChange(e.target.value)}
-            placeholder="Grand Plaza Hotel"
+            placeholder="Safir Hotel"
           />
         </div>
         <div>
           <Label>URL slug</Label>
           <div className="flex items-center gap-1.5">
-            <span className="text-sm text-slate-400">/hotel/</span>
+            <span className="text-sm text-slate-400">/</span>
             <Input
               value={slug}
               onChange={(e) => {
                 setSlugTouched(true);
                 setSlug(slugify(e.target.value));
               }}
-              placeholder="grand-plaza"
+              placeholder="safir"
             />
           </div>
           <p className="mt-1 text-xs text-slate-400">
-            Guests scan QR codes that point to /hotel/{slug || "…"}/room/101
+            Guests scan QR codes that point to /{slug || "…"}/101
           </p>
         </div>
 

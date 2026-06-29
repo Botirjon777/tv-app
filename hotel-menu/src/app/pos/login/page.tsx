@@ -9,9 +9,10 @@ export default function PosLoginPage() {
       <LoginForm
         role="pos"
         title="Oshxona POS"
-        subtitle="Buyurtmalarni ko‘rish uchun tizimga kiring."
+        subtitle="Mehmonxona kodi va parol bilan kiring."
         fallback="/pos"
         accent="bg-brand-600"
+        codeLabel="Mehmonxona kodi"
         passwordLabel="Parol"
         submitLabel="Kirish"
       />

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Globe, Webhook, Key, Copy, Check } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002';
 const WEBHOOK_URL = `${API_URL}/api/v1/webhooks/exely`;
 
 export default function SettingsPage() {

@@ -53,7 +53,7 @@ async function bootstrap() {
 
   server.get('/health', async () => ({ status: 'ok', ts: new Date().toISOString() }));
 
-  const port = parseInt(process.env.PORT || '3000', 10);
+  const port = parseInt(process.env.PORT || '3002', 10);
   const host = process.env.HOST || '0.0.0.0';
   await server.listen({ port, host });
 }

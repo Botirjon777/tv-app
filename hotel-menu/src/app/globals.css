@@ -16,6 +16,12 @@ body {
   @apply bg-slate-50 text-slate-900 antialiased;
 }
 
+/* Guest room pages toggle `.dark` on <html>; keep the page backdrop in sync
+   so there's no light flash behind the themed views. */
+html.dark body {
+  @apply bg-zinc-950 text-zinc-100;
+}
+
 /* Hide scrollbars on horizontal category rails while keeping scroll. */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

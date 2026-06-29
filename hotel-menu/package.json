@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3001",
+    "start": "next start -p 3000",
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -13,8 +13,8 @@
     "db:push": "prisma db push",
     "db:seed": "ts-node --project prisma/tsconfig.seed.json prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma db push --force-reset && npm run db:seed",
-    "setup": "prisma generate && prisma db push && npm run db:seed"
+    "db:reset": "prisma db push --force-reset && prisma db seed",
+    "setup": "prisma generate && prisma db push && prisma db seed"
   },
   "prisma": {
     "seed": "ts-node --project prisma/tsconfig.seed.json prisma/seed.ts"
@@ -24,6 +24,7 @@
     "@prisma/client": "^5.16.0",
     "@tanstack/react-query": "^5.51.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.41.0",
     "jspdf": "^2.5.1",
     "lucide-react": "^0.408.0",
     "next": "14.2.5",

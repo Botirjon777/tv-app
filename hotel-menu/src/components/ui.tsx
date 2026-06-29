@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Loader2, X } from "lucide-react";
-import { useEffect } from "react";
+import { Check, ChevronDown, Loader2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 /* ---------------------------------- Button --------------------------------- */
 
@@ -133,6 +133,108 @@ export function Label({
   );
 }
 
+/* --------------------------------- Dropdown -------------------------------- */
+
+export type DropdownOption<T extends string> = {
+  value: T;
+  label: string; // shown in the open list
+  triggerLabel?: string; // shown on the closed trigger (defaults to label)
+};
+
+// Reusable popover select. Auto-themes via the `dark` class strategy. Closes on
+// outside-click and Escape. Generic over the option value type.
+export function Dropdown<T extends string>({
+  value,
+  options,
+  onChange,
+  align = "start",
+  label,
+  className,
+  buttonClassName,
+}: {
+  value: T;
+  options: DropdownOption<T>[];
+  onChange: (value: T) => void;
+  align?: "start" | "end";
+  label?: string;
+  className?: string;
+  buttonClassName?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const current = options.find((o) => o.value === value);
+
+  return (
+    <div ref={ref} className={cn("relative", className)}>
+      <button
+        type="button"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-white px-2.5 py-1 text-xs font-bold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800",
+          buttonClassName
+        )}
+      >
+        {current?.triggerLabel ?? current?.label ?? value}
+        <ChevronDown
+          className={cn("h-3.5 w-3.5 transition", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          className={cn(
+            "absolute z-50 mt-1 min-w-[9rem] overflow-hidden rounded-xl border border-zinc-200 bg-white py-1 shadow-xl dark:border-zinc-800 dark:bg-zinc-900",
+            align === "end" ? "right-0" : "left-0"
+          )}
+        >
+          {options.map((o) => (
+            <li key={o.value}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={o.value === value}
+                onClick={() => {
+                  onChange(o.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm transition",
+                  o.value === value
+                    ? "bg-zinc-100 font-semibold text-zinc-900 dark:bg-zinc-800 dark:text-white"
+                    : "text-zinc-600 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/60"
+                )}
+              >
+                {o.label}
+                {o.value === value && (
+                  <Check className="h-4 w-4 text-brand-500" />
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /* ---------------------------------- Modal ---------------------------------- */
 
 export function Modal({
@@ -141,14 +243,12 @@ export function Modal({
   title,
   children,
   footer,
-  dark = false,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
   footer?: React.ReactNode;
-  dark?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -169,27 +269,12 @@ export function Modal({
         className="absolute inset-0 bg-black/50 animate-fade-in"
         onClick={onClose}
       />
-      <div
-        className={cn(
-          "relative z-10 w-full max-w-lg animate-slide-up rounded-t-3xl shadow-2xl sm:rounded-3xl",
-          dark ? "bg-zinc-900 text-zinc-100" : "bg-white"
-        )}
-      >
-        <div
-          className={cn(
-            "flex items-center justify-between border-b px-2.5 py-2.5 lg:px-5 lg:py-5",
-            dark ? "border-zinc-800" : "border-slate-100"
-          )}
-        >
+      <div className="relative z-10 w-full max-w-lg animate-slide-up rounded-t-3xl bg-white text-slate-900 shadow-2xl dark:bg-zinc-900 dark:text-zinc-100 sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-2.5 py-2.5 dark:border-zinc-800 lg:px-5 lg:py-5">
           <h2 className="text-lg font-bold">{title}</h2>
           <button
             onClick={onClose}
-            className={cn(
-              "rounded-full p-1.5",
-              dark
-                ? "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
-                : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-            )}
+            className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -197,12 +282,7 @@ export function Modal({
         </div>
         <div className="max-h-[70vh] overflow-y-auto px-2.5 py-2.5 lg:px-5 lg:py-5">{children}</div>
         {footer && (
-          <div
-            className={cn(
-              "border-t px-2.5 py-2.5 lg:px-5 lg:py-5",
-              dark ? "border-zinc-800" : "border-slate-100"
-            )}
-          >
+          <div className="border-t border-slate-100 px-2.5 py-2.5 dark:border-zinc-800 lg:px-5 lg:py-5">
             {footer}
           </div>
         )}

@@ -18,15 +18,17 @@ function generateRooms(floors: number, roomsPerFloor: number) {
 
 const HOTELS = [
   {
-    name: "Grand Plaza Hotel",
-    slug: "grand-plaza",
+    name: "Safir Hotel",
+    slug: "safir",
+    connectCode: "100001",
+    posPassword: "safir123",
     floors: 3,
     roomsPerFloor: 6,
     logoUrl: "",
     tripadvisorUrl: "https://www.tripadvisor.com/",
     googleMapsUrl: "https://maps.google.com/",
     yandexMapsUrl: "https://yandex.com/maps/",
-    wifiName: "GrandPlaza_Guest",
+    wifiName: "Safir_Guest",
     wifiPassword: "welcome2024",
     instagramUrl: "https://instagram.com/",
     telegramUrl: "https://t.me/",
@@ -34,6 +36,8 @@ const HOTELS = [
   {
     name: "Seaside Resort",
     slug: "seaside-resort",
+    connectCode: "100002",
+    posPassword: "seaside123",
     floors: 2,
     roomsPerFloor: 5,
     logoUrl: "",
@@ -381,6 +385,8 @@ async function main() {
       data: {
         name: h.name,
         slug: h.slug,
+        connectCode: h.connectCode,
+        posPassword: h.posPassword,
         floors: h.floors,
         roomsPerFloor: h.roomsPerFloor,
         logoUrl: h.logoUrl,

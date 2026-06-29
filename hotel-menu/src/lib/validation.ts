@@ -57,6 +57,7 @@ export const hotelUpdateInput = z.object({
     .max(60)
     .optional(),
   active: z.boolean().optional(),
+  posPassword: z.string().trim().min(1, "Password is required").max(60).optional(),
   ...hotelBranding,
 });
 
@@ -103,8 +104,9 @@ export const loginInput = z
   .object({
     role: z.enum(["admin", "pos"]).optional(),
     email: z.string().email().optional(),
+    connectCode: z.string().trim().optional(),
     password: z.string().min(1),
   })
-  .refine((v) => Boolean(v.role) || Boolean(v.email), {
-    message: "role or email is required",
+  .refine((v) => Boolean(v.role) || Boolean(v.email) || Boolean(v.connectCode), {
+    message: "role, email or connectCode is required",
   });

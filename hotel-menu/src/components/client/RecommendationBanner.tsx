@@ -75,7 +75,7 @@ export function RecommendationBanner({
                   priority
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-zinc-800 text-zinc-600">
+                <div className="flex h-full w-full items-center justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-600">
                   <UtensilsCrossed className="h-10 w-10" />
                 </div>
               )}
@@ -120,7 +120,7 @@ export function RecommendationBanner({
               key={it.id}
               className={cn(
                 "h-1.5 rounded-full transition-all",
-                i === active ? "w-5 bg-brand-500" : "w-1.5 bg-zinc-700"
+                i === active ? "w-5 bg-brand-500" : "w-1.5 bg-zinc-200 dark:bg-zinc-700"
               )}
             />
           ))}
