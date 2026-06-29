@@ -54,9 +54,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-        {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col border-r border-slate-200 bg-white p-4 sm:flex">
+    <div className="min-h-screen bg-slate-50">
+        {/* Desktop sidebar — fixed so it stays put on long pages */}
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col overflow-y-auto border-r border-slate-200 bg-white p-4 sm:flex">
           <div className="mb-6 px-2">
             <p className="text-xs uppercase tracking-wide text-slate-400">Hotel</p>
             <p className="truncate font-bold text-slate-900">
@@ -73,7 +73,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 sm:pl-60">
           {/* Mobile header + nav */}
           <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 sm:hidden">
             <p className="truncate font-bold text-slate-900">
