@@ -54,10 +54,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto flex max-w-5xl">
+    <div className="flex min-h-screen bg-slate-50">
         {/* Desktop sidebar */}
-        <aside className="sticky top-0 hidden h-screen w-56 flex-shrink-0 flex-col border-r border-slate-200 bg-white p-4 sm:flex">
+        <aside className="sticky top-0 hidden h-screen w-60 flex-shrink-0 flex-col border-r border-slate-200 bg-white p-4 sm:flex">
           <div className="mb-6 px-2">
             <p className="text-xs uppercase tracking-wide text-slate-400">Hotel</p>
             <p className="truncate font-bold text-slate-900">
@@ -90,9 +89,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             {NAV.map((n) => navLink(n, true))}
           </nav>
 
-          <div className="p-4 lg:p-6">{children}</div>
+          <div className="mx-auto max-w-4xl p-4 lg:p-6">{children}</div>
         </main>
-      </div>
     </div>
   );
 }
