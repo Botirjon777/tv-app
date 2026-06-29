@@ -10,8 +10,10 @@ import {
   Input,
   Label,
   Modal,
+  Select,
 } from "@/components/ui";
 import { LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
+import { formatPrice, parsePrice } from "@/lib/utils";
 import type { ServiceDTO } from "@/types";
 
 export default function ServicesPage() {
@@ -71,10 +73,23 @@ export default function ServicesPage() {
               key={s.id}
               className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
             >
+              {s.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={s.imageUrl}
+                  alt={s.name}
+                  className="h-12 w-12 flex-shrink-0 rounded-xl object-cover"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-slate-900">{s.name}</p>
                 {s.description && (
                   <p className="mt-0.5 text-sm text-slate-500">{s.description}</p>
+                )}
+                {s.price > 0 && (
+                  <p className="mt-0.5 text-sm font-medium text-slate-700">
+                    {formatPrice(s.price)}
+                  </p>
                 )}
               </div>
               <button
@@ -136,6 +151,8 @@ function ServiceForm({
   const isEdit = Boolean(service);
   const [name, setName] = useState(service?.name ?? "");
   const [description, setDescription] = useState(service?.description ?? "");
+  const [price, setPrice] = useState(String(service?.price || ""));
+  const [imageUrl, setImageUrl] = useState(service?.imageUrl ?? "");
   const [sourceLang, setSourceLang] = useState<Lang>(service?.sourceLang ?? "en");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,7 +162,13 @@ function ServiceForm({
     setSaving(true);
     setError(null);
     try {
-      const body = { name, description, sourceLang };
+      const body = {
+        name,
+        description,
+        price: parsePrice(price),
+        imageUrl,
+        sourceLang,
+      };
       if (isEdit) await api.patch(`/api/dashboard/services/${service!.id}`, body);
       else await api.post("/api/dashboard/services", body);
       onSaved();
@@ -191,18 +214,35 @@ function ServiceForm({
           />
         </div>
         <div>
+          <Label>Price (UZS, optional)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="Leave empty for no price"
+          />
+        </div>
+        <div>
+          <Label>Image URL (optional)</Label>
+          <Input
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://…"
+          />
+        </div>
+        <div>
           <Label>Language you typed in</Label>
-          <select
+          <Select
             value={sourceLang}
             onChange={(e) => setSourceLang(e.target.value as Lang)}
-            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none focus:border-brand-500"
           >
             {LANGS.map((l) => (
               <option key={l} value={l}>
                 {LANG_LABEL[l]}
               </option>
             ))}
-          </select>
+          </Select>
           <p className="mt-1 text-xs text-slate-400">
             We translate it to the other languages automatically.
           </p>

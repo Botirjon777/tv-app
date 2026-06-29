@@ -10,13 +10,11 @@ import {
   Input,
   Label,
   Modal,
+  Select,
 } from "@/components/ui";
 import { formatPrice, parsePrice } from "@/lib/utils";
 import { LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
 import type { CategoryDTO, ProductDTO } from "@/types";
-
-const LANG_SELECT =
-  "h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none focus:border-brand-500";
 
 export default function MenuPage() {
   const [categories, setCategories] = useState<CategoryDTO[]>([]);
@@ -253,17 +251,16 @@ function CategoryForm({
         </div>
         <div>
           <Label>Language you typed in</Label>
-          <select
+          <Select
             value={sourceLang}
             onChange={(e) => setSourceLang(e.target.value as Lang)}
-            className={LANG_SELECT}
           >
             {LANGS.map((l) => (
               <option key={l} value={l}>
                 {LANG_LABEL[l]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         {error && (
           <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">
@@ -369,17 +366,13 @@ function ProductForm({
           </div>
           <div>
             <Label>Category</Label>
-            <select
-              value={catId}
-              onChange={(e) => setCatId(e.target.value)}
-              className={LANG_SELECT}
-            >
+            <Select value={catId} onChange={(e) => setCatId(e.target.value)}>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
         <div>
@@ -392,17 +385,16 @@ function ProductForm({
         </div>
         <div>
           <Label>Language you typed in</Label>
-          <select
+          <Select
             value={sourceLang}
             onChange={(e) => setSourceLang(e.target.value as Lang)}
-            className={LANG_SELECT}
           >
             {LANGS.map((l) => (
               <option key={l} value={l}>
                 {LANG_LABEL[l]}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
         {error && (
           <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">

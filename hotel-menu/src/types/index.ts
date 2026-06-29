@@ -36,6 +36,8 @@ export type ServiceDTO = {
   description: string;
   descI18n: I18nText;
   icon: string;
+  imageUrl: string;
+  price: number; // integer UZS; 0 = no price
   sortOrder: number;
   active: boolean;
 };

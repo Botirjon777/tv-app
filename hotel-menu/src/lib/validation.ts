@@ -113,6 +113,8 @@ export const serviceInput = z.object({
   description: z.string().max(500).optional().default(""),
   sourceLang: z.enum(LANGS).optional().default("en"),
   icon: z.string().trim().max(40).optional().default(""),
+  imageUrl: z.string().trim().max(1000).optional().default(""),
+  price: z.number().int().min(0).optional().default(0),
   sortOrder: z.number().int().optional(),
   active: z.boolean().optional(),
 });

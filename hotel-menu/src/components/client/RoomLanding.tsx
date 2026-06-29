@@ -20,7 +20,7 @@ import {
   Wifi,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { resolveText, t, type Lang } from "@/lib/i18n";
 import { buildDateOptions, TIME_OPTIONS } from "@/lib/datetime";
 import type { ServiceDTO } from "@/types";
@@ -298,10 +298,19 @@ export function RoomLanding({
                     key={s.id}
                     className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-white p-3.5 dark:border-zinc-800 dark:bg-zinc-900"
                   >
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-300">
-                      <Hotel className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0">
+                    {s.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={s.imageUrl}
+                        alt={resolveText(s.nameI18n, lang, s.name)}
+                        className="h-12 w-12 flex-shrink-0 rounded-xl object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-300">
+                        <Hotel className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
                       <p className="font-semibold text-zinc-900 dark:text-zinc-50">
                         {resolveText(s.nameI18n, lang, s.name)}
                       </p>
@@ -311,6 +320,11 @@ export function RoomLanding({
                         </p>
                       )}
                     </div>
+                    {s.price > 0 && (
+                      <span className="flex-shrink-0 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                        {formatPrice(s.price)}
+                      </span>
+                    )}
                   </div>
                 );
               })}

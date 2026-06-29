@@ -47,6 +47,8 @@ export async function POST(req: Request) {
         nameI18n: JSON.stringify(translated.name),
         descI18n: JSON.stringify(translated.description),
         icon: data.icon ?? "",
+        imageUrl: data.imageUrl ?? "",
+        price: data.price ?? 0,
         sortOrder: data.sortOrder ?? count,
         active: data.active ?? true,
       },

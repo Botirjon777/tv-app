@@ -194,6 +194,8 @@ model HotelService {
   description String   @default("")
   descI18n    String   @default("{}")
   icon        String   @default("") // optional icon key
+  imageUrl    String   @default("")
+  price       Int      @default(0) // integer UZS; 0 = no price shown
   sortOrder   Int      @default(0)
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
 import { handle, ok, unauthorized } from "@/lib/http";
 import { hotelSettingsInput } from "@/lib/validation";
+import { ACTIVE_STATUSES } from "@/lib/orders";
 
 // GET /api/dashboard/hotel — the signed-in manager's hotel + setup status.
 export async function GET() {
@@ -29,10 +30,16 @@ export async function GET() {
     });
     if (!hotel) return unauthorized();
 
-    const [serviceCount, productCount] = await Promise.all([
-      prisma.hotelService.count({ where: { hotelId: hotel.id } }),
-      prisma.product.count({ where: { hotelId: hotel.id } }),
-    ]);
+    const [serviceCount, productCount, roomCount, orderCount, activeOrderCount] =
+      await Promise.all([
+        prisma.hotelService.count({ where: { hotelId: hotel.id } }),
+        prisma.product.count({ where: { hotelId: hotel.id } }),
+        prisma.room.count({ where: { hotelId: hotel.id } }),
+        prisma.order.count({ where: { room: { hotelId: hotel.id } } }),
+        prisma.order.count({
+          where: { room: { hotelId: hotel.id }, status: { in: ACTIVE_STATUSES } },
+        }),
+      ]);
 
     return ok({
       id: hotel.id,
@@ -50,6 +57,9 @@ export async function GET() {
       wifiPassword: hotel.wifiPassword,
       serviceCount,
       productCount,
+      roomCount,
+      orderCount,
+      activeOrderCount,
     });
   });
 }

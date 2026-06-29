@@ -26,6 +26,9 @@ type DashboardHotel = {
   telegramUrl: string;
   serviceCount: number;
   productCount: number;
+  roomCount: number;
+  orderCount: number;
+  activeOrderCount: number;
 };
 
 type ChecklistItem = {
@@ -119,8 +122,29 @@ export default function DashboardHome() {
 
   const doneCount = items.filter((i) => i.done).length;
 
+  const stats = [
+    { label: "Active orders", value: hotel.activeOrderCount },
+    { label: "Total orders", value: hotel.orderCount },
+    { label: "Rooms", value: hotel.roomCount },
+    { label: "Menu items", value: hotel.productCount },
+    { label: "Services", value: hotel.serviceCount },
+  ];
+
   return (
     <div>
+      <h2 className="mb-3 text-xl font-bold text-slate-900">Overview</h2>
+      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+        {stats.map((s) => (
+          <div
+            key={s.label}
+            className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+          >
+            <p className="text-2xl font-bold text-slate-900">{s.value}</p>
+            <p className="mt-0.5 text-xs text-slate-500">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
       <div className="mb-5 flex items-end justify-between">
         <div>
           <h2 className="text-xl font-bold text-slate-900">Set up your hotel</h2>

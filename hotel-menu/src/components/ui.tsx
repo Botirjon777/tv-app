@@ -89,32 +89,37 @@ export function CenteredSpinner({ label }: { label?: string }) {
   );
 }
 
-/* ---------------------------------- Input ---------------------------------- */
+/* ----------------------------- Form fields --------------------------------- */
+
+// Shared field styling. Light by default (admin/manager); the `dark:` variants
+// kick in on the client guest pages (Tailwind `dark` class on <html>), so the
+// same components work across all three surfaces.
+const FIELD =
+  "w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-brand-900";
 
 export const Input = ({
   className,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input
-    className={cn(
-      "h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200",
-      className
-    )}
-    {...props}
-  />
+  <input className={cn(FIELD, "h-11", className)} {...props} />
 );
 
 export const Textarea = ({
   className,
   ...props
 }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
-  <textarea
-    className={cn(
-      "w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-200",
-      className
-    )}
-    {...props}
-  />
+  <textarea className={cn(FIELD, "py-2", className)} {...props} />
+);
+
+// Native select styled like the other fields (keeps the browser's caret).
+export const Select = ({
+  className,
+  children,
+  ...props
+}: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+  <select className={cn(FIELD, "h-11", className)} {...props}>
+    {children}
+  </select>
 );
 
 export function Label({
@@ -126,9 +131,57 @@ export function Label({
 }) {
   return (
     <label
-      className={cn("mb-1.5 block text-sm font-medium text-slate-700", className)}
+      className={cn(
+        "mb-1.5 block text-sm font-medium text-slate-700 dark:text-zinc-300",
+        className
+      )}
     >
       {children}
+    </label>
+  );
+}
+
+// Checkbox / radio with an optional label, sharing the brand accent color.
+type ToggleProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  label?: React.ReactNode;
+};
+
+export function Checkbox({ label, className, ...props }: ToggleProps) {
+  const input = (
+    <input
+      type="checkbox"
+      className={cn(
+        "h-4 w-4 flex-shrink-0 accent-brand-600 disabled:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  );
+  if (!label) return input;
+  return (
+    <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-zinc-200">
+      {input}
+      {label}
+    </label>
+  );
+}
+
+export function Radio({ label, className, ...props }: ToggleProps) {
+  const input = (
+    <input
+      type="radio"
+      className={cn(
+        "h-4 w-4 flex-shrink-0 accent-brand-600 disabled:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  );
+  if (!label) return input;
+  return (
+    <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-zinc-200">
+      {input}
+      {label}
     </label>
   );
 }

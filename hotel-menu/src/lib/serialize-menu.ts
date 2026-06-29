@@ -14,6 +14,8 @@ type ServiceRow = {
   description: string;
   descI18n: string;
   icon: string;
+  imageUrl: string;
+  price: number;
   sortOrder: number;
   active: boolean;
 };
@@ -27,6 +29,8 @@ export function serializeService(s: ServiceRow): ServiceDTO {
     description: s.description,
     descI18n: parseI18n(s.descI18n),
     icon: s.icon,
+    imageUrl: s.imageUrl,
+    price: s.price,
     sortOrder: s.sortOrder,
     active: s.active,
   };
