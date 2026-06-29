@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  CalendarDays,
   Hotel,
   LayoutDashboard,
   Settings,
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/menu", label: "Menu", icon: UtensilsCrossed },
+  { href: "/dashboard/recommendations", label: "Recommended", icon: CalendarDays },
   { href: "/dashboard/services", label: "Services", icon: Hotel },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
