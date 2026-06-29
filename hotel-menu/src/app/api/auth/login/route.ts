@@ -16,17 +16,20 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => ({}));
     const { role, connectCode, password } = loginInput.parse(body);
 
-    // POS signs in per hotel with its connect code + password; admin is global.
+    // POS & manager sign in per hotel with the connect code + their respective
+    // password (manager dashboard vs kitchen POS); admin is a global password.
     let session: Session | null = null;
     if (connectCode) {
       const hotel = await prisma.hotel.findUnique({ where: { connectCode } });
-      if (
-        hotel &&
-        hotel.active &&
-        hotel.posPassword &&
-        constantTimeEqual(password, hotel.posPassword)
-      ) {
-        session = { role: "pos", hotelId: hotel.id };
+      if (hotel && hotel.active) {
+        const expected =
+          role === "manager" ? hotel.managerPassword : hotel.posPassword;
+        if (expected && constantTimeEqual(password, expected)) {
+          session =
+            role === "manager"
+              ? { role: "manager", hotelId: hotel.id }
+              : { role: "pos", hotelId: hotel.id };
+        }
       }
     } else if (role === "admin" && checkAdminPassword(password)) {
       session = { role: "admin" };
@@ -48,10 +51,6 @@ export async function POST(req: Request) {
       maxAge: SESSION_MAX_AGE,
     });
 
-    return ok(
-      session.role === "pos"
-        ? { role: "pos", hotelId: session.hotelId }
-        : { role: "admin" }
-    );
+    return ok(session);
   });
 }

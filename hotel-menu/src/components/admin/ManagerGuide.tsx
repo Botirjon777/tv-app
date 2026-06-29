@@ -10,10 +10,12 @@ export function ManagerGuide({
   hotelName,
   connectCode,
   posPassword,
+  managerPassword,
 }: {
   hotelName: string;
   connectCode: string;
   posPassword: string;
+  managerPassword: string;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -22,7 +24,13 @@ export function ManagerGuide({
       ? window.location.origin
       : process.env.NEXT_PUBLIC_BASE_URL ?? "";
 
-  const text = buildManagerGuide({ hotelName, connectCode, posPassword, baseUrl });
+  const text = buildManagerGuide({
+    hotelName,
+    connectCode,
+    posPassword,
+    managerPassword,
+    baseUrl,
+  });
 
   const copy = async () => {
     try {

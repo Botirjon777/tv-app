@@ -102,7 +102,7 @@ export const recommendationInput = z.object({
 // `{ email, password }` (native apps that sign in by email).
 export const loginInput = z
   .object({
-    role: z.enum(["admin", "pos"]).optional(),
+    role: z.enum(["admin", "pos", "manager"]).optional(),
     email: z.string().email().optional(),
     connectCode: z.string().trim().optional(),
     password: z.string().min(1),

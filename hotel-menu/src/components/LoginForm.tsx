@@ -32,8 +32,8 @@ export function LoginForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // POS signs in per hotel (connect code + password); admin is a global password.
-  const isPos = role === "pos";
+  // POS & manager sign in per hotel (connect code + password); admin is global.
+  const isCodeLogin = role === "pos" || role === "manager";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +44,7 @@ export function LoginForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
-          isPos ? { connectCode: code, password } : { role, password }
+          isCodeLogin ? { role, connectCode: code, password } : { role, password }
         ),
       });
       const data = await res.json();
@@ -73,7 +73,7 @@ export function LoginForm({
         <h1 className="text-xl font-bold">{title}</h1>
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
 
-        {isPos && (
+        {isCodeLogin && (
           <div className="mt-6">
             <Label>{codeLabel}</Label>
             <Input
@@ -86,11 +86,11 @@ export function LoginForm({
           </div>
         )}
 
-        <div className={isPos ? "mt-4" : "mt-6"}>
+        <div className={isCodeLogin ? "mt-4" : "mt-6"}>
           <Label>{passwordLabel}</Label>
           <Input
             type="password"
-            autoFocus={!isPos}
+            autoFocus={!isCodeLogin}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"

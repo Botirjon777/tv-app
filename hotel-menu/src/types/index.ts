@@ -44,6 +44,7 @@ export type HotelDTO = {
   active: boolean;
   connectCode: string;
   posPassword: string;
+  managerPassword: string;
   telegramLinked: boolean;
   logoUrl: string;
   tripadvisorUrl: string;

@@ -13,22 +13,27 @@ export function buildManagerGuide(opts: {
   hotelName: string;
   connectCode: string;
   posPassword: string;
+  managerPassword: string;
   baseUrl: string;
 }): string {
-  const { hotelName, connectCode, posPassword, baseUrl } = opts;
+  const { hotelName, connectCode, posPassword, managerPassword, baseUrl } = opts;
   const bot = botUsername();
   return [
-    `🏨 ${hotelName} — order bot setup`,
+    `🏨 ${hotelName} — setup`,
     ``,
+    `Telegram order alerts:`,
     `1. In Telegram, add this bot to your staff group:`,
     `   @${bot}`,
     `2. Make the bot an administrator of the group.`,
     `3. Send this code as a message in the group:  ${connectCode}`,
     `   → the bot replies "✅ Connected to ${hotelName}".`,
     ``,
-    `That's it — every new room order will be posted to your group.`,
+    `Manager dashboard (set up your menu, prices, services, fees):`,
+    `• Open ${baseUrl}/dashboard`,
+    `• Hotel code: ${connectCode}`,
+    `• Password:   ${managerPassword}`,
     ``,
-    `Kitchen POS screen (optional):`,
+    `Kitchen POS screen:`,
     `• Open ${baseUrl}/pos`,
     `• Hotel code: ${connectCode}`,
     `• Password:   ${posPassword}`,

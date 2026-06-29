@@ -228,6 +228,7 @@ export default function HotelsPage() {
             hotelName={created.name}
             connectCode={created.connectCode}
             posPassword={created.posPassword}
+            managerPassword={created.managerPassword}
           />
         </Modal>
       )}

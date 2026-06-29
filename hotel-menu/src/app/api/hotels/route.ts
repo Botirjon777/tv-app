@@ -33,6 +33,7 @@ function toHotelDTO(h: {
   active: boolean;
   connectCode: string;
   posPassword: string;
+  managerPassword: string;
   telegramChatId: string;
   logoUrl: string;
   tripadvisorUrl: string;
@@ -53,6 +54,7 @@ function toHotelDTO(h: {
     active: h.active,
     connectCode: h.connectCode,
     posPassword: h.posPassword,
+    managerPassword: h.managerPassword,
     telegramLinked: Boolean(h.telegramChatId),
     logoUrl: h.logoUrl,
     tripadvisorUrl: h.tripadvisorUrl,
@@ -117,6 +119,7 @@ export async function POST(req: Request) {
         roomsPerFloor,
         connectCode,
         posPassword: generatePassword(),
+        managerPassword: generatePassword(),
         ...branding,
         rooms: { create: rooms },
       },

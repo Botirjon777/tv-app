@@ -8,12 +8,12 @@ export async function GET() {
     const session = await getServerSession();
     if (!session) return unauthorized();
 
-    if (session.role === "pos") {
+    if (session.role === "pos" || session.role === "manager") {
       const hotel = await prisma.hotel.findUnique({
         where: { id: session.hotelId },
         select: { id: true, name: true, connectCode: true },
       });
-      return ok({ role: "pos" as const, hotel });
+      return ok({ role: session.role, hotel });
     }
 
     return ok({ role: "admin" as const, hotel: null });

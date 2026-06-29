@@ -166,6 +166,7 @@ export default function HotelDetailPage({
             hotelName={hotel.name}
             connectCode={hotel.connectCode}
             posPassword={hotel.posPassword}
+            managerPassword={hotel.managerPassword}
           />
         </div>
       )}

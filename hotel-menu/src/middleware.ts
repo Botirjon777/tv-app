@@ -12,9 +12,14 @@ export async function middleware(req: NextRequest) {
 
   const isAdmin = pathname.startsWith("/admin");
   const isPos = pathname.startsWith("/pos");
+  const isDashboard = pathname.startsWith("/dashboard");
 
   // Login pages are public.
-  if (pathname === "/admin/login" || pathname === "/pos/login") {
+  if (
+    pathname === "/admin/login" ||
+    pathname === "/pos/login" ||
+    pathname === "/dashboard/login"
+  ) {
     return NextResponse.next();
   }
 
@@ -38,9 +43,19 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  if (isDashboard) {
+    // A hotel manager (or admin) may enter the hotel dashboard.
+    if (role !== "manager" && role !== "admin") {
+      const url = req.nextUrl.clone();
+      url.pathname = "/dashboard/login";
+      url.searchParams.set("from", pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/pos/:path*"],
+  matcher: ["/admin/:path*", "/pos/:path*", "/dashboard/:path*"],
 };

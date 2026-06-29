@@ -6,8 +6,11 @@
 // signed, so a leaked cookie is time-limited and non-replayable. HMAC uses Web
 // Crypto so verification works in both the Node and Edge (middleware) runtimes.
 
-export type Role = "admin" | "pos";
-export type Session = { role: "admin" } | { role: "pos"; hotelId: string };
+export type Role = "admin" | "pos" | "manager";
+export type Session =
+  | { role: "admin" }
+  | { role: "pos"; hotelId: string }
+  | { role: "manager"; hotelId: string };
 
 export const SESSION_COOKIE = "hm_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days (seconds)
@@ -60,7 +63,9 @@ function randomNonce(): string {
 }
 
 function subjectFor(session: Session): string {
-  return session.role === "admin" ? "admin" : `pos:${session.hotelId}`;
+  if (session.role === "admin") return "admin";
+  if (session.role === "manager") return `mgr:${session.hotelId}`;
+  return `pos:${session.hotelId}`;
 }
 
 function parseSubject(subject: string): Session | null {
@@ -68,6 +73,10 @@ function parseSubject(subject: string): Session | null {
   if (subject.startsWith("pos:")) {
     const hotelId = subject.slice(4);
     if (hotelId) return { role: "pos", hotelId };
+  }
+  if (subject.startsWith("mgr:")) {
+    const hotelId = subject.slice(4);
+    if (hotelId) return { role: "manager", hotelId };
   }
   return null;
 }

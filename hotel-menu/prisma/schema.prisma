@@ -72,6 +72,14 @@ model Hotel {
   posPassword    String  @default("")
   telegramChatId String  @default("")
 
+  // Manager dashboard login + ordering settings.
+  managerPassword String  @default("")
+  serviceFeeType  String  @default("none") // none | percent | fixed
+  serviceFeeValue Int     @default(0) // percent (e.g. 10) or fixed UZS amount
+  preorderEnabled Boolean @default(false)
+
+  services      HotelService[]
+
   // Branding & guest-landing content (surfaced on the in-room web page).
   logoUrl        String @default("")
   tripadvisorUrl String @default("")
@@ -147,8 +155,31 @@ model ServiceRequest {
   guestName  String   @default("")
   source     String   @default("web")
   status     String   @default("NEW") // NEW | DONE
+  // Structured fields: taxi has a destination; taxi & alarm have a scheduled time.
+  destination String  @default("")
+  scheduledFor DateTime?
   createdAt  DateTime @default(now())
 
   @@index([hotelSlug, roomNumber])
   @@index([createdAt])
+}
+
+// Manager-defined services shown on the in-room landing (transfer to airport,
+// pool, conference hall, …). Per hotel, translatable like menu items.
+model HotelService {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  hotelId     String   @db.ObjectId
+  hotel       Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  name        String // source/fallback text
+  sourceLang  String   @default("en")
+  nameI18n    String   @default("{}") // JSON: { en, ru, uz }
+  description String   @default("")
+  descI18n    String   @default("{}")
+  icon        String   @default("") // optional icon key
+  sortOrder   Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([hotelId])
 }
