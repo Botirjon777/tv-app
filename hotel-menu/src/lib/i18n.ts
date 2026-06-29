@@ -109,7 +109,8 @@ type UIKey =
   | "requestFailed"
   | "close"
   | "lightMode"
-  | "darkMode";
+  | "darkMode"
+  | "backToTop";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -175,6 +176,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     close: "Close",
     lightMode: "Switch to light mode",
     darkMode: "Switch to dark mode",
+    backToTop: "Back to top",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -239,6 +241,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     close: "Закрыть",
     lightMode: "Светлая тема",
     darkMode: "Тёмная тема",
+    backToTop: "Наверх",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -303,6 +306,7 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     close: "Yopish",
     lightMode: "Yorug‘ rejim",
     darkMode: "Tungi rejim",
+    backToTop: "Yuqoriga",
   },
 };
 

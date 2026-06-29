@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { ArrowLeft, Minus, Plus, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import { ArrowLeft, ArrowUp, Minus, Plus, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import type { MenuCategoryDTO, ProductDTO } from "@/types";
 import { useCart } from "./useCart";
 import { cn } from "@/lib/utils";
@@ -39,11 +39,19 @@ export function MenuClient({
   const [activeCategory, setActiveCategory] = useState(menu[0]?.id ?? "");
   const [cartOpen, setCartOpen] = useState(false);
   const [trackedOrderId, setTrackedOrderId] = useState<string | null>(null);
+  const [showTop, setShowTop] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   // The menu is its own route — start at the top each time it opens.
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  // Show the scroll-to-top button once the guest has scrolled down a bit.
+  useEffect(() => {
+    const onScroll = () => setShowTop(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const scrollToCategory = (id: string) => {
@@ -214,6 +222,20 @@ export function MenuClient({
             </button>
           </div>
         </div>
+      )}
+
+      {/* Scroll to top */}
+      {showTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label={t(lang, "backToTop")}
+          className={cn(
+            "fixed right-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-lg transition active:scale-95 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 lg:right-6",
+            cart.count > 0 ? "bottom-24" : "bottom-6"
+          )}
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
       )}
 
       <CartSheet
