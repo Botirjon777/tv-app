@@ -28,6 +28,18 @@ export type MenuCategoryDTO = CategoryDTO & {
   products: ProductDTO[];
 };
 
+export type ServiceDTO = {
+  id: string;
+  name: string;
+  sourceLang: Lang;
+  nameI18n: I18nText;
+  description: string;
+  descI18n: I18nText;
+  icon: string;
+  sortOrder: number;
+  active: boolean;
+};
+
 export type RecommendationDTO = {
   id: string;
   dayOfWeek: number; // 0=Sunday … 6=Saturday

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "@/lib/session";
 import { handle, ok, unauthorized } from "@/lib/http";
+import { hotelSettingsInput } from "@/lib/validation";
 
 // GET /api/dashboard/hotel — the signed-in manager's hotel + setup status.
 export async function GET() {
@@ -23,6 +24,7 @@ export async function GET() {
         telegramChatId: true,
         logoUrl: true,
         wifiName: true,
+        wifiPassword: true,
       },
     });
     if (!hotel) return unauthorized();
@@ -46,8 +48,22 @@ export async function GET() {
       telegramLinked: Boolean(hotel.telegramChatId),
       logoUrl: hotel.logoUrl,
       wifiName: hotel.wifiName,
+      wifiPassword: hotel.wifiPassword,
       serviceCount,
       productCount,
     });
+  });
+}
+
+// PATCH /api/dashboard/hotel — manager updates their own hotel's settings
+// (service fee, preorder, social links, Wi-Fi, logo).
+export async function PATCH(req: Request) {
+  return handle(async () => {
+    const session = await getServerSession();
+    if (!session || session.role !== "manager") return unauthorized();
+    const body = await req.json().catch(() => ({}));
+    const data = hotelSettingsInput.parse(body);
+    await prisma.hotel.update({ where: { id: session.hotelId }, data });
+    return ok({ ok: true });
   });
 }

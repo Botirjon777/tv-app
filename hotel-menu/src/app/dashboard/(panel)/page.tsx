@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   BadgePercent,
   Check,
   ChefHat,
+  ChevronRight,
   Circle,
   Hotel,
   Send,
   Share2,
 } from "lucide-react";
-import { LogoutButton } from "@/components/LogoutButton";
 import { CenteredSpinner } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { botUsername } from "@/lib/onboarding";
@@ -33,6 +34,7 @@ type ChecklistItem = {
   description: string;
   done: boolean;
   important?: boolean;
+  href?: string;
   icon: React.ReactNode;
 };
 
@@ -44,22 +46,16 @@ export default function DashboardHome() {
     let active = true;
     fetch("/api/dashboard/hotel", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (active) setHotel(data);
-      })
+      .then((data) => active && setHotel(data))
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
   }, []);
 
-  if (loading) return <CenteredSpinner label="Loading your dashboard…" />;
+  if (loading) return <CenteredSpinner label="Loading…" />;
   if (!hotel)
-    return (
-      <main className="flex min-h-screen items-center justify-center text-slate-500">
-        Could not load your dashboard.
-      </main>
-    );
+    return <p className="text-slate-500">Could not load your dashboard.</p>;
 
   const items: ChecklistItem[] = [
     {
@@ -88,11 +84,12 @@ export default function DashboardHome() {
       title: "Set your service fee",
       description:
         hotel.serviceFeeType === "none"
-          ? "Add a service fee (a percentage or a fixed amount), or leave it off."
+          ? "Add a percentage or fixed fee per order — or leave it off."
           : hotel.serviceFeeType === "percent"
             ? `${hotel.serviceFeeValue}% added to each order.`
-            : `Fixed fee per order.`,
+            : "Fixed fee added to each order.",
       done: hotel.serviceFeeType !== "none",
+      href: "/dashboard/settings",
       icon: <BadgePercent className="h-5 w-5" />,
     },
     {
@@ -103,6 +100,7 @@ export default function DashboardHome() {
           ? `${hotel.serviceCount} services configured.`
           : "Airport transfer, pool, conference hall, and more.",
       done: hotel.serviceCount > 0,
+      href: "/dashboard/services",
       icon: <Hotel className="h-5 w-5" />,
     },
     {
@@ -113,6 +111,7 @@ export default function DashboardHome() {
           ? "Shown to guests on the in-room page."
           : "Instagram / Telegram — hidden from guests until you add them.",
       done: Boolean(hotel.instagramUrl || hotel.telegramUrl),
+      href: "/dashboard/settings",
       icon: <Share2 className="h-5 w-5" />,
     },
   ];
@@ -120,40 +119,26 @@ export default function DashboardHome() {
   const doneCount = items.filter((i) => i.done).length;
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 lg:px-6">
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">{hotel.name}</h1>
-            <p className="text-xs text-slate-400">Manager dashboard</p>
-          </div>
-          <LogoutButton
-            redirectTo="/dashboard/login"
-            label="Sign out"
-            className="text-sm text-slate-500 hover:text-slate-800"
-          />
+    <div>
+      <div className="mb-5 flex items-end justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-slate-900">Set up your hotel</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Complete these steps to finish your guests&apos; in-room experience.
+          </p>
         </div>
-      </header>
+        <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-bold text-brand-700">
+          {doneCount}/{items.length}
+        </span>
+      </div>
 
-      <div className="mx-auto max-w-3xl px-4 py-6 lg:px-6">
-        <div className="mb-5 flex items-end justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900">Set up your hotel</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Complete these steps to finish your guests&apos; in-room experience.
-            </p>
-          </div>
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-bold text-brand-700">
-            {doneCount}/{items.length}
-          </span>
-        </div>
-
-        <ul className="space-y-2.5">
-          {items.map((item) => (
-            <li
-              key={item.key}
+      <ul className="space-y-2.5">
+        {items.map((item) => {
+          const Row = (
+            <div
               className={cn(
-                "flex items-start gap-3 rounded-2xl border bg-white p-4 shadow-sm",
+                "flex items-start gap-3 rounded-2xl border bg-white p-4 shadow-sm transition",
+                item.href && "hover:border-brand-300",
                 item.done
                   ? "border-slate-100"
                   : item.important
@@ -192,16 +177,25 @@ export default function DashboardHome() {
                   <>
                     <Check className="h-4 w-4" /> Done
                   </>
+                ) : item.href ? (
+                  <>
+                    Set up <ChevronRight className="h-4 w-4" />
+                  </>
                 ) : (
                   <>
                     <Circle className="h-3.5 w-3.5" /> To do
                   </>
                 )}
               </span>
+            </div>
+          );
+          return (
+            <li key={item.key}>
+              {item.href ? <Link href={item.href}>{Row}</Link> : Row}
             </li>
-          ))}
-        </ul>
-      </div>
-    </main>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

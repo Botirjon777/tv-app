@@ -92,6 +92,30 @@ export const orderStatusInput = z.object({
   status: z.enum(ORDER_STATUSES),
 });
 
+// Manager dashboard: hotel settings the manager can edit for their own hotel.
+export const hotelSettingsInput = z.object({
+  serviceFeeType: z.enum(["none", "percent", "fixed"]).optional(),
+  serviceFeeValue: z.number().int().min(0).max(1_000_000).optional(),
+  preorderEnabled: z.boolean().optional(),
+  instagramUrl: z.string().trim().max(1000).optional(),
+  telegramUrl: z.string().trim().max(1000).optional(),
+  wifiName: z.string().trim().max(120).optional(),
+  wifiPassword: z.string().trim().max(120).optional(),
+  logoUrl: z.string().trim().max(1000).optional(),
+});
+
+// Manager dashboard: a hotel service (transfer, pool, conference hall, …).
+export const serviceInput = z.object({
+  name: z.string().trim().min(1, "Name is required").max(120),
+  description: z.string().max(500).optional().default(""),
+  sourceLang: z.enum(LANGS).optional().default("en"),
+  icon: z.string().trim().max(40).optional().default(""),
+  sortOrder: z.number().int().optional(),
+  active: z.boolean().optional(),
+});
+
+export const serviceUpdateInput = serviceInput.partial();
+
 export const recommendationInput = z.object({
   dayOfWeek: z.number().int().min(0).max(6),
   productId: z.string().min(1, "Product is required"),

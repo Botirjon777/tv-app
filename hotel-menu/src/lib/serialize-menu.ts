@@ -1,5 +1,36 @@
 import { parseI18n, type Lang } from "@/lib/i18n";
-import type { CategoryDTO, ProductDTO, RecommendationDTO } from "@/types";
+import type {
+  CategoryDTO,
+  ProductDTO,
+  RecommendationDTO,
+  ServiceDTO,
+} from "@/types";
+
+type ServiceRow = {
+  id: string;
+  name: string;
+  sourceLang: string;
+  nameI18n: string;
+  description: string;
+  descI18n: string;
+  icon: string;
+  sortOrder: number;
+  active: boolean;
+};
+
+export function serializeService(s: ServiceRow): ServiceDTO {
+  return {
+    id: s.id,
+    name: s.name,
+    sourceLang: s.sourceLang as Lang,
+    nameI18n: parseI18n(s.nameI18n),
+    description: s.description,
+    descI18n: parseI18n(s.descI18n),
+    icon: s.icon,
+    sortOrder: s.sortOrder,
+    active: s.active,
+  };
+}
 
 type CategoryRow = {
   id: string;
