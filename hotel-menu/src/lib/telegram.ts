@@ -12,11 +12,13 @@ export function telegramEnabled(): boolean {
   return Boolean(TOKEN);
 }
 
-// Send an HTML message to a chat. Never throws — returns false on any failure so
-// callers (e.g. order creation) are never blocked by Telegram being down.
+// Send an HTML message to a chat (optionally into a forum topic via threadId).
+// Never throws — returns false on any failure so callers (e.g. order creation)
+// are never blocked by Telegram being down.
 export async function sendMessage(
   chatId: string | number,
-  text: string
+  text: string,
+  threadId?: number
 ): Promise<boolean> {
   if (!TOKEN) return false;
   try {
@@ -29,12 +31,63 @@ export async function sendMessage(
         text,
         parse_mode: "HTML",
         disable_web_page_preview: true,
+        ...(threadId ? { message_thread_id: threadId } : {}),
       }),
     });
     return res.ok;
   } catch {
     return false;
   }
+}
+
+// Forum topic routing. A manager sends one of these keywords inside a topic to
+// bind that topic to a category; messages of that category then post there.
+export const TOPIC_KEYWORDS: Record<string, string> = {
+  orders: "orders",
+  order: "orders",
+  menu: "orders",
+  taxi: "taxi",
+  service: "service",
+  services: "service",
+  alarm: "alarm",
+  wake: "alarm",
+  wakeup: "alarm",
+  reception: "reception",
+  problem: "problem",
+  problems: "problem",
+};
+
+export const TOPIC_LABELS: Record<string, string> = {
+  orders: "Menu orders",
+  taxi: "Taxi",
+  service: "Service requests",
+  alarm: "Wake-up calls",
+  reception: "Reception",
+  problem: "Problem reports",
+};
+
+// Service-request type -> topic category.
+export const REQUEST_TYPE_TOPIC: Record<string, string> = {
+  TAXI: "taxi",
+  SERVICE: "service",
+  ALARM: "alarm",
+  RECEPTION: "reception",
+  PROBLEM: "problem",
+};
+
+function parseTopics(json: string): Record<string, number> {
+  try {
+    const obj = JSON.parse(json);
+    return obj && typeof obj === "object" ? obj : {};
+  } catch {
+    return {};
+  }
+}
+
+// Resolve the forum topic thread id for a category (undefined = post to General).
+export function topicId(json: string, key: string): number | undefined {
+  const value = parseTopics(json)[key];
+  return typeof value === "number" ? value : undefined;
 }
 
 function escapeHtml(value: string): string {
@@ -55,6 +108,9 @@ export function setupInstructions(): string {
     "3. Send your hotel's <b>connect code</b> in the group (find it in the admin panel).",
     "",
     "Once linked, every new room order is posted to that group automatically.",
+    "",
+    "<b>Using Topics?</b> Open each topic and send its keyword so messages route there:",
+    "<code>orders</code> · <code>taxi</code> · <code>service</code> · <code>alarm</code> · <code>reception</code> · <code>problem</code>",
   ].join("\n");
 }
 

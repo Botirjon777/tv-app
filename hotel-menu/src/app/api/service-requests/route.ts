@@ -4,7 +4,12 @@
  */
 import { prisma } from "@/lib/prisma";
 import { fail, handle, ok } from "@/lib/http";
-import { formatRequestMessage, sendMessage } from "@/lib/telegram";
+import {
+  formatRequestMessage,
+  sendMessage,
+  topicId,
+  REQUEST_TYPE_TOPIC,
+} from "@/lib/telegram";
 
 const TYPES = new Set(["ALARM", "SERVICE", "TAXI", "RECEPTION", "PROBLEM"]);
 
@@ -42,9 +47,10 @@ export async function POST(req: Request) {
     // Notify the hotel's Telegram staff group (best-effort).
     const hotel = await prisma.hotel.findUnique({
       where: { slug: String(hotelSlug) },
-      select: { telegramChatId: true },
+      select: { telegramChatId: true, telegramTopics: true },
     });
     if (hotel?.telegramChatId) {
+      const topicKey = REQUEST_TYPE_TOPIC[type];
       await sendMessage(
         hotel.telegramChatId,
         formatRequestMessage({
@@ -54,7 +60,8 @@ export async function POST(req: Request) {
           scheduledFor: request.scheduledFor?.toISOString() ?? null,
           note: request.note,
           guestName: request.guestName,
-        })
+        }),
+        topicKey ? topicId(hotel.telegramTopics, topicKey) : undefined
       );
     }
 

@@ -4,7 +4,7 @@ import { fail, handle, ok, unauthorized } from "@/lib/http";
 import { getServerSession } from "@/lib/session";
 import { serializeOrder, orderInclude } from "@/lib/serialize";
 import { ACTIVE_STATUSES, isOrderStatus } from "@/lib/orders";
-import { sendMessage, formatOrderMessage } from "@/lib/telegram";
+import { sendMessage, formatOrderMessage, topicId } from "@/lib/telegram";
 import { computeServiceFee } from "@/lib/fees";
 
 // GET /api/orders — staff only.
@@ -115,9 +115,14 @@ export async function POST(req: Request) {
 
     const dto = serializeOrder(order);
 
-    // Notify the hotel's linked Telegram staff group (best-effort).
+    // Notify the hotel's linked Telegram staff group (best-effort), routed to
+    // the "orders" topic when the group uses Topics.
     if (hotel.telegramChatId) {
-      await sendMessage(hotel.telegramChatId, formatOrderMessage(dto));
+      await sendMessage(
+        hotel.telegramChatId,
+        formatOrderMessage(dto),
+        topicId(hotel.telegramTopics, "orders")
+      );
     }
 
     return ok(dto, 201);

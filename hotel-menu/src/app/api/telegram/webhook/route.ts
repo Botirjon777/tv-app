@@ -1,5 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { sendMessage, setupInstructions } from "@/lib/telegram";
+import {
+  sendMessage,
+  setupInstructions,
+  TOPIC_KEYWORDS,
+  TOPIC_LABELS,
+} from "@/lib/telegram";
 
 // Telegram webhook. Register it once with:
 //   curl "https://api.telegram.org/bot<TOKEN>/setWebhook" \
@@ -29,6 +34,8 @@ export async function POST(req: Request) {
 
   const chatId = chat.id as number;
   const chatType = chat.type as string;
+  const threadId: number | undefined =
+    typeof msg?.message_thread_id === "number" ? msg.message_thread_id : undefined;
 
   // /start in a private chat → setup instructions for the manager.
   if (chatType === "private" && /^\/start\b/.test(text)) {
@@ -36,8 +43,8 @@ export async function POST(req: Request) {
     return Response.json({ ok: true });
   }
 
-  // In a group/supergroup, a bare connect code links that group to the hotel.
   if (chatType === "group" || chatType === "supergroup") {
+    // A bare connect code links the whole group to the hotel.
     const code = text.replace(/\D/g, "");
     if (code.length >= 4) {
       const hotel = await prisma.hotel.findUnique({
@@ -50,7 +57,37 @@ export async function POST(req: Request) {
         });
         await sendMessage(
           chatId,
-          `✅ Connected to <b>${hotel.name}</b>. New orders will appear here.`
+          `✅ Connected to <b>${hotel.name}</b>. New orders will appear here.`,
+          threadId
+        );
+      }
+      return Response.json({ ok: true });
+    }
+
+    // A keyword sent inside a topic binds that topic to a category.
+    const topicKey = TOPIC_KEYWORDS[text.toLowerCase()];
+    if (topicKey && threadId) {
+      const hotel = await prisma.hotel.findFirst({
+        where: { telegramChatId: String(chatId) },
+      });
+      if (hotel) {
+        const topics = (() => {
+          try {
+            const o = JSON.parse(hotel.telegramTopics);
+            return o && typeof o === "object" ? o : {};
+          } catch {
+            return {};
+          }
+        })();
+        topics[topicKey] = threadId;
+        await prisma.hotel.update({
+          where: { id: hotel.id },
+          data: { telegramTopics: JSON.stringify(topics) },
+        });
+        await sendMessage(
+          chatId,
+          `✅ This topic will receive <b>${TOPIC_LABELS[topicKey]}</b>.`,
+          threadId
         );
       }
     }

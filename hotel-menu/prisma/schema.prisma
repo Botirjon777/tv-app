@@ -74,6 +74,9 @@ model Hotel {
 
   // Manager dashboard login + ordering settings.
   managerPassword String  @default("")
+  // Telegram forum topics: JSON map of category -> message_thread_id, e.g.
+  // { "orders": 12, "taxi": 8 }. Empty when the group has no topics.
+  telegramTopics  String  @default("{}")
   serviceFeeType  String  @default("none") // none | percent | fixed
   serviceFeeValue Int     @default(0) // percent (e.g. 10) or fixed UZS amount
   preorderEnabled Boolean @default(false)
