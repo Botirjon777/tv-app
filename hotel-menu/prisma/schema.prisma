@@ -2,13 +2,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// MongoDB (e.g. MongoDB Atlas free tier). Atlas clusters are replica sets,
+// which Prisma's MongoDB connector requires. DATABASE_URL is the connection
+// string (mongodb+srv://…). Schema changes are applied with `prisma db push`
+// (MongoDB has no migrations).
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("MONGODB_URL")
 }
 
 model Category {
-  id         String    @id @default(cuid())
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
   name       String // source/fallback text (in sourceLang)
   sourceLang String    @default("en")
   nameI18n   String    @default("{}") // JSON: { en, ru, uz }
@@ -19,7 +23,7 @@ model Category {
 }
 
 model Product {
-  id          String      @id @default(cuid())
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
   name        String // source/fallback text (in sourceLang)
   description String      @default("")
   sourceLang  String      @default("en")
@@ -29,7 +33,7 @@ model Product {
   imageUrl    String      @default("")
   available   Boolean     @default(true)
   sortOrder   Int         @default(0)
-  categoryId  String
+  categoryId  String      @db.ObjectId
   category    Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   orderItems  OrderItem[]
   recommendations Recommendation[]
@@ -42,9 +46,9 @@ model Product {
 // "Recommendation of the day" — a product featured on a given weekday.
 // Global (shared across hotels, like the menu). dayOfWeek: 0=Sunday … 6=Saturday.
 model Recommendation {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   dayOfWeek Int
-  productId String
+  productId String   @db.ObjectId
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
@@ -54,12 +58,19 @@ model Recommendation {
 }
 
 model Hotel {
-  id            String   @id @default(cuid())
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
   name          String
   slug          String   @unique
   floors        Int      @default(1)
   roomsPerFloor Int      @default(0)
   active        Boolean  @default(true)
+
+  // Multi-tenant wiring: a short code links the Telegram staff group and is the
+  // POS "hotel id"; posPassword gates the per-hotel POS login; telegramChatId is
+  // the linked group chat ("" until a manager connects it via the bot).
+  connectCode    String  @unique
+  posPassword    String  @default("")
+  telegramChatId String  @default("")
 
   // Branding & guest-landing content (surfaced on the in-room web page).
   logoUrl        String @default("")
@@ -77,8 +88,8 @@ model Hotel {
 }
 
 model Room {
-  id        String   @id @default(cuid())
-  hotelId   String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  hotelId   String   @db.ObjectId
   hotel     Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
   number    String
   name      String   @default("")
@@ -94,11 +105,11 @@ model Room {
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  roomId    String
+  id        String      @id @default(auto()) @map("_id") @db.ObjectId
+  roomId    String      @db.ObjectId
   room      Room        @relation(fields: [roomId], references: [id])
   // One of: PENDING | PREPARING | READY | DELIVERED | CANCELLED
-  // (SQLite connector has no native enums — validated in app code, see src/lib/orders.ts)
+  // (validated in app code, see src/lib/orders.ts)
   status    String      @default("PENDING")
   note      String      @default("")
   total     Int         @default(0) // integer UZS (so'm), snapshot at order time
@@ -112,14 +123,32 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(cuid())
-  orderId   String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId   String   @db.ObjectId
   order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
+  productId String   @db.ObjectId
   product   Product  @relation(fields: [productId], references: [id])
   name      String // snapshot of product name at order time
   price     Int // snapshot of unit price — integer UZS (so'm)
   quantity  Int      @default(1)
 
   @@index([orderId])
+}
+
+// Guest service requests (alarm / reception / taxi / problem) raised from the
+// in-room landing. Persisted here so staff can review them; denormalized with
+// hotelSlug + roomNumber so no joins are needed for a simple feed.
+model ServiceRequest {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  hotelSlug  String
+  roomNumber String
+  type       String // ALARM | SERVICE | TAXI | RECEPTION | PROBLEM
+  note       String   @default("")
+  guestName  String   @default("")
+  source     String   @default("web")
+  status     String   @default("NEW") // NEW | DONE
+  createdAt  DateTime @default(now())
+
+  @@index([hotelSlug, roomNumber])
+  @@index([createdAt])
 }

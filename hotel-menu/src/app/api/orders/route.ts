@@ -1,16 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { orderInput } from "@/lib/validation";
 import { fail, handle, ok, unauthorized } from "@/lib/http";
-import { requireRole } from "@/lib/session";
+import { getServerSession } from "@/lib/session";
 import { serializeOrder, orderInclude } from "@/lib/serialize";
-import { publishOrderEvent } from "@/lib/events";
 import { ACTIVE_STATUSES, isOrderStatus } from "@/lib/orders";
+import { sendMessage, formatOrderMessage } from "@/lib/telegram";
 
 // GET /api/orders — staff only.
 // Filters: ?status=PENDING&active=1&hotelId=...&hotelSlug=...&roomNumber=101&limit=50
 export async function GET(req: Request) {
   return handle(async () => {
-    if (!(await requireRole(["pos", "admin"]))) return unauthorized();
+    const session = await getServerSession();
+    if (!session) return unauthorized();
     const url = new URL(req.url);
     const status = url.searchParams.get("status");
     const active = url.searchParams.get("active") === "1";
@@ -19,9 +20,11 @@ export async function GET(req: Request) {
     const roomNumber = url.searchParams.get("roomNumber") || undefined;
     const limit = Math.min(Number(url.searchParams.get("limit")) || 100, 200);
 
+    // POS is locked to its own hotel; admin may filter by query params.
+    const scopedHotelId = session.role === "pos" ? session.hotelId : hotelId;
     const roomFilter = {
-      ...(hotelId ? { hotelId } : {}),
-      ...(hotelSlug ? { hotel: { slug: hotelSlug } } : {}),
+      ...(scopedHotelId ? { hotelId: scopedHotelId } : {}),
+      ...(session.role === "admin" && hotelSlug ? { hotel: { slug: hotelSlug } } : {}),
       ...(roomNumber ? { number: roomNumber } : {}),
     };
 
@@ -104,7 +107,12 @@ export async function POST(req: Request) {
     });
 
     const dto = serializeOrder(order);
-    publishOrderEvent({ type: "order.created", order: dto });
+
+    // Notify the hotel's linked Telegram staff group (best-effort).
+    if (hotel.telegramChatId) {
+      await sendMessage(hotel.telegramChatId, formatOrderMessage(dto));
+    }
+
     return ok(dto, 201);
   });
 }

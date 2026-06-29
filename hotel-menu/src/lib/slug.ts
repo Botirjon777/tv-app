@@ -20,6 +20,22 @@ export const RESERVED_SLUGS = new Set([
   "_next",
 ]);
 
+// Short numeric code a manager shares with the Telegram bot to link their group
+// and uses (with a password) to sign into the POS. Caller ensures uniqueness.
+export function generateConnectCode(): string {
+  return String(100000 + Math.floor(Math.random() * 900000));
+}
+
+// Readable per-hotel POS password (no ambiguous characters).
+export function generatePassword(length = 8): string {
+  const chars = "abcdefghijkmnpqrstuvwxyz23456789";
+  let out = "";
+  for (let i = 0; i < length; i++) {
+    out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
 // Floor-based room generator: floor 1 -> 101..1NN, floor 2 -> 201..2NN, etc.
 export function generateRooms(
   floors: number,

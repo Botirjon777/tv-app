@@ -7,7 +7,7 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { CenteredSpinner } from "@/components/ui";
 import { OrderTicket } from "./OrderTicket";
 import type { OrderStatus } from "@/lib/orders";
-import type { HotelDTO, OrderDTO } from "@/types";
+import type { OrderDTO } from "@/types";
 
 // POS is Uzbek-only (kitchen staff).
 const COLUMNS: { status: OrderStatus; title: string; tone: string }[] = [
@@ -16,32 +16,20 @@ const COLUMNS: { status: OrderStatus; title: string; tone: string }[] = [
   { status: "READY", title: "Tayyor", tone: "bg-emerald-500" },
 ];
 
-const HOTEL_KEY = "hotel-menu-pos-hotel";
-
 export function PosBoard() {
+  // Orders are scoped server-side to the signed-in hotel.
   const { orders, loading, connected, updateStatus } =
     useOrderStream("active=1&limit=200");
 
-  const [hotels, setHotels] = useState<HotelDTO[]>([]);
-  const [hotelId, setHotelId] = useState<string>("");
+  const [hotelName, setHotelName] = useState<string>("");
 
-  // Load hotels for the switcher and restore the last-selected one.
+  // Show which hotel this POS is signed in as.
   useEffect(() => {
     let active = true;
-    fetch("/api/hotels", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((data: HotelDTO[]) => {
-        if (!active) return;
-        setHotels(data);
-        const saved =
-          typeof window !== "undefined"
-            ? localStorage.getItem(HOTEL_KEY)
-            : null;
-        const initial =
-          saved && data.some((h) => h.id === saved)
-            ? saved
-            : data[0]?.id ?? "";
-        setHotelId(initial);
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (active && data?.hotel?.name) setHotelName(data.hotel.name);
       })
       .catch(() => {});
     return () => {
@@ -49,32 +37,21 @@ export function PosBoard() {
     };
   }, []);
 
-  const selectHotel = (id: string) => {
-    setHotelId(id);
-    try {
-      localStorage.setItem(HOTEL_KEY, id);
-    } catch {
-      /* ignore */
-    }
-  };
-
   const byStatus = useMemo(() => {
     const map: Record<string, OrderDTO[]> = {
       PENDING: [],
       PREPARING: [],
       READY: [],
     };
-    const scoped = orders
-      .filter((o) => !hotelId || o.hotelId === hotelId)
-      .sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-      );
-    for (const o of scoped) {
+    const sorted = [...orders].sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+    for (const o of sorted) {
       if (map[o.status]) map[o.status].push(o);
     }
     return map;
-  }, [orders, hotelId]);
+  }, [orders]);
 
   return (
     <div className="flex h-screen flex-col bg-slate-900 text-white">
@@ -85,7 +62,9 @@ export function PosBoard() {
             <ChefHat className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-bold leading-tight">Oshxona ekrani</h1>
+            <h1 className="font-bold leading-tight">
+              {hotelName ? `${hotelName} · Oshxona` : "Oshxona ekrani"}
+            </h1>
             <p className="flex items-center gap-1 text-xs text-slate-400">
               {connected ? (
                 <>
@@ -100,26 +79,11 @@ export function PosBoard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {hotels.length > 1 && (
-            <select
-              value={hotelId}
-              onChange={(e) => selectHotel(e.target.value)}
-              className="h-9 rounded-lg border border-white/20 bg-slate-800 px-3 text-sm font-medium text-white outline-none"
-            >
-              {hotels.map((h) => (
-                <option key={h.id} value={h.id}>
-                  {h.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <LogoutButton
-            redirectTo="/pos/login"
-            label="Chiqish"
-            className="text-slate-400 hover:text-white"
-          />
-        </div>
+        <LogoutButton
+          redirectTo="/pos/login"
+          label="Chiqish"
+          className="text-slate-400 hover:text-white"
+        />
       </header>
 
       {loading ? (

@@ -29,8 +29,8 @@ tap-to-add — managed under **Admin → Recommendations**.
 ## Stack
 
 - **Next.js 14** (App Router) + TypeScript + Tailwind CSS — dark, mobile-first guest UI
-- **Prisma** + **SQLite** (zero-config; swap to Postgres by editing `schema.prisma`)
-- **Server-Sent Events** for live order push to the POS / admin
+- **Prisma** + **MongoDB** (e.g. MongoDB Atlas free tier) — fully serverless-friendly
+- **Polling** (every few seconds) keeps the POS / admin order board fresh
 - **React Query** for admin data management
 - Cookie-based password auth (HMAC-signed) gating `/admin` and `/pos`
 
@@ -76,10 +76,10 @@ Guest (mobile)                 Kitchen (tablet)            Manager (desktop)
         v   {hotelSlug, room}       |   (filtered by hotel)      v
    ┌──────────────────────────  Next.js route handlers  ──────────────────────┐
    │ /api/orders /api/products /api/categories /api/hotels /api/rooms /api/auth │
-   │                    publishOrderEvent ──► /api/orders/stream (SSE)          │
+   │              POS / admin poll /api/orders every few seconds                │
    └────────────────────────────────  Prisma  ────────────────────────────────┘
                                      │
-                                  SQLite (dev.db)
+                                MongoDB (Atlas)
 ```
 
 Data model: `Hotel 1─* Room 1─* Order *─* Product` (via `OrderItem` snapshots).
@@ -103,7 +103,7 @@ hotel** (`@@unique([hotelId, number])`).
   same.
 - Product images are referenced by URL (paste any image link in the admin form).
   Add file uploads (e.g. S3) if you need hosted images.
-- Order status is stored as a string (SQLite has no native enums); valid values
+- Order status is stored as a string (validated in app code); valid values
   live in `src/lib/orders.ts`.
 - Auth is a simple shared password per role. Swap in per-user accounts later if
   you need staff-level auditing.

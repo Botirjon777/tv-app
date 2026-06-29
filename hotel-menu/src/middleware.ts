@@ -7,7 +7,8 @@ import { SESSION_COOKIE, verifyToken } from "@/lib/auth";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get(SESSION_COOKIE)?.value;
-  const role = await verifyToken(token);
+  const session = await verifyToken(token);
+  const role = session?.role ?? null;
 
   const isAdmin = pathname.startsWith("/admin");
   const isPos = pathname.startsWith("/pos");

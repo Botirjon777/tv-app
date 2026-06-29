@@ -12,6 +12,7 @@ export function LoginForm({
   subtitle,
   fallback,
   accent,
+  codeLabel = "Hotel code",
   passwordLabel = "Password",
   submitLabel = "Sign in",
 }: {
@@ -20,14 +21,19 @@ export function LoginForm({
   subtitle: string;
   fallback: string; // where to go after login if no ?from
   accent: string; // tailwind bg class for the icon
+  codeLabel?: string;
   passwordLabel?: string;
   submitLabel?: string;
 }) {
   const router = useRouter();
   const params = useSearchParams();
+  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // POS signs in per hotel (connect code + password); admin is a global password.
+  const isPos = role === "pos";
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +43,9 @@ export function LoginForm({
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, password }),
+        body: JSON.stringify(
+          isPos ? { connectCode: code, password } : { role, password }
+        ),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Login failed");
@@ -65,11 +73,24 @@ export function LoginForm({
         <h1 className="text-xl font-bold">{title}</h1>
         <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
 
-        <div className="mt-6">
+        {isPos && (
+          <div className="mt-6">
+            <Label>{codeLabel}</Label>
+            <Input
+              autoFocus
+              inputMode="numeric"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="100001"
+            />
+          </div>
+        )}
+
+        <div className={isPos ? "mt-4" : "mt-6"}>
           <Label>{passwordLabel}</Label>
           <Input
             type="password"
-            autoFocus
+            autoFocus={!isPos}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"

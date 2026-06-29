@@ -2,12 +2,19 @@ import { prisma } from "@/lib/prisma";
 import { hotelInput } from "@/lib/validation";
 import { fail, handle, ok, unauthorized } from "@/lib/http";
 import { requireRole } from "@/lib/session";
-import { generateRooms, RESERVED_SLUGS, slugify } from "@/lib/slug";
+import {
+  generateConnectCode,
+  generatePassword,
+  generateRooms,
+  RESERVED_SLUGS,
+  slugify,
+} from "@/lib/slug";
 
-// GET /api/hotels — staff (admin + pos). Includes room counts.
+// GET /api/hotels — admin only (returns the per-hotel POS password + connect
+// code, so it must not be exposed to the POS role).
 export async function GET() {
   return handle(async () => {
-    if (!(await requireRole(["pos", "admin"]))) return unauthorized();
+    if (!(await requireRole(["admin"]))) return unauthorized();
     const hotels = await prisma.hotel.findMany({
       orderBy: { name: "asc" },
       include: { _count: { select: { rooms: true } } },
@@ -16,7 +23,7 @@ export async function GET() {
   });
 }
 
-// Shared DTO shape for hotels — keeps branding fields in one place.
+// Shared DTO shape for hotels — keeps branding + connection fields in one place.
 function toHotelDTO(h: {
   id: string;
   name: string;
@@ -24,6 +31,9 @@ function toHotelDTO(h: {
   floors: number;
   roomsPerFloor: number;
   active: boolean;
+  connectCode: string;
+  posPassword: string;
+  telegramChatId: string;
   logoUrl: string;
   tripadvisorUrl: string;
   googleMapsUrl: string;
@@ -41,6 +51,9 @@ function toHotelDTO(h: {
     floors: h.floors,
     roomsPerFloor: h.roomsPerFloor,
     active: h.active,
+    connectCode: h.connectCode,
+    posPassword: h.posPassword,
+    telegramLinked: Boolean(h.telegramChatId),
     logoUrl: h.logoUrl,
     tripadvisorUrl: h.tripadvisorUrl,
     googleMapsUrl: h.googleMapsUrl,
@@ -60,7 +73,6 @@ async function resolveSlug(desired: string): Promise<string | null> {
   if (RESERVED_SLUGS.has(base)) base = `${base}-hotel`;
   let candidate = base;
   let n = 2;
-  // Loop until we find a free slug.
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const exists = await prisma.hotel.findUnique({ where: { slug: candidate } });
@@ -69,7 +81,20 @@ async function resolveSlug(desired: string): Promise<string | null> {
   }
 }
 
-// POST /api/hotels — admin. Creates the hotel and auto-generates its rooms.
+// Find a connect code not already in use.
+async function resolveConnectCode(): Promise<string> {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const code = generateConnectCode();
+    const exists = await prisma.hotel.findUnique({
+      where: { connectCode: code },
+    });
+    if (!exists) return code;
+  }
+}
+
+// POST /api/hotels — admin. Creates the hotel, its rooms, a unique connect code
+// and a POS password.
 export async function POST(req: Request) {
   return handle(async () => {
     if (!(await requireRole(["admin"]))) return unauthorized();
@@ -80,6 +105,7 @@ export async function POST(req: Request) {
     if (!slug) return fail("Could not derive a valid slug from the name", 422);
 
     const rooms = generateRooms(data.floors, data.roomsPerFloor);
+    const connectCode = await resolveConnectCode();
 
     const { name, floors, roomsPerFloor, slug: _slug, ...branding } = data;
 
@@ -89,6 +115,8 @@ export async function POST(req: Request) {
         slug,
         floors,
         roomsPerFloor,
+        connectCode,
+        posPassword: generatePassword(),
         ...branding,
         rooms: { create: rooms },
       },

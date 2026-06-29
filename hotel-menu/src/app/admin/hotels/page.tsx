@@ -117,7 +117,20 @@ export default function HotelsPage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-slate-900">{h.name}</h2>
-                    <p className="text-xs text-slate-400">/{h.slug}</p>
+                    <p className="text-xs text-slate-400">
+                      /{h.slug} · code{" "}
+                      <span className="font-mono font-semibold text-slate-600">
+                        {h.connectCode}
+                      </span>{" "}
+                      ·{" "}
+                      <span
+                        className={
+                          h.telegramLinked ? "text-emerald-600" : "text-slate-400"
+                        }
+                      >
+                        {h.telegramLinked ? "Telegram linked" : "Telegram off"}
+                      </span>
+                    </p>
                   </div>
                 </div>
                 <button
