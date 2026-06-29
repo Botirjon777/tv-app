@@ -1,10 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { X } from "lucide-react";
-import { api } from "@/lib/client-api";
-import { Button, CenteredSpinner } from "@/components/ui";
-import type { ProductDTO, RecommendationDTO } from "@/types";
+import { CenteredSpinner } from "@/components/ui";
+import {
+  useProducts,
+  useRecommendations,
+  useRecommendationMutations,
+} from "@/hooks/dashboard";
+import type { RecommendationDTO } from "@/types";
 
 // 0 = Sunday … 6 = Saturday (matches Date.getDay()). Shown Monday-first.
 const DAYS: { value: number; label: string }[] = [
@@ -18,24 +22,10 @@ const DAYS: { value: number; label: string }[] = [
 ];
 
 export default function RecommendationsPage() {
-  const [recs, setRecs] = useState<RecommendationDTO[]>([]);
-  const [products, setProducts] = useState<ProductDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
-
-  const load = () => {
-    Promise.all([
-      api.get<RecommendationDTO[]>("/api/dashboard/menu/recommendations"),
-      api.get<ProductDTO[]>("/api/dashboard/menu/products"),
-    ])
-      .then(([r, p]) => {
-        setRecs(r);
-        setProducts(p);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-  useEffect(load, []);
+  const { data: recs = [], isLoading: recsLoading } = useRecommendations();
+  const { data: products = [], isLoading: prodLoading } = useProducts();
+  const { create, remove: removeRec } = useRecommendationMutations();
+  const busy = create.isPending || removeRec.isPending;
 
   const byDay = useMemo(() => {
     const map: Record<number, RecommendationDTO[]> = {};
@@ -43,33 +33,17 @@ export default function RecommendationsPage() {
     return map;
   }, [recs]);
 
-  const add = async (dayOfWeek: number, productId: string) => {
+  const add = (dayOfWeek: number, productId: string) => {
     if (!productId) return;
-    setBusy(true);
-    try {
-      await api.post("/api/dashboard/menu/recommendations", {
-        dayOfWeek,
-        productId,
-      });
-      load();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Failed to add");
-    } finally {
-      setBusy(false);
-    }
+    create.mutate(
+      { dayOfWeek, productId },
+      { onError: (e) => alert(e instanceof Error ? e.message : "Failed to add") }
+    );
   };
 
-  const remove = async (id: string) => {
-    setBusy(true);
-    try {
-      await api.del(`/api/dashboard/menu/recommendations/${id}`);
-      load();
-    } finally {
-      setBusy(false);
-    }
-  };
+  const remove = (id: string) => removeRec.mutate(id);
 
-  if (loading) return <CenteredSpinner label="Loading…" />;
+  if (recsLoading || prodLoading) return <CenteredSpinner label="Loading…" />;
 
   return (
     <div className="max-w-2xl">

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Download, DoorOpen, Plus, QrCode, Trash2 } from "lucide-react";
-import { api } from "@/lib/client-api";
 import {
   Button,
   CenteredSpinner,
@@ -13,6 +12,11 @@ import {
   Modal,
 } from "@/components/ui";
 import { downloadRoomQrPdf } from "@/lib/qrpdf";
+import {
+  useDashboardHotel,
+  useRooms,
+  useRoomMutations,
+} from "@/hooks/dashboard";
 import type { RoomDTO } from "@/types";
 
 function baseUrl() {
@@ -21,43 +25,24 @@ function baseUrl() {
 }
 
 export default function RoomsPage() {
-  const [rooms, setRooms] = useState<RoomDTO[]>([]);
-  const [slug, setSlug] = useState("");
-  const [hotelName, setHotelName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { data: hotel } = useDashboardHotel();
+  const { data: rooms = [], isLoading } = useRooms();
+  const { update, remove: removeRoom } = useRoomMutations();
   const [adding, setAdding] = useState(false);
   const [qrRoom, setQrRoom] = useState<RoomDTO | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const load = () => {
-    Promise.all([
-      api.get<{ slug: string; name: string }>("/api/dashboard/hotel"),
-      api.get<RoomDTO[]>("/api/dashboard/rooms"),
-    ])
-      .then(([h, r]) => {
-        setSlug(h.slug);
-        setHotelName(h.name);
-        setRooms(r);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-  useEffect(load, []);
-
+  const slug = hotel?.slug ?? "";
+  const hotelName = hotel?.name ?? "";
   const urlFor = (number: string) => `${baseUrl()}/${slug}/${number}`;
 
-  const toggle = async (r: RoomDTO) => {
-    await api.patch(`/api/dashboard/rooms/${r.id}`, { active: !r.active });
-    load();
-  };
-  const remove = async (r: RoomDTO) => {
+  const toggle = (r: RoomDTO) =>
+    update.mutate({ id: r.id, data: { active: !r.active } });
+  const remove = (r: RoomDTO) => {
     if (!confirm(`Delete room ${r.number}?`)) return;
-    try {
-      await api.del(`/api/dashboard/rooms/${r.id}`);
-      load();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Failed");
-    }
+    removeRoom.mutate(r.id, {
+      onError: (e) => alert(e instanceof Error ? e.message : "Failed"),
+    });
   };
   const downloadAll = async () => {
     if (rooms.length === 0) return;
@@ -69,7 +54,7 @@ export default function RoomsPage() {
     }
   };
 
-  if (loading) return <CenteredSpinner label="Loading rooms…" />;
+  if (isLoading) return <CenteredSpinner label="Loading rooms…" />;
 
   return (
     <div>
@@ -146,10 +131,7 @@ export default function RoomsPage() {
       {adding && (
         <AddRoomForm
           onClose={() => setAdding(false)}
-          onSaved={() => {
-            setAdding(false);
-            load();
-          }}
+          onSaved={() => setAdding(false)}
         />
       )}
       {qrRoom && (
@@ -193,17 +175,16 @@ function AddRoomForm({
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const { create } = useRoomMutations();
   const [number, setNumber] = useState("");
   const [floor, setFloor] = useState("1");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const submit = async () => {
     if (!number.trim()) return setError("Room number is required");
-    setSaving(true);
     setError(null);
     try {
-      await api.post("/api/dashboard/rooms", {
+      await create.mutateAsync({
         number,
         floor: parseInt(floor) || 0,
         name: `Room ${number}`,
@@ -211,8 +192,6 @@ function AddRoomForm({
       onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -226,7 +205,7 @@ function AddRoomForm({
           <Button variant="outline" className="flex-1" onClick={onClose}>
             Cancel
           </Button>
-          <Button className="flex-1" loading={saving} onClick={submit}>
+          <Button className="flex-1" loading={create.isPending} onClick={submit}>
             Add room
           </Button>
         </div>

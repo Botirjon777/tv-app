@@ -1,27 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/client-api";
-import { Button, CenteredSpinner, Input, Label } from "@/components/ui";
+import {
+  Button,
+  CenteredSpinner,
+  Checkbox,
+  Input,
+  Label,
+} from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { useDashboardHotel, useUpdateHotel } from "@/hooks/dashboard";
 
 type FeeType = "none" | "percent" | "fixed";
-
-type HotelSettings = {
-  serviceFeeType: FeeType;
-  serviceFeeValue: number;
-  preorderEnabled: boolean;
-  instagramUrl: string;
-  telegramUrl: string;
-  wifiName: string;
-  wifiPassword: string;
-};
 
 const FEE_PRESETS = [0, 10, 12, 15];
 
 export default function SettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { data: hotel, isLoading } = useDashboardHotel();
+  const update = useUpdateHotel();
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,28 +29,23 @@ export default function SettingsPage() {
   const [wifiName, setWifiName] = useState("");
   const [wifiPassword, setWifiPassword] = useState("");
 
+  // Populate the form once the hotel loads.
   useEffect(() => {
-    api
-      .get<HotelSettings>("/api/dashboard/hotel")
-      .then((h) => {
-        setFeeType(h.serviceFeeType);
-        setFeeValue(String(h.serviceFeeValue));
-        setPreorder(h.preorderEnabled);
-        setInstagram(h.instagramUrl ?? "");
-        setTelegram(h.telegramUrl ?? "");
-        setWifiName(h.wifiName ?? "");
-        setWifiPassword(h.wifiPassword ?? "");
-      })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
-  }, []);
+    if (!hotel) return;
+    setFeeType(hotel.serviceFeeType);
+    setFeeValue(String(hotel.serviceFeeValue));
+    setPreorder(hotel.preorderEnabled);
+    setInstagram(hotel.instagramUrl ?? "");
+    setTelegram(hotel.telegramUrl ?? "");
+    setWifiName(hotel.wifiName ?? "");
+    setWifiPassword(hotel.wifiPassword ?? "");
+  }, [hotel]);
 
-  const save = async () => {
-    setSaving(true);
+  const save = () => {
     setSaved(false);
     setError(null);
-    try {
-      await api.patch("/api/dashboard/hotel", {
+    update.mutate(
+      {
         serviceFeeType: feeType,
         serviceFeeValue: feeType === "none" ? 0 : parseInt(feeValue) || 0,
         preorderEnabled: preorder,
@@ -62,16 +53,16 @@ export default function SettingsPage() {
         telegramUrl: telegram.trim(),
         wifiName: wifiName.trim(),
         wifiPassword: wifiPassword.trim(),
-      });
-      setSaved(true);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save");
-    } finally {
-      setSaving(false);
-    }
+      },
+      {
+        onSuccess: () => setSaved(true),
+        onError: (e) =>
+          setError(e instanceof Error ? e.message : "Failed to save"),
+      }
+    );
   };
 
-  if (loading) return <CenteredSpinner label="Loading settings…" />;
+  if (isLoading) return <CenteredSpinner label="Loading settings…" />;
 
   return (
     <div className="max-w-xl">
@@ -159,11 +150,10 @@ export default function SettingsPage() {
               Let guests schedule an order for a later time.
             </span>
           </span>
-          <input
-            type="checkbox"
+          <Checkbox
             checked={preorder}
             onChange={(e) => setPreorder(e.target.checked)}
-            className="h-5 w-5 accent-brand-600"
+            className="h-5 w-5"
           />
         </label>
       </section>
@@ -222,7 +212,7 @@ export default function SettingsPage() {
       )}
 
       <div className="mt-5 flex items-center gap-3">
-        <Button onClick={save} loading={saving}>
+        <Button onClick={save} loading={update.isPending}>
           Save settings
         </Button>
         {saved && <span className="text-sm font-medium text-emerald-600">Saved ✓</span>}

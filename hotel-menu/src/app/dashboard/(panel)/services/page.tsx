@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Hotel, Pencil, Plus, Trash2 } from "lucide-react";
-import { api } from "@/lib/client-api";
 import {
   Button,
   CenteredSpinner,
@@ -14,35 +13,22 @@ import {
 } from "@/components/ui";
 import { LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
 import { formatPrice, parsePrice } from "@/lib/utils";
+import { useServices, useServiceMutations } from "@/hooks/dashboard";
 import type { ServiceDTO } from "@/types";
 
 export default function ServicesPage() {
-  const [services, setServices] = useState<ServiceDTO[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: services = [], isLoading } = useServices();
+  const { update, remove: removeService } = useServiceMutations();
   const [editing, setEditing] = useState<ServiceDTO | null>(null);
   const [adding, setAdding] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    api
-      .get<ServiceDTO[]>("/api/dashboard/services")
-      .then(setServices)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(load, []);
-
-  const remove = async (s: ServiceDTO) => {
+  const remove = (s: ServiceDTO) => {
     if (!confirm(`Delete "${s.name}"?`)) return;
-    await api.del(`/api/dashboard/services/${s.id}`);
-    load();
+    removeService.mutate(s.id);
   };
 
-  const toggle = async (s: ServiceDTO) => {
-    await api.patch(`/api/dashboard/services/${s.id}`, { active: !s.active });
-    load();
-  };
+  const toggle = (s: ServiceDTO) =>
+    update.mutate({ id: s.id, data: { active: !s.active } });
 
   return (
     <div className="max-w-2xl">
@@ -58,7 +44,7 @@ export default function ServicesPage() {
         </Button>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <CenteredSpinner />
       ) : services.length === 0 ? (
         <EmptyState
@@ -131,7 +117,6 @@ export default function ServicesPage() {
           onSaved={() => {
             setAdding(false);
             setEditing(null);
-            load();
           }}
         />
       )}
@@ -149,33 +134,31 @@ function ServiceForm({
   onSaved: () => void;
 }) {
   const isEdit = Boolean(service);
+  const { create, update } = useServiceMutations();
   const [name, setName] = useState(service?.name ?? "");
   const [description, setDescription] = useState(service?.description ?? "");
   const [price, setPrice] = useState(String(service?.price || ""));
   const [imageUrl, setImageUrl] = useState(service?.imageUrl ?? "");
   const [sourceLang, setSourceLang] = useState<Lang>(service?.sourceLang ?? "en");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const saving = create.isPending || update.isPending;
 
   const submit = async () => {
     if (!name.trim()) return setError("Name is required");
-    setSaving(true);
     setError(null);
+    const body = {
+      name,
+      description,
+      price: parsePrice(price),
+      imageUrl,
+      sourceLang,
+    };
     try {
-      const body = {
-        name,
-        description,
-        price: parsePrice(price),
-        imageUrl,
-        sourceLang,
-      };
-      if (isEdit) await api.patch(`/api/dashboard/services/${service!.id}`, body);
-      else await api.post("/api/dashboard/services", body);
+      if (isEdit) await update.mutateAsync({ id: service!.id, data: body });
+      else await create.mutateAsync(body);
       onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
-    } finally {
-      setSaving(false);
     }
   };
 

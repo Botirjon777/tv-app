@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Pencil, Plus, Trash2, UtensilsCrossed } from "lucide-react";
-import { api } from "@/lib/client-api";
 import {
   Button,
   CenteredSpinner,
@@ -14,30 +13,23 @@ import {
 } from "@/components/ui";
 import { formatPrice, parsePrice } from "@/lib/utils";
 import { LANGS, LANG_LABEL, type Lang } from "@/lib/i18n";
+import {
+  useCategories,
+  useCategoryMutations,
+  useProducts,
+  useProductMutations,
+} from "@/hooks/dashboard";
 import type { CategoryDTO, ProductDTO } from "@/types";
 
 export default function MenuPage() {
-  const [categories, setCategories] = useState<CategoryDTO[]>([]);
-  const [products, setProducts] = useState<ProductDTO[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: categories = [], isLoading: catLoading } = useCategories();
+  const { data: products = [], isLoading: prodLoading } = useProducts();
+  const { remove: removeCategory } = useCategoryMutations();
+  const { update: updateProduct, remove: removeProduct } = useProductMutations();
   const [catForm, setCatForm] = useState<CategoryDTO | "new" | null>(null);
   const [prodForm, setProdForm] = useState<ProductDTO | { categoryId: string } | null>(
     null
   );
-
-  const load = () => {
-    Promise.all([
-      api.get<CategoryDTO[]>("/api/dashboard/menu/categories"),
-      api.get<ProductDTO[]>("/api/dashboard/menu/products"),
-    ])
-      .then(([c, p]) => {
-        setCategories(c);
-        setProducts(p);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  };
-  useEffect(load, []);
 
   const byCategory = useMemo(() => {
     const map: Record<string, ProductDTO[]> = {};
@@ -45,24 +37,18 @@ export default function MenuPage() {
     return map;
   }, [products]);
 
-  const delCategory = async (c: CategoryDTO) => {
+  const delCategory = (c: CategoryDTO) => {
     if (!confirm(`Delete "${c.name}" and its products?`)) return;
-    await api.del(`/api/dashboard/menu/categories/${c.id}`);
-    load();
+    removeCategory.mutate(c.id);
   };
-  const delProduct = async (p: ProductDTO) => {
+  const delProduct = (p: ProductDTO) => {
     if (!confirm(`Delete "${p.name}"?`)) return;
-    await api.del(`/api/dashboard/menu/products/${p.id}`);
-    load();
+    removeProduct.mutate(p.id);
   };
-  const toggleProduct = async (p: ProductDTO) => {
-    await api.patch(`/api/dashboard/menu/products/${p.id}`, {
-      available: !p.available,
-    });
-    load();
-  };
+  const toggleProduct = (p: ProductDTO) =>
+    updateProduct.mutate({ id: p.id, data: { available: !p.available } });
 
-  if (loading) return <CenteredSpinner label="Loading menu…" />;
+  if (catLoading || prodLoading) return <CenteredSpinner label="Loading menu…" />;
 
   return (
     <div className="max-w-2xl">
@@ -169,10 +155,7 @@ export default function MenuPage() {
         <CategoryForm
           category={catForm === "new" ? null : catForm}
           onClose={() => setCatForm(null)}
-          onSaved={() => {
-            setCatForm(null);
-            load();
-          }}
+          onSaved={() => setCatForm(null)}
         />
       )}
       {prodForm && (
@@ -181,10 +164,7 @@ export default function MenuPage() {
           categoryId={"id" in prodForm ? prodForm.categoryId : prodForm.categoryId}
           categories={categories}
           onClose={() => setProdForm(null)}
-          onSaved={() => {
-            setProdForm(null);
-            load();
-          }}
+          onSaved={() => setProdForm(null)}
         />
       )}
     </div>
@@ -201,25 +181,22 @@ function CategoryForm({
   onSaved: () => void;
 }) {
   const isEdit = Boolean(category);
+  const { create, update } = useCategoryMutations();
   const [name, setName] = useState(category?.name ?? "");
   const [sourceLang, setSourceLang] = useState<Lang>(category?.sourceLang ?? "en");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const saving = create.isPending || update.isPending;
 
   const submit = async () => {
     if (!name.trim()) return setError("Name is required");
-    setSaving(true);
     setError(null);
+    const body = { name, sourceLang };
     try {
-      const body = { name, sourceLang };
-      if (isEdit)
-        await api.patch(`/api/dashboard/menu/categories/${category!.id}`, body);
-      else await api.post("/api/dashboard/menu/categories", body);
+      if (isEdit) await update.mutateAsync({ id: category!.id, data: body });
+      else await create.mutateAsync(body);
       onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -286,36 +263,33 @@ function ProductForm({
   onSaved: () => void;
 }) {
   const isEdit = Boolean(product);
+  const { create, update } = useProductMutations();
   const [name, setName] = useState(product?.name ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
   const [price, setPrice] = useState(String(product?.price ?? ""));
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? "");
   const [catId, setCatId] = useState(product?.categoryId ?? categoryId);
   const [sourceLang, setSourceLang] = useState<Lang>(product?.sourceLang ?? "en");
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const saving = create.isPending || update.isPending;
 
   const submit = async () => {
     if (!name.trim()) return setError("Name is required");
-    setSaving(true);
     setError(null);
+    const body = {
+      name,
+      description,
+      price: parsePrice(price),
+      imageUrl,
+      categoryId: catId,
+      sourceLang,
+    };
     try {
-      const body = {
-        name,
-        description,
-        price: parsePrice(price),
-        imageUrl,
-        categoryId: catId,
-        sourceLang,
-      };
-      if (isEdit)
-        await api.patch(`/api/dashboard/menu/products/${product!.id}`, body);
-      else await api.post("/api/dashboard/menu/products", body);
+      if (isEdit) await update.mutateAsync({ id: product!.id, data: body });
+      else await create.mutateAsync(body);
       onSaved();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save");
-    } finally {
-      setSaving(false);
     }
   };
 

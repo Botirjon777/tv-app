@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   BadgePercent,
@@ -15,21 +14,7 @@ import {
 import { CenteredSpinner } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { botUsername } from "@/lib/onboarding";
-
-type DashboardHotel = {
-  name: string;
-  connectCode: string;
-  serviceFeeType: string;
-  serviceFeeValue: number;
-  telegramLinked: boolean;
-  instagramUrl: string;
-  telegramUrl: string;
-  serviceCount: number;
-  productCount: number;
-  roomCount: number;
-  orderCount: number;
-  activeOrderCount: number;
-};
+import { useDashboardHotel } from "@/hooks/dashboard";
 
 type ChecklistItem = {
   key: string;
@@ -42,21 +27,9 @@ type ChecklistItem = {
 };
 
 export default function DashboardHome() {
-  const [hotel, setHotel] = useState<DashboardHotel | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: hotel, isLoading } = useDashboardHotel();
 
-  useEffect(() => {
-    let active = true;
-    fetch("/api/dashboard/hotel", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => active && setHotel(data))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (loading) return <CenteredSpinner label="Loading…" />;
+  if (isLoading) return <CenteredSpinner label="Loading…" />;
   if (!hotel)
     return <p className="text-slate-500">Could not load your dashboard.</p>;
 
