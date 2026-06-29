@@ -210,9 +210,31 @@ export function OrderTracker({
                   </li>
                 ))}
               </ul>
-              <div className="mt-3 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-3 font-bold">
-                <span>{t(lang, "total")}</span>
-                <PriceTag uzs={order.total} subClassName="text-zinc-500" />
+              <div className="mt-3 border-t border-zinc-200 dark:border-zinc-800 pt-3">
+                {order.serviceFee > 0 && (
+                  <>
+                    <div className="flex items-center justify-between text-sm text-zinc-500 dark:text-zinc-400">
+                      <span>{t(lang, "subtotal")}</span>
+                      <PriceTag
+                        uzs={order.total - order.serviceFee}
+                        className="text-sm font-normal text-zinc-600 dark:text-zinc-300"
+                        subClassName="text-zinc-500"
+                      />
+                    </div>
+                    <div className="mt-1 flex items-center justify-between text-sm text-zinc-500 dark:text-zinc-400">
+                      <span>{t(lang, "serviceFee")}</span>
+                      <PriceTag
+                        uzs={order.serviceFee}
+                        className="text-sm font-normal text-zinc-600 dark:text-zinc-300"
+                        subClassName="text-zinc-500"
+                      />
+                    </div>
+                  </>
+                )}
+                <div className="mt-1 flex items-center justify-between font-bold">
+                  <span>{t(lang, "total")}</span>
+                  <PriceTag uzs={order.total} subClassName="text-zinc-500" />
+                </div>
               </div>
               {order.note && (
                 <p className="mt-3 rounded-lg bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">

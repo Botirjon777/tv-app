@@ -10,6 +10,7 @@ import { useCart } from "./useCart";
 import { cn } from "@/lib/utils";
 import { PriceTag } from "./PriceTag";
 import { resolveText, t, type Lang } from "@/lib/i18n";
+import { computeServiceFee } from "@/lib/fees";
 import { CartSheet } from "./CartSheet";
 import { OrderTracker } from "./OrderTracker";
 import { RecommendationBanner } from "./RecommendationBanner";
@@ -18,7 +19,12 @@ import { useLang } from "./useLang";
 import { useTheme } from "./useTheme";
 
 type Room = { id: string; number: string; name: string };
-type Hotel = { slug: string; name: string };
+type Hotel = {
+  slug: string;
+  name: string;
+  serviceFeeType: string;
+  serviceFeeValue: number;
+};
 
 export function MenuClient({
   hotel,
@@ -67,6 +73,13 @@ export function MenuClient({
     for (const item of cart.items) map[item.productId] = item.quantity;
     return map;
   }, [cart.items]);
+
+  const serviceFee = computeServiceFee(
+    cart.total,
+    hotel.serviceFeeType,
+    hotel.serviceFeeValue
+  );
+  const grandTotal = cart.total + serviceFee;
 
   if (menu.length === 0) {
     return (
@@ -215,7 +228,7 @@ export function MenuClient({
                 <span className="font-semibold">{t(lang, "viewCart")}</span>
               </span>
               <PriceTag
-                uzs={cart.total}
+                uzs={grandTotal}
                 className="text-white"
                 subClassName="text-white/70"
               />
@@ -245,6 +258,8 @@ export function MenuClient({
         lang={lang}
         hotelSlug={hotel.slug}
         roomNumber={room.number}
+        feeType={hotel.serviceFeeType}
+        feeValue={hotel.serviceFeeValue}
         onPlaced={(orderId) => {
           cart.clear();
           setCartOpen(false);

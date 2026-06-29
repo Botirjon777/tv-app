@@ -110,7 +110,10 @@ type UIKey =
   | "close"
   | "lightMode"
   | "darkMode"
-  | "backToTop";
+  | "backToTop"
+  | "subtotal"
+  | "serviceFee"
+  | "hotelServices";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -177,6 +180,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     lightMode: "Switch to light mode",
     darkMode: "Switch to dark mode",
     backToTop: "Back to top",
+    subtotal: "Subtotal",
+    serviceFee: "Service fee",
+    hotelServices: "Hotel services",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -242,6 +248,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     lightMode: "Светлая тема",
     darkMode: "Тёмная тема",
     backToTop: "Наверх",
+    subtotal: "Подытог",
+    serviceFee: "Сервисный сбор",
+    hotelServices: "Услуги отеля",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -307,6 +316,9 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     lightMode: "Yorug‘ rejim",
     darkMode: "Tungi rejim",
     backToTop: "Yuqoriga",
+    subtotal: "Oraliq jami",
+    serviceFee: "Xizmat haqi",
+    hotelServices: "Mehmonxona xizmatlari",
   },
 };
 

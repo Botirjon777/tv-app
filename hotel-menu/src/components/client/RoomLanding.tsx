@@ -21,7 +21,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { t, type Lang } from "@/lib/i18n";
+import { resolveText, t, type Lang } from "@/lib/i18n";
+import type { ServiceDTO } from "@/types";
 import { Modal, Button, Textarea } from "@/components/ui";
 import { RoomControls } from "./RoomControls";
 import { useLang } from "./useLang";
@@ -57,9 +58,11 @@ export type LandingHotel = {
 export function RoomLanding({
   hotel,
   room,
+  hotelServices = [],
 }: {
   hotel: LandingHotel;
   room: { number: string };
+  hotelServices?: ServiceDTO[];
 }) {
   const router = useRouter();
   const { lang, changeLang } = useLang();
@@ -270,6 +273,40 @@ export function RoomLanding({
             />
           </motion.div>
         </motion.div>
+
+        {/* Hotel services (manager-defined: transfer, pool, conference…) */}
+        {hotelServices.length > 0 && (
+          <div className="mt-8">
+            <h2 className="mb-3 font-serif text-lg font-bold text-zinc-900 dark:text-white">
+              {t(lang, "hotelServices")}
+            </h2>
+            <div className="space-y-2.5">
+              {hotelServices.map((s) => {
+                const desc = resolveText(s.descI18n, lang, s.description);
+                return (
+                  <div
+                    key={s.id}
+                    className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-white p-3.5 dark:border-zinc-800 dark:bg-zinc-900"
+                  >
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-300">
+                      <Hotel className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-zinc-900 dark:text-zinc-50">
+                        {resolveText(s.nameI18n, lang, s.name)}
+                      </p>
+                      {desc && (
+                        <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+                          {desc}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Social footer */}
         {(hotel.instagramUrl || hotel.telegramUrl) && (

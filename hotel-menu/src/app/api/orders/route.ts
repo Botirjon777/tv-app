@@ -5,6 +5,7 @@ import { getServerSession } from "@/lib/session";
 import { serializeOrder, orderInclude } from "@/lib/serialize";
 import { ACTIVE_STATUSES, isOrderStatus } from "@/lib/orders";
 import { sendMessage, formatOrderMessage } from "@/lib/telegram";
+import { computeServiceFee } from "@/lib/fees";
 
 // GET /api/orders — staff only.
 // Filters: ?status=PENDING&active=1&hotelId=...&hotelSlug=...&roomNumber=101&limit=50
@@ -90,16 +91,22 @@ export async function POST(req: Request) {
       };
     });
 
-    const total = lineItems.reduce(
+    const subtotal = lineItems.reduce(
       (sum, it) => sum + it.price * it.quantity,
       0
+    );
+    const serviceFee = computeServiceFee(
+      subtotal,
+      hotel.serviceFeeType,
+      hotel.serviceFeeValue
     );
 
     const order = await prisma.order.create({
       data: {
         roomId: room.id,
         note: data.note ?? "",
-        total,
+        serviceFee,
+        total: subtotal + serviceFee,
         status: "PENDING",
         items: { create: lineItems },
       },

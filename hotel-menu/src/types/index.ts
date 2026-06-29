@@ -95,7 +95,8 @@ export type OrderDTO = {
   hotelName: string;
   status: OrderStatus;
   note: string;
-  total: number; // integer UZS (so'm)
+  serviceFee: number; // integer UZS (so'm)
+  total: number; // subtotal + serviceFee, integer UZS (so'm)
   items: OrderItemDTO[];
   createdAt: string;
   updatedAt: string;

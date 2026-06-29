@@ -8,6 +8,7 @@ describe("serializeOrder", () => {
       roomId: "r1",
       status: "PENDING",
       note: "no onions",
+      serviceFee: 0,
       total: 50000,
       createdAt: new Date("2026-06-24T10:00:00Z"),
       updatedAt: new Date("2026-06-24T10:05:00Z"),
@@ -30,6 +31,7 @@ describe("serializeOrder", () => {
       hotelName: "Grand",
       status: "PENDING",
       note: "no onions",
+      serviceFee: 0,
       total: 50000,
       items: [
         { id: "i1", productId: "p1", name: "Tea", price: 10000, quantity: 2 },
@@ -45,6 +47,7 @@ describe("serializeOrder", () => {
       roomId: "r9",
       status: "PENDING",
       note: "",
+      serviceFee: 0,
       total: 0,
       createdAt: new Date("2026-06-24T10:00:00Z"),
       updatedAt: new Date("2026-06-24T10:00:00Z"),

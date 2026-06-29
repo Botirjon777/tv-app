@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { Button, Modal } from "@/components/ui";
 import { PriceTag } from "./PriceTag";
 import { t, type Lang } from "@/lib/i18n";
+import { computeServiceFee } from "@/lib/fees";
 import type { useCart } from "./useCart";
 
 type Cart = ReturnType<typeof useCart>;
@@ -16,6 +17,8 @@ export function CartSheet({
   lang,
   hotelSlug,
   roomNumber,
+  feeType,
+  feeValue,
   onPlaced,
 }: {
   open: boolean;
@@ -24,11 +27,16 @@ export function CartSheet({
   lang: Lang;
   hotelSlug: string;
   roomNumber: string;
+  feeType: string;
+  feeValue: number;
   onPlaced: (orderId: string) => void;
 }) {
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const serviceFee = computeServiceFee(cart.total, feeType, feeValue);
+  const grandTotal = cart.total + serviceFee;
 
   const placeOrder = async () => {
     setSubmitting(true);
@@ -72,9 +80,32 @@ export function CartSheet({
               {error}
             </p>
           )}
+          {serviceFee > 0 && (
+            <div className="space-y-1 text-sm text-zinc-500 dark:text-zinc-400">
+              <div className="flex items-center justify-between">
+                <span>{t(lang, "subtotal")}</span>
+                <PriceTag
+                  uzs={cart.total}
+                  className="text-sm font-normal text-zinc-600 dark:text-zinc-300"
+                  subClassName="text-zinc-500"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span>
+                  {t(lang, "serviceFee")}
+                  {feeType === "percent" ? ` (${feeValue}%)` : ""}
+                </span>
+                <PriceTag
+                  uzs={serviceFee}
+                  className="text-sm font-normal text-zinc-600 dark:text-zinc-300"
+                  subClassName="text-zinc-500"
+                />
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between text-base font-bold">
             <span>{t(lang, "total")}</span>
-            <PriceTag uzs={cart.total} subClassName="text-zinc-500" />
+            <PriceTag uzs={grandTotal} subClassName="text-zinc-500" />
           </div>
           <Button
             size="lg"

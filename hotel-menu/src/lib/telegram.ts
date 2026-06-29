@@ -67,11 +67,14 @@ export function formatOrderMessage(order: OrderDTO): string {
       )}`
   );
   const note = order.note ? `\n📝 ${escapeHtml(order.note)}` : "";
+  const feeLine =
+    order.serviceFee > 0 ? [`Service fee: ${formatPrice(order.serviceFee)}`] : [];
   return [
     `🛎 <b>New order</b> · Room <b>${escapeHtml(order.roomNumber)}</b>`,
     "",
     ...lines,
     "",
+    ...feeLine,
     `<b>Total: ${formatPrice(order.total)}</b>${note}`,
   ].join("\n");
 }

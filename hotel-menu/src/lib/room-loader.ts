@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { parseI18n, type Lang } from "@/lib/i18n";
 import { resolveHotelAsset } from "@/lib/hotel-assets";
+import { serializeService } from "@/lib/serialize-menu";
 import type { LandingHotel } from "@/components/client/RoomLanding";
-import type { MenuCategoryDTO, ProductDTO } from "@/types";
+import type { MenuCategoryDTO, ProductDTO, ServiceDTO } from "@/types";
 
 type RoomRef = { id: string; number: string; name: string };
 
@@ -56,10 +57,19 @@ function toProductDTO(p: ProductRow): ProductDTO {
 export async function loadRoomLanding(
   slug: string,
   number: string
-): Promise<{ hotel: LandingHotel; room: RoomRef } | null> {
+): Promise<{
+  hotel: LandingHotel;
+  room: RoomRef;
+  services: ServiceDTO[];
+} | null> {
   const found = await findActiveRoom(slug, number);
   if (!found) return null;
   const { hotel, room } = found;
+
+  const services = await prisma.hotelService.findMany({
+    where: { hotelId: hotel.id, active: true },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
 
   return {
     hotel: {
@@ -76,6 +86,7 @@ export async function loadRoomLanding(
       telegramUrl: hotel.telegramUrl,
     },
     room: toRoomRef(room),
+    services: services.map(serializeService),
   };
 }
 
@@ -84,7 +95,12 @@ export async function loadRoomMenu(
   slug: string,
   number: string
 ): Promise<{
-  hotel: { slug: string; name: string };
+  hotel: {
+    slug: string;
+    name: string;
+    serviceFeeType: string;
+    serviceFeeValue: number;
+  };
   room: RoomRef;
   menu: MenuCategoryDTO[];
   recommendations: ProductDTO[];
@@ -124,7 +140,12 @@ export async function loadRoomMenu(
   const recommendations: ProductDTO[] = recs.map((r) => toProductDTO(r.product));
 
   return {
-    hotel: { slug: hotel.slug, name: hotel.name },
+    hotel: {
+      slug: hotel.slug,
+      name: hotel.name,
+      serviceFeeType: hotel.serviceFeeType,
+      serviceFeeValue: hotel.serviceFeeValue,
+    },
     room: toRoomRef(room),
     menu,
     recommendations,

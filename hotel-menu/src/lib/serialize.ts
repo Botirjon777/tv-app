@@ -8,6 +8,7 @@ type OrderWithRelations = {
   roomId: string;
   status: string;
   note: string;
+  serviceFee: number;
   total: number;
   createdAt: Date;
   updatedAt: Date;
@@ -35,6 +36,7 @@ export function serializeOrder(order: OrderWithRelations): OrderDTO {
     hotelName: order.room?.hotel?.name ?? "",
     status: order.status as OrderStatus,
     note: order.note,
+    serviceFee: order.serviceFee,
     total: order.total,
     items: order.items.map((it) => ({
       id: it.id,

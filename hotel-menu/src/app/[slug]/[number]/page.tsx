@@ -14,5 +14,11 @@ export default async function RoomLandingPage({
     return <RoomNotAvailable slug={params.slug} number={params.number} />;
   }
 
-  return <RoomLanding hotel={data.hotel} room={data.room} />;
+  return (
+    <RoomLanding
+      hotel={data.hotel}
+      room={data.room}
+      hotelServices={data.services}
+    />
+  );
 }
