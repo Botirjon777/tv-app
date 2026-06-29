@@ -28,6 +28,7 @@ import {
 import { api } from "@/lib/client-api";
 import { downloadRoomQrPdf } from "@/lib/qrpdf";
 import { slugify } from "@/lib/slug";
+import { ManagerGuide } from "@/components/admin/ManagerGuide";
 import type { HotelDTO, RoomDTO } from "@/types";
 
 function baseUrl() {
@@ -40,6 +41,7 @@ export default function HotelsPage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<HotelDTO | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [created, setCreated] = useState<HotelDTO | null>(null);
 
   const hotelsQ = useQuery({
     queryKey: ["hotels"],
@@ -201,12 +203,33 @@ export default function HotelsPage() {
             setCreating(false);
             setEditing(null);
           }}
-          onSaved={() => {
+          onSaved={(saved) => {
             qc.invalidateQueries({ queryKey: ["hotels"] });
+            const wasEdit = Boolean(editing);
             setCreating(false);
             setEditing(null);
+            // After creating (not editing), show the manager setup guide.
+            if (!wasEdit && saved) setCreated(saved);
           }}
         />
+      )}
+
+      {created && (
+        <Modal
+          open
+          onClose={() => setCreated(null)}
+          title={`${created.name} created`}
+        >
+          <p className="mb-3 text-sm text-slate-500">
+            Send this to the hotel manager so they can connect their Telegram
+            group. You can find it again on the hotel&apos;s page anytime.
+          </p>
+          <ManagerGuide
+            hotelName={created.name}
+            connectCode={created.connectCode}
+            posPassword={created.posPassword}
+          />
+        </Modal>
       )}
     </div>
   );
@@ -221,7 +244,7 @@ function HotelForm({
 }: {
   hotel: HotelDTO | null;
   onClose: () => void;
-  onSaved: () => void;
+  onSaved: (hotel?: HotelDTO) => void;
 }) {
   const isEdit = Boolean(hotel);
   const [name, setName] = useState(hotel?.name ?? "");
@@ -277,7 +300,7 @@ function HotelForm({
         ...branding,
       });
     },
-    onSuccess: onSaved,
+    onSuccess: (data) => onSaved(data as HotelDTO),
     onError: (e: Error) => setError(e.message),
   });
 

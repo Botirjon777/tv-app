@@ -27,6 +27,7 @@ import {
 } from "@/components/ui";
 import { api } from "@/lib/client-api";
 import { downloadRoomQrPdf } from "@/lib/qrpdf";
+import { ManagerGuide } from "@/components/admin/ManagerGuide";
 import type { HotelDTO, RoomDTO } from "@/types";
 
 function baseUrl() {
@@ -156,6 +157,16 @@ export default function HotelDetailPage({
               Open the bot, add it to your group, send the code
             </p>
           </div>
+        </div>
+      )}
+
+      {hotel && (
+        <div className="mb-5">
+          <ManagerGuide
+            hotelName={hotel.name}
+            connectCode={hotel.connectCode}
+            posPassword={hotel.posPassword}
+          />
         </div>
       )}
 
