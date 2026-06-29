@@ -86,6 +86,9 @@ export const orderInput = z.object({
   roomNumber: z.string().trim().min(1, "Room is required"),
   note: z.string().max(500).optional().default(""),
   items: z.array(orderItemInput).min(1, "Cart is empty"),
+  // Preorder: optional date (YYYY-MM-DD) + time (HH:MM) to schedule for later.
+  scheduledDate: z.string().trim().optional(),
+  scheduledTime: z.string().trim().optional(),
 });
 
 export const orderStatusInput = z.object({

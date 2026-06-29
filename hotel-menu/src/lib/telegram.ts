@@ -163,8 +163,13 @@ export function formatOrderMessage(order: OrderDTO): string {
   const note = order.note ? `\n📝 ${escapeHtml(order.note)}` : "";
   const feeLine =
     order.serviceFee > 0 ? [`Service fee: ${formatPrice(order.serviceFee)}`] : [];
+  const header = order.scheduledFor
+    ? `🛎 <b>Preorder</b> · Room <b>${escapeHtml(order.roomNumber)}</b>\n🕒 ${new Date(
+        order.scheduledFor
+      ).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}`
+    : `🛎 <b>New order</b> · Room <b>${escapeHtml(order.roomNumber)}</b>`;
   return [
-    `🛎 <b>New order</b> · Room <b>${escapeHtml(order.roomNumber)}</b>`,
+    header,
     "",
     ...lines,
     "",

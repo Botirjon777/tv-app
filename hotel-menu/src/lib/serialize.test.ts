@@ -10,6 +10,7 @@ describe("serializeOrder", () => {
       note: "no onions",
       serviceFee: 0,
       total: 50000,
+      scheduledFor: null,
       createdAt: new Date("2026-06-24T10:00:00Z"),
       updatedAt: new Date("2026-06-24T10:05:00Z"),
       room: {
@@ -33,6 +34,7 @@ describe("serializeOrder", () => {
       note: "no onions",
       serviceFee: 0,
       total: 50000,
+      scheduledFor: null,
       items: [
         { id: "i1", productId: "p1", name: "Tea", price: 10000, quantity: 2 },
       ],
@@ -49,6 +51,7 @@ describe("serializeOrder", () => {
       note: "",
       serviceFee: 0,
       total: 0,
+      scheduledFor: null,
       createdAt: new Date("2026-06-24T10:00:00Z"),
       updatedAt: new Date("2026-06-24T10:00:00Z"),
       room: null,

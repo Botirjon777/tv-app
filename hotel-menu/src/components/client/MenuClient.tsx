@@ -24,6 +24,7 @@ type Hotel = {
   name: string;
   serviceFeeType: string;
   serviceFeeValue: number;
+  preorderEnabled: boolean;
 };
 
 export function MenuClient({
@@ -260,6 +261,7 @@ export function MenuClient({
         roomNumber={room.number}
         feeType={hotel.serviceFeeType}
         feeValue={hotel.serviceFeeValue}
+        preorderEnabled={hotel.preorderEnabled}
         onPlaced={(orderId) => {
           cart.clear();
           setCartOpen(false);

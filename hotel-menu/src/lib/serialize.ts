@@ -10,6 +10,7 @@ type OrderWithRelations = {
   note: string;
   serviceFee: number;
   total: number;
+  scheduledFor: Date | null;
   createdAt: Date;
   updatedAt: Date;
   room?: {
@@ -38,6 +39,7 @@ export function serializeOrder(order: OrderWithRelations): OrderDTO {
     note: order.note,
     serviceFee: order.serviceFee,
     total: order.total,
+    scheduledFor: order.scheduledFor ? order.scheduledFor.toISOString() : null,
     items: order.items.map((it) => ({
       id: it.id,
       productId: it.productId,

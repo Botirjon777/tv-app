@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveText, t, type Lang } from "@/lib/i18n";
+import { buildDateOptions, TIME_OPTIONS } from "@/lib/datetime";
 import type { ServiceDTO } from "@/types";
 import { Modal, Button, Textarea } from "@/components/ui";
 import { RoomControls } from "./RoomControls";
@@ -39,42 +40,6 @@ const tileItem: Variants = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
 };
-
-function localeFor(lang: Lang): string {
-  return lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-GB";
-}
-
-// Next 14 days as { YYYY-MM-DD, localized label } for the date dropdown.
-function buildDateOptions(lang: Lang): { value: string; label: string }[] {
-  const out: { value: string; label: string }[] = [];
-  const now = new Date();
-  for (let i = 0; i < 14; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
-    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(d.getDate()).padStart(2, "0")}`;
-    out.push({
-      value,
-      label: d.toLocaleDateString(localeFor(lang), {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }),
-    });
-  }
-  return out;
-}
-
-// 30-minute slots for the time dropdown.
-const TIME_OPTIONS: string[] = (() => {
-  const out: string[] = [];
-  for (let h = 0; h < 24; h++) {
-    out.push(`${String(h).padStart(2, "0")}:00`);
-    out.push(`${String(h).padStart(2, "0")}:30`);
-  }
-  return out;
-})();
 
 // Hotel data surfaced on the in-room landing.
 export type LandingHotel = {

@@ -101,12 +101,21 @@ export async function POST(req: Request) {
       hotel.serviceFeeValue
     );
 
+    // Preorder: schedule for a later time (only when the hotel enables it).
+    let scheduledFor: Date | null = null;
+    if (hotel.preorderEnabled && data.scheduledDate) {
+      const time = data.scheduledTime || "00:00";
+      const parsed = new Date(`${data.scheduledDate}T${time}:00`);
+      if (!Number.isNaN(parsed.getTime())) scheduledFor = parsed;
+    }
+
     const order = await prisma.order.create({
       data: {
         roomId: room.id,
         note: data.note ?? "",
         serviceFee,
         total: subtotal + serviceFee,
+        scheduledFor,
         status: "PENDING",
         items: { create: lineItems },
       },

@@ -97,6 +97,7 @@ export type OrderDTO = {
   note: string;
   serviceFee: number; // integer UZS (so'm)
   total: number; // subtotal + serviceFee, integer UZS (so'm)
+  scheduledFor: string | null; // ISO datetime for preorders, null = ASAP
   items: OrderItemDTO[];
   createdAt: string;
   updatedAt: string;

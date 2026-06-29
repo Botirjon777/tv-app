@@ -116,7 +116,9 @@ type UIKey =
   | "hotelServices"
   | "destination"
   | "dateLabel"
-  | "timeLabel";
+  | "timeLabel"
+  | "scheduleForLater"
+  | "scheduledForLabel";
 
 export const UI: Record<Lang, Record<UIKey, string>> = {
   en: {
@@ -189,6 +191,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     destination: "Destination",
     dateLabel: "Date",
     timeLabel: "Time",
+    scheduleForLater: "Schedule for later (optional)",
+    scheduledForLabel: "Scheduled for",
   },
   ru: {
     inRoomDining: "Обслуживание в номере",
@@ -260,6 +264,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     destination: "Пункт назначения",
     dateLabel: "Дата",
     timeLabel: "Время",
+    scheduleForLater: "Запланировать на потом (необязательно)",
+    scheduledForLabel: "Запланировано на",
   },
   uz: {
     inRoomDining: "Xona xizmati",
@@ -331,6 +337,8 @@ export const UI: Record<Lang, Record<UIKey, string>> = {
     destination: "Manzil",
     dateLabel: "Sana",
     timeLabel: "Vaqt",
+    scheduleForLater: "Keyinroqqa rejalashtirish (ixtiyoriy)",
+    scheduledForLabel: "Rejalashtirilgan",
   },
 };
 

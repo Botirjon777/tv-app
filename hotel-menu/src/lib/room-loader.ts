@@ -100,6 +100,7 @@ export async function loadRoomMenu(
     name: string;
     serviceFeeType: string;
     serviceFeeValue: number;
+    preorderEnabled: boolean;
   };
   room: RoomRef;
   menu: MenuCategoryDTO[];
@@ -145,6 +146,7 @@ export async function loadRoomMenu(
       name: hotel.name,
       serviceFeeType: hotel.serviceFeeType,
       serviceFeeValue: hotel.serviceFeeValue,
+      preorderEnabled: hotel.preorderEnabled,
     },
     room: toRoomRef(room),
     menu,

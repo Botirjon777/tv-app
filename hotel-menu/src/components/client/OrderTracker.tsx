@@ -7,6 +7,7 @@ import { Button, Spinner } from "@/components/ui";
 import { PriceTag } from "./PriceTag";
 import { cn } from "@/lib/utils";
 import { t, type Lang } from "@/lib/i18n";
+import { localeFor } from "@/lib/datetime";
 import type { OrderStatus } from "@/lib/orders";
 import type { OrderDTO } from "@/types";
 
@@ -127,6 +128,20 @@ export function OrderTracker({
                 {t(lang, "orderNo")} #{order.id.slice(-6).toUpperCase()} ·{" "}
                 {t(lang, "room")} {order.roomNumber}
               </motion.p>
+              {order.scheduledFor && (
+                <motion.p
+                  className="mt-1 text-xs font-semibold text-brand-600 dark:text-brand-400"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.45, duration: 0.4 }}
+                >
+                  🕒 {t(lang, "scheduledForLabel")}:{" "}
+                  {new Date(order.scheduledFor).toLocaleString(localeFor(lang), {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </motion.p>
+              )}
             </div>
 
             {cancelled ? (

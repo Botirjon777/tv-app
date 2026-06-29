@@ -6,6 +6,7 @@ import { Button, Modal } from "@/components/ui";
 import { PriceTag } from "./PriceTag";
 import { t, type Lang } from "@/lib/i18n";
 import { computeServiceFee } from "@/lib/fees";
+import { buildDateOptions, TIME_OPTIONS } from "@/lib/datetime";
 import type { useCart } from "./useCart";
 
 type Cart = ReturnType<typeof useCart>;
@@ -19,6 +20,7 @@ export function CartSheet({
   roomNumber,
   feeType,
   feeValue,
+  preorderEnabled,
   onPlaced,
 }: {
   open: boolean;
@@ -29,9 +31,12 @@ export function CartSheet({
   roomNumber: string;
   feeType: string;
   feeValue: number;
+  preorderEnabled: boolean;
   onPlaced: (orderId: string) => void;
 }) {
   const [note, setNote] = useState("");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,6 +54,8 @@ export function CartSheet({
           hotelSlug,
           roomNumber,
           note,
+          scheduledDate,
+          scheduledTime,
           items: cart.items.map((i) => ({
             productId: i.productId,
             quantity: i.quantity,
@@ -60,6 +67,8 @@ export function CartSheet({
         throw new Error(data?.error || t(lang, "couldNotPlace"));
       }
       setNote("");
+      setScheduledDate("");
+      setScheduledTime("");
       onPlaced(data.id);
     } catch (e) {
       setError(e instanceof Error ? e.message : t(lang, "couldNotPlace"));
@@ -180,6 +189,40 @@ export function CartSheet({
             onChange={(e) => setNote(e.target.value)}
             className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-100 outline-none transition placeholder:text-zinc-500 focus:border-brand-500"
           />
+
+          {preorderEnabled && (
+            <div>
+              <p className="mb-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                {t(lang, "scheduleForLater")}
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                <select
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                >
+                  <option value="">{t(lang, "dateLabel")}</option>
+                  {buildDateOptions(lang).map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={scheduledTime}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-3 text-sm outline-none transition focus:border-brand-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                >
+                  <option value="">{t(lang, "timeLabel")}</option>
+                  {TIME_OPTIONS.map((tm) => (
+                    <option key={tm} value={tm}>
+                      {tm}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Modal>
