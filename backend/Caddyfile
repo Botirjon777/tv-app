@@ -1,0 +1,33 @@
+# Caddy reverse proxy with automatic HTTPS (Let's Encrypt).
+#
+# {$APP_DOMAIN} is injected from the environment (see docker-compose.prod.yml).
+# Point an A/AAAA record for this domain at the VPS before starting, and Caddy
+# will obtain and renew the certificate automatically over ports 80/443.
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	# WebSocket upgrades (the /api/v1/ws channel) pass through transparently.
+	reverse_proxy backend:3000 {
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+	}
+
+	# Hardening headers added at the edge (helmet also sets these on the app).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+
+	request_body {
+		max_size 60MB
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

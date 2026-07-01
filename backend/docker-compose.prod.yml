@@ -1,0 +1,110 @@
+# Production stack for a bare Ubuntu VPS.
+#
+#   cp .env.production.example .env         # then fill in real secrets
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Only Caddy is exposed to the internet (ports 80/443); it terminates TLS
+# (automatic Let's Encrypt certs) and reverse-proxies to the backend. Postgres
+# and Redis are reachable only on the internal Docker network.
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # The public hostname of the API; used by Caddy to obtain a certificate.
+      APP_DOMAIN: "${APP_DOMAIN}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    logging: *default-logging
+
+  backend:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "${JWT_SECRET}"
+      ADMIN_EMAIL: "${ADMIN_EMAIL}"
+      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY}"
+      EXELY_WEBHOOK_SECRET: "${EXELY_WEBHOOK_SECRET}"
+      OPENWEATHER_API_KEY: "${OPENWEATHER_API_KEY:-}"
+      TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN:-}"
+      TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID:-}"
+      CORS_ORIGIN: "${CORS_ORIGIN}"
+      PUBLIC_BASE_URL: "${PUBLIC_BASE_URL}"
+      MEDIA_DIR: "/data/uploads"
+      RATE_LIMIT_MAX: "${RATE_LIMIT_MAX:-300}"
+      PORT: "3000"
+      HOST: "0.0.0.0"
+      NODE_ENV: "production"
+    volumes:
+      - media_data:/data
+    # No host port mapping — only Caddy talks to the backend, over the internal
+    # network. Expose to localhost for debugging with:  ports: ["127.0.0.1:3000:3000"]
+    expose:
+      - "3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 512M
+    logging: *default-logging
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    logging: *default-logging
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save 60 1 --maxmemory 128mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 192M
+    logging: *default-logging
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  caddy_data:
+  caddy_config:

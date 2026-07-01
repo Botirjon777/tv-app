@@ -46,9 +46,17 @@ export async function menuDataRoutes(server: FastifyInstance) {
   server.post(
     '/menu/data/:model/:op',
     async (req: FastifyRequest, reply: FastifyReply) => {
-      // Optional shared-secret guard (set INTERNAL_API_KEY to enable).
-      const key = process.env.INTERNAL_API_KEY;
-      if (key && req.headers['x-internal-key'] !== key) {
+      // This route is a raw Prisma bridge (arbitrary model.op) — it MUST be
+      // authenticated. Fail closed: with no key configured the route is
+      // disabled entirely rather than left open to the internet. In production
+      // the key is required at boot (see config/env.ts), so this can't happen.
+      const key = server.env.INTERNAL_API_KEY;
+      if (!key) {
+        req.log.error('menu/data called but INTERNAL_API_KEY is not configured — refusing');
+        return reply.status(503).send({ error: 'Data bridge not configured' });
+      }
+      const provided = req.headers['x-internal-key'];
+      if (typeof provided !== 'string' || provided !== key) {
         return reply.status(401).send({ error: 'Unauthorized' });
       }
 

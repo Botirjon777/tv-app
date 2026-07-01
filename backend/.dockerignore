@@ -1,0 +1,21 @@
+# Keep the build context small and secrets out of the image.
+node_modules
+dist
+uploads
+npm-debug.log*
+
+# Never bake real secrets into an image layer.
+.env
+.env.*
+!.env.example
+
+# Local tooling / VCS
+.git
+.gitignore
+.vscode
+.idea
+*.md
+docs
+Dockerfile
+docker-compose*.yml
+Caddyfile

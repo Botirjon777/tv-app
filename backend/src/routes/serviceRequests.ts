@@ -13,6 +13,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { sendTelegram, formatRequestMessage } from '../services/telegramService';
+import { requireAdmin } from '../auth';
 
 const REQUEST_TYPES = ['ALARM', 'SERVICE', 'TAXI', 'RECEPTION', 'PROBLEM'] as const;
 const REQUEST_STATUSES = ['PENDING', 'ACKNOWLEDGED', 'RESOLVED', 'CANCELLED'] as const;
@@ -42,7 +43,10 @@ export async function serviceRequestRoutes(server: FastifyInstance) {
   const prisma = server.prisma;
 
   /* ── POST /menu/requests (public) ─────────────────────────────────── */
-  server.post('/menu/requests', async (req, reply) => {
+  server.post('/menu/requests', {
+    // Guest-facing; cap to curb spam / Telegram-notification flooding.
+    config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
+  }, async (req, reply) => {
     const parsed = createBody.safeParse(req.body);
     if (!parsed.success) return err(reply, 'Invalid request payload', 422);
     const data = parsed.data;
@@ -161,8 +165,4 @@ export async function serviceRequestRoutes(server: FastifyInstance) {
       });
     },
   );
-}
-
-async function requireAdmin(req: FastifyRequest): Promise<void> {
-  await req.jwtVerify();
 }

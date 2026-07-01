@@ -13,7 +13,7 @@ yarn-error.log*
 .env.*.local
 
 # ── Backend ───────────────────────────────────────────────────────────────────
-backend/prisma/migrations/
+# NOTE: prisma migrations MUST be committed — do not ignore them.
 
 # ── OS / IDE ──────────────────────────────────────────────────────────────────
 .DS_Store

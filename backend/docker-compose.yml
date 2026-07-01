@@ -1,3 +1,6 @@
+# Simple all-in-one stack for LOCAL / staging use (relaxed validation, backend
+# published on :3000, weak default DB password). For a real VPS deployment with
+# TLS and hardened validation use docker-compose.prod.yml instead.
 version: '3.9'
 
 services:
@@ -9,14 +12,19 @@ services:
     environment:
       DATABASE_URL: "postgresql://hoteltv:hoteltv@postgres:5432/hoteltv"
       REDIS_URL:    "redis://redis:6379"
-      JWT_SECRET:   "${JWT_SECRET}"
-      EXELY_WEBHOOK_SECRET: "${EXELY_WEBHOOK_SECRET}"
-      OPENWEATHER_API_KEY:  "${OPENWEATHER_API_KEY}"
+      JWT_SECRET:   "${JWT_SECRET:-dev-only-change-me-000000000000000000000000000000000000000000}"
+      ADMIN_EMAIL:  "${ADMIN_EMAIL:-}"
+      ADMIN_PASSWORD_HASH: "${ADMIN_PASSWORD_HASH:-}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-}"
+      EXELY_WEBHOOK_SECRET: "${EXELY_WEBHOOK_SECRET:-}"
+      OPENWEATHER_API_KEY:  "${OPENWEATHER_API_KEY:-}"
+      CORS_ORIGIN:     "${CORS_ORIGIN:-*}"
       MEDIA_DIR:       "/data/uploads"
       PUBLIC_BASE_URL: "${PUBLIC_BASE_URL:-}"
       PORT:  "3000"
       HOST:  "0.0.0.0"
-      NODE_ENV: "production"
+      # development => relaxed env validation (no forced secrets / explicit CORS).
+      NODE_ENV: "development"
     volumes:
       - media_data:/data
     depends_on:

@@ -4,25 +4,37 @@ import { createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import bcrypt from 'bcryptjs';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { pushToRoom, broadcastToHotel } from '../services/pushService';
 import { MEDIA_DIR } from '../plugins/media';
+import { requireAdmin } from '../auth';
 
-/* ── Auth middleware ── */
-async function requireAdmin(req: FastifyRequest): Promise<void> {
-  await req.jwtVerify();
-}
+/* Uploads: only these content types are accepted & stored. Prevents an
+ * authenticated staff account from planting active content (HTML/SVG/scripts)
+ * that would then be served from the same origin as the media. */
+const ALLOWED_UPLOAD_MIME = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'image/avif',
+  'video/mp4',
+  'video/webm',
+  'application/pdf',
+]);
 
 export async function adminRoutes(server: FastifyInstance) {
   /* ── POST /admin/login ──────────────────────────────────────────── */
-  server.post('/admin/login', async (req, reply) => {
-    const { email, password } = req.body as { email: string; password: string };
+  server.post('/admin/login', {
+    // Brute-force protection: far stricter than the global limit.
+    config: { rateLimit: { max: 10, timeWindow: '15 minutes' } },
+  }, async (req, reply) => {
+    const { email, password } = (req.body ?? {}) as { email?: string; password?: string };
     if (!email || !password) return reply.status(400).send({ error: 'email + password required' });
 
-    // Simple single-admin check via env (replace with DB users for multi-staff)
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminHash  = process.env.ADMIN_PASSWORD_HASH;
+    const adminEmail = server.env.ADMIN_EMAIL;
+    const adminHash  = server.env.ADMIN_PASSWORD_HASH;
     if (!adminEmail || !adminHash) return reply.status(503).send({ error: 'Admin not configured' });
 
     if (email !== adminEmail || !(await bcrypt.compare(password, adminHash))) {
@@ -171,6 +183,12 @@ export async function adminRoutes(server: FastifyInstance) {
     async (req, reply) => {
       const data = await req.file();
       if (!data) return reply.code(400).send({ error: 'No file uploaded' });
+
+      if (!ALLOWED_UPLOAD_MIME.has(data.mimetype)) {
+        // Drain the stream so the connection can be reused, then reject.
+        data.file.resume();
+        return reply.code(415).send({ error: `Unsupported file type: ${data.mimetype}` });
+      }
 
       const safeName = data.filename.replace(/[^\w.\-]+/g, '_');
       const key      = `${randomBytes(16).toString('hex')}-${safeName}`;

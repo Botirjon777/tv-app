@@ -10,7 +10,10 @@ const RegisterSchema = z.object({
 });
 
 export async function deviceRoutes(server: FastifyInstance) {
-  server.post('/devices/register', async (req, reply) => {
+  server.post('/devices/register', {
+    // Registration creates a room row + mints a token — tighter than global.
+    config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
+  }, async (req, reply) => {
     const parse = RegisterSchema.safeParse(req.body);
     if (!parse.success) {
       return reply.status(400).send({ error: parse.error.flatten() });

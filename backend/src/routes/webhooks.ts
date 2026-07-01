@@ -38,13 +38,11 @@ function verifySignature(secret: string, body: string, header: string): boolean 
 export async function webhookRoutes(server: FastifyInstance) {
   server.post(
     '/webhooks/exely',
-    {
-      config: { rawBody: true }, // requires addContentTypeParser for raw body
-    },
     async (req: FastifyRequest, reply) => {
-      const secret = process.env.EXELY_WEBHOOK_SECRET;
+      const secret = server.env.EXELY_WEBHOOK_SECRET;
       if (!secret) {
-        server.log.warn('EXELY_WEBHOOK_SECRET not set — skipping signature check');
+        // Only reachable in non-production (env validation requires it in prod).
+        server.log.warn('EXELY_WEBHOOK_SECRET not set — skipping signature check (dev only)');
       } else {
         const sig  = (req.headers['x-exely-signature'] as string) ?? '';
         const body = (req as FastifyRequest & { rawBody?: Buffer }).rawBody?.toString('utf8') ?? JSON.stringify(req.body);

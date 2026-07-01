@@ -10,12 +10,17 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:seed": "ts-node prisma/seed.ts"
+    "db:seed": "ts-node prisma/seed.ts",
+    "db:deploy": "prisma migrate deploy",
+    "hash:password": "ts-node scripts/hash-password.ts",
+    "gen:secrets": "node -e \"const c=require('crypto');console.log('JWT_SECRET='+c.randomBytes(48).toString('hex'));console.log('INTERNAL_API_KEY='+c.randomBytes(24).toString('hex'));console.log('EXELY_WEBHOOK_SECRET='+c.randomBytes(24).toString('hex'));\""
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
+    "@fastify/helmet": "^11.1.1",
     "@fastify/jwt": "^8.0.1",
     "@fastify/multipart": "^8.3.0",
+    "@fastify/rate-limit": "^9.1.0",
     "@fastify/static": "^7.0.4",
     "@fastify/websocket": "^10.0.1",
     "@prisma/client": "^5.16.0",
